@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   Home,
+  ChevronDown,
   ListTree,
   RotateCcw,
 } from 'lucide-react'
@@ -131,6 +132,36 @@ export function LessonLayout({
 
   const Content = content?.Content
 
+  const tocList =
+    toc.length > 0 ? (
+      <ol className="mt-3 space-y-1">
+        {toc.map((item) => {
+          const isActive = item.id === activeId
+          return (
+            <li key={item.id} className={cn(item.level === 3 && 'ps-3')}>
+              <button
+                type="button"
+                onClick={() => jumpToHeading(item.id)}
+                aria-current={isActive ? 'location' : undefined}
+                className={cn(
+                  'w-full rounded-lg px-2 py-1.5 text-start text-xs leading-5 transition-colors',
+                  isActive
+                    ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-slate-100',
+                )}
+              >
+                {item.text}
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    ) : (
+      <p className="mt-3 text-xs leading-6 text-slate-500 dark:text-slate-400">
+        برای این درس هنوز فهرست مطالب ساخته نشده است.
+      </p>
+    )
+
   return (
     <div className="mx-auto max-w-6xl">
       <nav
@@ -236,10 +267,33 @@ export function LessonLayout({
           </div>
 
           <aside className="order-first xl:order-none">
-            <div className="xl:sticky xl:top-20">
+            <div className="space-y-3 xl:sticky xl:top-20">
+              <nav aria-label="فهرست مطالب درس" className="xl:hidden">
+                <details className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-soft dark:border-slate-800 dark:bg-slate-900/70">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 focus-visible:outline-none">
+                    <span className="flex items-center gap-2">
+                      <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        در این درس
+                      </span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                        {toPersianDigits(toc.length)} سرفصل
+                      </span>
+                    </span>
+                    <ChevronDown
+                      className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                      aria-hidden="true"
+                    />
+                  </summary>
+                  <div className="border-t border-slate-200/80 p-3 dark:border-slate-800">
+                    {tocList}
+                  </div>
+                </details>
+              </nav>
+
               <nav
                 aria-label="فهرست مطالب درس"
-                className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900/70"
+                className="hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 xl:block"
               >
                 <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800">
                   <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
@@ -247,36 +301,7 @@ export function LessonLayout({
                     در این درس
                   </h2>
                 </div>
-
-                {toc.length > 0 ? (
-                  <ol className="mt-3 space-y-1">
-                    {toc.map((item) => {
-                      const isActive = item.id === activeId
-                      return (
-                        <li key={item.id} className={cn(item.level === 3 && 'ps-3')}>
-                          <button
-                            type="button"
-                            onClick={() => jumpToHeading(item.id)}
-                            aria-current={isActive ? 'location' : undefined}
-                            className={cn(
-                              'w-full rounded-lg px-2 py-1.5 text-start text-xs leading-5 transition-colors',
-                              isActive
-                                ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-slate-100',
-                            )}
-                          >
-                            {item.text}
-                          </button>
-                        </li>
-                      )
-                    })}
-                  </ol>
-                ) : (
-                  <p className="mt-3 text-xs leading-6 text-slate-500 dark:text-slate-400">
-                    برای این درس هنوز فهرست مطالب ساخته نشده است.
-                  </p>
-                )}
-
+                {tocList}
               </nav>
             </div>
           </aside>
