@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { BookOpen, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { BarChart3, BookOpen, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
 import { useLessonSearch } from '../../hooks/useLessonSearch'
 import { useAppStore } from '../../store/useAppStore'
@@ -171,6 +171,25 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               {toPersianDigits(progressPercent)}٪
             </span>
           </div>
+
+          <NavLink
+            to="/progress"
+            aria-label="پیشرفت من"
+            title="پیشرفت من"
+            className={({ isActive }) =>
+              cn(
+                buttonClasses({
+                  variant: 'ghost',
+                  size: 'icon',
+                  className: 'border border-slate-200 dark:border-slate-800',
+                }),
+                isActive &&
+                  'bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-200',
+              )
+            }
+          >
+            <BarChart3 className="h-5 w-5" aria-hidden="true" />
+          </NavLink>
 
           <button
             type="button"

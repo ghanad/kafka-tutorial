@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { allLessons } from '../../content/curriculum'
+import { publishedLessons } from '../../content/curriculum'
 import { KafkaLogo } from '../ui/KafkaLogo'
 import { Ltr } from '../ui/Ltr'
 
 export function Footer() {
-  const sampleLesson = allLessons[0]
+  const firstLesson = publishedLessons[0]
 
   return (
     <footer className="mt-auto border-t border-slate-200/70 bg-white/60 dark:border-slate-800 dark:bg-slate-950/60">
@@ -29,14 +29,20 @@ export function Footer() {
           >
             صفحه اصلی
           </Link>
-          {sampleLesson && (
+          {firstLesson && (
             <Link
-              to={`/lessons/${sampleLesson.slug}`}
+              to={`/lessons/${firstLesson.slug}`}
               className="text-xs font-medium text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-300"
             >
-              درس نمونه
+              شروع یادگیری
             </Link>
           )}
+          <Link
+            to="/progress"
+            className="text-xs font-medium text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-300"
+          >
+            پیشرفت من
+          </Link>
           <span className="text-xs text-slate-400 dark:text-slate-500">
             ساخته‌شده با <Ltr>React</Ltr> و <Ltr>Tailwind CSS</Ltr>
           </span>

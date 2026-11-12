@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { CheckCircle2, Circle, Clock, Home, X } from 'lucide-react'
-import { allLessons, sections } from '../../content/curriculum'
+import { BarChart3, CheckCircle2, Circle, Clock, Home, X } from 'lucide-react'
+import { allLessons, publishedLessons, sections } from '../../content/curriculum'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
 import { toPersianDigits } from '../../utils/persianDigits'
@@ -43,8 +43,8 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
           </div>
           <ProgressBar value={progressPercent} label="پیشرفت کل دوره" />
           <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-            {toPersianDigits(completedCount)} از {toPersianDigits(allLessons.length)} درس تکمیل
-            شده است
+            {toPersianDigits(completedCount)} از {toPersianDigits(publishedLessons.length)} درس
+            منتشرشده تکمیل شده است
           </p>
         </div>
       </div>
@@ -65,10 +65,10 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
                       <h3 className="text-xs font-extrabold leading-6 text-slate-700 dark:text-slate-200">
                         {section.title}
                       </h3>
-                      {sectionProgress.total > 0 ? (
+                      {sectionProgress.published > 0 ? (
                         <span className="shrink-0 text-[10px] font-medium text-slate-400">
                           {toPersianDigits(sectionProgress.completed)}/
-                          {toPersianDigits(sectionProgress.total)}
+                          {toPersianDigits(sectionProgress.published)}
                         </span>
                       ) : (
                         <Badge variant="neutral" size="sm" className="shrink-0">
@@ -77,62 +77,75 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
                       )}
                     </div>
 
-                    {sectionProgress.total > 0 ? (
-                      <ul className="mt-1.5 space-y-0.5 border-s border-slate-200 ps-2 dark:border-slate-800">
-                        {section.lessons.map((lesson) => {
-                          const isCompleted = completedSet.has(lesson.id)
+                    <ul className="mt-1.5 space-y-0.5 border-s border-slate-200 ps-2 dark:border-slate-800">
+                      {section.lessons.map((lesson) => {
+                        const isCompleted = completedSet.has(lesson.id)
 
+                        if (lesson.status === 'planned') {
                           return (
                             <li key={lesson.id}>
-                              <NavLink
-                                to={`/lessons/${lesson.slug}`}
-                                onClick={onNavigate}
-                                className={({ isActive }) =>
-                                  cn(
-                                    'group flex items-start gap-2 rounded-lg px-2 py-2 text-xs transition-colors',
-                                    isActive
-                                      ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
-                                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70',
-                                  )
-                                }
-                              >
-                                {({ isActive }) => (
-                                  <>
-                                    {isCompleted ? (
-                                      <CheckCircle2
-                                        className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
-                                        aria-label="تکمیل شده"
-                                      />
-                                    ) : (
-                                      <Circle
-                                        className={cn(
-                                          'mt-0.5 h-4 w-4 shrink-0',
-                                          isActive
-                                            ? 'text-primary-500'
-                                            : 'text-slate-300 dark:text-slate-600',
-                                        )}
-                                        aria-hidden="true"
-                                      />
-                                    )}
-                                    <span className="min-w-0 flex-1">
-                                      <span className="block leading-5">{lesson.title}</span>
-                                      <span className="mt-0.5 flex items-center gap-1 text-[10px] font-normal text-slate-400">
-                                        <Clock className="h-3 w-3" aria-hidden="true" />
-                                        {toPersianDigits(lesson.readingTime)} دقیقه
-                                      </span>
-                                    </span>
-                                  </>
-                                )}
-                              </NavLink>
+                              <div className="flex items-start gap-2 rounded-lg px-2 py-2 text-xs text-slate-400 dark:text-slate-500">
+                                <Clock
+                                  className="mt-0.5 h-4 w-4 shrink-0 opacity-70"
+                                  aria-hidden="true"
+                                />
+                                <span className="min-w-0 flex-1">
+                                  <span className="block leading-5">{lesson.title}</span>
+                                  <Badge variant="neutral" size="sm" className="mt-1">
+                                    به‌زودی
+                                  </Badge>
+                                </span>
+                              </div>
                             </li>
                           )
-                        })}
-                      </ul>
-                    ) : (
-                      <p className="mt-1.5 text-[11px] leading-5 text-slate-400 dark:text-slate-500">
-                        درس‌های این فصل به‌زودی اضافه می‌شوند.
-                      </p>
-                    )}
+                        }
+
+                        return (
+                          <li key={lesson.id}>
+                            <NavLink
+                              to={`/lessons/${lesson.slug}`}
+                              onClick={onNavigate}
+                              className={({ isActive }) =>
+                                cn(
+                                  'group flex items-start gap-2 rounded-lg px-2 py-2 text-xs transition-colors',
+                                  isActive
+                                    ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70',
+                                )
+                              }
+                            >
+                              {({ isActive }) => (
+                                <>
+                                  {isCompleted ? (
+                                    <CheckCircle2
+                                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
+                                      aria-label="تکمیل شده"
+                                    />
+                                  ) : (
+                                    <Circle
+                                      className={cn(
+                                        'mt-0.5 h-4 w-4 shrink-0',
+                                        isActive
+                                          ? 'text-primary-500'
+                                          : 'text-slate-300 dark:text-slate-600',
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block leading-5">{lesson.title}</span>
+                                    <span className="mt-0.5 flex items-center gap-1 text-[10px] font-normal text-slate-400">
+                                      <Clock className="h-3 w-3" aria-hidden="true" />
+                                      {toPersianDigits(lesson.readingTime)} دقیقه
+                                    </span>
+                                  </span>
+                                </>
+                              )}
+                            </NavLink>
+                          </li>
+                        )
+                      })}
+                    </ul>
                   </div>
                 </div>
               </li>
@@ -141,7 +154,15 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
         </ol>
       </nav>
 
-      <div className="shrink-0 border-t border-slate-200/70 p-3 dark:border-slate-800">
+      <div className="shrink-0 space-y-1 border-t border-slate-200/70 p-3 dark:border-slate-800">
+        <Link
+          to="/progress"
+          onClick={onNavigate}
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70"
+        >
+          <BarChart3 className="h-4 w-4" aria-hidden="true" />
+          پیشرفت من
+        </Link>
         <Link
           to="/"
           onClick={onNavigate}

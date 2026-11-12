@@ -75,11 +75,11 @@
   }
 
   .lesson-prose h2 {
-    @apply mt-10 border-s-4 border-primary-500 ps-3 text-2xl font-extrabold text-slate-900 dark:text-white;
+    @apply mt-10 scroll-mt-24 border-s-4 border-primary-500 ps-3 text-2xl font-extrabold text-slate-900 dark:text-white;
   }
 
   .lesson-prose h3 {
-    @apply mt-8 text-xl font-bold text-slate-900 dark:text-slate-100;
+    @apply mt-8 scroll-mt-24 text-xl font-bold text-slate-900 dark:text-slate-100;
   }
 
   .lesson-prose p {

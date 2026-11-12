@@ -19,10 +19,11 @@ export interface AppStore {
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
   setLastVisitedLesson: (lessonId: string) => void
+  importData: (data: unknown) => void
   resetAllData: () => void
 }
 
-type PersistedAppState = Pick<
+export type PersistedAppState = Pick<
   AppStore,
   'completedLessons' | 'quizScores' | 'bookmarks' | 'notes' | 'theme' | 'lastVisitedLesson'
 >
@@ -114,6 +115,8 @@ export const useAppStore = create<AppStore>()(
         set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
       setLastVisitedLesson: (lessonId) => set({ lastVisitedLesson: lessonId }),
+
+      importData: (data) => set({ ...sanitizePersistedState(data) }),
 
       resetAllData: () => set({ ...initialPersistedState }),
     }),

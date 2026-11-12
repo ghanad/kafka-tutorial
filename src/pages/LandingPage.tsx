@@ -26,7 +26,7 @@ import { Button } from '../components/ui/Button'
 import { buttonClasses } from '../components/ui/buttonStyles'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card'
 import { Ltr } from '../components/ui/Ltr'
-import { findLessonById, allLessons, sections } from '../content/curriculum'
+import { findLessonById, publishedLessons, sections } from '../content/curriculum'
 import { useAppStore } from '../store/useAppStore'
 import { toPersianDigits } from '../utils/persianDigits'
 import { getProgressPercent, getSectionProgress } from '../utils/progress'
@@ -69,8 +69,9 @@ export function LandingPage() {
   const lastVisitedLessonId = useAppStore((state) => state.lastVisitedLesson)
   const completedLessons = useAppStore((state) => state.completedLessons)
   const lastLesson = lastVisitedLessonId ? findLessonById(lastVisitedLessonId) : undefined
-  const targetLesson = lastLesson ?? allLessons[0]
-  const isContinue = Boolean(lastLesson)
+  const continueLesson = lastLesson?.status === 'published' ? lastLesson : undefined
+  const targetLesson = continueLesson ?? publishedLessons[0]
+  const isContinue = Boolean(continueLesson)
   const progressPercent = getProgressPercent(completedLessons)
 
   function scrollToRoadmap() {
@@ -126,16 +127,16 @@ export function LandingPage() {
               </Button>
             </div>
 
-            {lastLesson && (
+            {continueLesson && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                آخرین درس باز‌شده: <span className="font-bold">{lastLesson.title}</span>
+                آخرین درس باز‌شده: <span className="font-bold">{continueLesson.title}</span>
               </p>
             )}
 
             <div className="mt-8 grid max-w-lg grid-cols-3 gap-3">
               {[
                 { value: toPersianDigits(sections.length), label: 'فصل آموزشی' },
-                { value: toPersianDigits(allLessons.length), label: 'درس ثبت‌شده' },
+                { value: toPersianDigits(publishedLessons.length), label: 'درس آماده' },
                 { value: '۱۰۰٪', label: 'بدون اینترنت' },
               ].map((stat) => (
                 <div
@@ -204,8 +205,8 @@ export function LandingPage() {
             مسیر یادگیری در {toPersianDigits(sections.length)} فصل
           </h2>
           <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-            هر فصل روی فصل قبل ساخته می‌شود. فصل‌هایی که هنوز درس ندارند با برچسب
-            «به‌زودی» مشخص شده‌اند و در گام‌های بعدی تکمیل می‌شوند.
+            هر فصل روی فصل قبل ساخته می‌شود. درس‌هایی که هنوز منتشر نشده‌اند با
+            برچسب «به‌زودی» مشخص شده‌اند و در گام‌های بعدی تکمیل می‌شوند.
           </p>
         </div>
 
@@ -218,9 +219,10 @@ export function LandingPage() {
             {sections.map((section, index) => {
               const Icon = sectionIcons[section.id] ?? BookOpen
               const sectionProgress = getSectionProgress(section, completedLessons)
-              const firstLesson = section.lessons[0]
+              const firstLesson = section.lessons.find((lesson) => lesson.status === 'published')
               const isComplete =
-                sectionProgress.total > 0 && sectionProgress.completed === sectionProgress.total
+                sectionProgress.published > 0 &&
+                sectionProgress.completed === sectionProgress.published
 
               return (
                 <li key={section.id} className="relative flex gap-4">
@@ -235,7 +237,7 @@ export function LandingPage() {
                           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                             فصل {toPersianDigits(index + 1)}
                           </span>
-                          {sectionProgress.total === 0 ? (
+                          {sectionProgress.published === 0 ? (
                             <Badge variant="neutral" size="sm">
                               به‌زودی
                             </Badge>
@@ -259,10 +261,10 @@ export function LandingPage() {
                       </div>
 
                       <div className="flex shrink-0 items-center gap-3 self-end sm:self-center">
-                        {sectionProgress.total > 0 && (
+                        {sectionProgress.published > 0 && (
                           <span className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
                             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                            {toPersianDigits(sectionProgress.total)} درس
+                            {toPersianDigits(sectionProgress.published)} درس آماده
                           </span>
                         )}
                         {firstLesson && (
@@ -294,7 +296,7 @@ export function LandingPage() {
               <p className="mt-2 max-w-xl text-sm leading-7 text-primary-100">
                 {isContinue
                   ? 'پیشرفت شما در همین مرورگر ذخیره شده است. درس بعدی را باز کنید و مسیر را ادامه دهید.'
-                  : 'با درس نمونه شروع کنید، اجزای سایت را ببینید و بعد به سراغ مفاهیم اصلی Kafka بروید.'}
+                  : 'با اولین درس دوره شروع کنید، اجزای سایت را ببینید و بعد به سراغ مفاهیم اصلی Kafka بروید.'}
               </p>
             </div>
             <Link
