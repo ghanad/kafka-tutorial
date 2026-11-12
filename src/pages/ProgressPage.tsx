@@ -8,11 +8,9 @@ import {
   Download,
   FileJson,
   GraduationCap,
-  NotebookPen,
   RotateCcw,
   ShieldAlert,
   Trash2,
-  Trophy,
   Upload,
 } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
@@ -52,9 +50,7 @@ const reportTimestamp = new Date()
 
 export function ProgressPage() {
   const completedLessons = useAppStore((state) => state.completedLessons)
-  const quizScores = useAppStore((state) => state.quizScores)
   const bookmarks = useAppStore((state) => state.bookmarks)
-  const notes = useAppStore((state) => state.notes)
   const importData = useAppStore((state) => state.importData)
   const resetAllData = useAppStore((state) => state.resetAllData)
 
@@ -75,26 +71,9 @@ export function ProgressPage() {
   const bookmarkedLessons = bookmarks
     .map((id) => findLessonById(id))
     .filter((lesson): lesson is NonNullable<typeof lesson> => Boolean(lesson))
-  const quizEntries = Object.entries(quizScores)
-    .map(([lessonId, score]) => ({ lesson: findLessonById(lessonId), score }))
-    .filter((entry): entry is { lesson: NonNullable<ReturnType<typeof findLessonById>>; score: number } =>
-      Boolean(entry.lesson),
-    )
-    .sort((a, b) => b.score - a.score)
-  const noteEntries = Object.entries(notes)
-    .map(([lessonId, note]) => ({ lesson: findLessonById(lessonId), note }))
-    .filter((entry): entry is { lesson: NonNullable<ReturnType<typeof findLessonById>>; note: string } =>
-      Boolean(entry.lesson),
-    )
 
   const progressPercent = getProgressPercent(completedLessons)
   const completedCount = getCompletedLessonCount(completedLessons)
-  const averageQuizScore =
-    quizEntries.length > 0
-      ? Math.round(
-          quizEntries.reduce((sum, entry) => sum + entry.score, 0) / quizEntries.length,
-        )
-      : 0
 
   function showMessage(type: StatusMessage['type'], text: string) {
     setMessage({ type, text })
@@ -177,7 +156,7 @@ export function ProgressPage() {
         </div>
       </header>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3">
         {[
           {
             icon: CheckCircle2,
@@ -186,22 +165,10 @@ export function ProgressPage() {
             tone: 'text-emerald-600 dark:text-emerald-400',
           },
           {
-            icon: Trophy,
-            label: 'میانگین آزمون‌ها',
-            value: `${toPersianDigits(averageQuizScore)}٪`,
-            tone: 'text-amber-600 dark:text-amber-400',
-          },
-          {
             icon: Bookmark,
             label: 'نشانک',
             value: toPersianDigits(bookmarkedLessons.length),
             tone: 'text-primary-600 dark:text-primary-300',
-          },
-          {
-            icon: NotebookPen,
-            label: 'یادداشت',
-            value: toPersianDigits(noteEntries.length),
-            tone: 'text-fuchsia-600 dark:text-fuchsia-400',
           },
         ].map((stat) => {
           const Icon = stat.icon
@@ -296,37 +263,6 @@ export function ProgressPage() {
                 ),
             },
             {
-              id: 'quizzes',
-              label: `آزمون‌ها (${toPersianDigits(quizEntries.length)})`,
-              content:
-                quizEntries.length > 0 ? (
-                  <ul className="space-y-2">
-                    {quizEntries.map(({ lesson, score }) => (
-                      <li
-                        key={lesson.id}
-                        className="flex items-center gap-3 rounded-xl border border-slate-200/80 p-3 dark:border-slate-800"
-                      >
-                        <Trophy
-                          className="h-5 w-5 shrink-0 text-amber-500"
-                          aria-hidden="true"
-                        />
-                        <Link
-                          to={`/lessons/${lesson.slug}`}
-                          className="min-w-0 flex-1 truncate text-sm font-bold text-slate-800 transition-colors hover:text-primary-600 dark:text-slate-100 dark:hover:text-primary-300"
-                        >
-                          {lesson.title}
-                        </Link>
-                        <Badge variant={score >= 75 ? 'success' : 'warning'}>
-                          {toPersianDigits(score)}٪
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  emptyState('هنوز آزمونی نداده‌اید. در پایان هر درس یک آزمون کوتاه منتظر شماست.')
-                ),
-            },
-            {
               id: 'bookmarks',
               label: `نشانک‌ها (${toPersianDigits(bookmarkedLessons.length)})`,
               content:
@@ -351,33 +287,6 @@ export function ProgressPage() {
                   </ul>
                 ) : (
                   emptyState('هنوز نشانکی اضافه نکرده‌اید. در هر درس می‌توانید نشانک بگذارید.')
-                ),
-            },
-            {
-              id: 'notes',
-              label: `یادداشت‌ها (${toPersianDigits(noteEntries.length)})`,
-              content:
-                noteEntries.length > 0 ? (
-                  <ul className="space-y-2">
-                    {noteEntries.map(({ lesson, note }) => (
-                      <li
-                        key={lesson.id}
-                        className="rounded-xl border border-slate-200/80 p-3 dark:border-slate-800"
-                      >
-                        <Link
-                          to={`/lessons/${lesson.slug}`}
-                          className="text-sm font-bold text-slate-800 transition-colors hover:text-primary-600 dark:text-slate-100 dark:hover:text-primary-300"
-                        >
-                          {lesson.title}
-                        </Link>
-                        <p className="mt-1.5 whitespace-pre-line text-xs leading-6 text-slate-600 dark:text-slate-300">
-                          {note}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  emptyState('هنوز یادداشتی ننوشته‌اید. در پایین هر درس یک جعبه یادداشت وجود دارد.')
                 ),
             },
           ]}

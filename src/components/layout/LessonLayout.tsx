@@ -11,7 +11,6 @@ import {
   Home,
   ListTree,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react'
 import type { CourseSection, LessonMeta } from '../../content/curriculum'
 import { sections } from '../../content/curriculum'
@@ -24,8 +23,6 @@ import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
 import { Ltr } from '../ui/Ltr'
-import { Quiz } from '../quiz/Quiz'
-import { NotesBox } from './NotesBox'
 
 interface TocItem {
   id: string
@@ -55,7 +52,6 @@ export function LessonLayout({
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
-  const bestScore = useAppStore((state) => state.quizScores[lesson.id] ?? 0)
   const toggleLessonComplete = useAppStore((state) => state.toggleLessonComplete)
   const toggleBookmark = useAppStore((state) => state.toggleBookmark)
 
@@ -172,12 +168,6 @@ export function LessonLayout({
                 <Clock className="h-3 w-3" aria-hidden="true" />
                 {toPersianDigits(lesson.readingTime)} دقیقه مطالعه
               </Badge>
-              {bestScore > 0 && (
-                <Badge variant="success">
-                  <Sparkles className="h-3 w-3" aria-hidden="true" />
-                  بهترین آزمون: {toPersianDigits(bestScore)}٪
-                </Badge>
-              )}
               {lesson.status === 'planned' && <Badge variant="neutral">به‌زودی</Badge>}
               {isCompleted && (
                 <Badge variant="success">
@@ -243,9 +233,6 @@ export function LessonLayout({
               </Card>
             )}
 
-            {content && <Quiz lessonId={lesson.id} questions={content.quiz} />}
-
-            <NotesBox key={lesson.id} lessonId={lesson.id} />
           </div>
 
           <aside className="order-first xl:order-none">
@@ -290,20 +277,6 @@ export function LessonLayout({
                   </p>
                 )}
 
-                <div className="mt-4 border-t border-slate-200/80 pt-3 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      document.getElementById('quiz')?.scrollIntoView({
-                        behavior: shouldReduceMotion ? 'auto' : 'smooth',
-                        block: 'start',
-                      })
-                    }}
-                    className="w-full rounded-lg bg-primary-50 px-2 py-2 text-start text-xs font-bold text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-200 dark:hover:bg-primary-900"
-                  >
-                    رفتن به آزمون درس
-                  </button>
-                </div>
               </nav>
             </div>
           </aside>

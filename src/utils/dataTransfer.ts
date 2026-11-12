@@ -5,9 +5,7 @@ export function getPersistedSnapshot(): PersistedAppState {
   const state = useAppStore.getState()
   return {
     completedLessons: state.completedLessons,
-    quizScores: state.quizScores,
     bookmarks: state.bookmarks,
-    notes: state.notes,
     theme: state.theme,
     lastVisitedLesson: state.lastVisitedLesson,
   }

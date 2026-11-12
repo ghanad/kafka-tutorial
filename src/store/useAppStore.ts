@@ -5,17 +5,13 @@ export type Theme = 'light' | 'dark'
 
 export interface AppStore {
   completedLessons: string[]
-  quizScores: Record<string, number>
   bookmarks: string[]
-  notes: Record<string, string>
   theme: Theme
   lastVisitedLesson: string | null
 
   toggleLessonComplete: (lessonId: string) => void
   markLessonComplete: (lessonId: string) => void
-  setQuizScore: (lessonId: string, score: number) => void
   toggleBookmark: (lessonId: string) => void
-  setNote: (lessonId: string, note: string) => void
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
   setLastVisitedLesson: (lessonId: string) => void
@@ -25,17 +21,15 @@ export interface AppStore {
 
 export type PersistedAppState = Pick<
   AppStore,
-  'completedLessons' | 'quizScores' | 'bookmarks' | 'notes' | 'theme' | 'lastVisitedLesson'
+  'completedLessons' | 'bookmarks' | 'theme' | 'lastVisitedLesson'
 >
 
 export const STORAGE_KEY = 'kafka-tutorial-store'
-export const STORE_VERSION = 1
+export const STORE_VERSION = 2
 
 const initialPersistedState: PersistedAppState = {
   completedLessons: [],
-  quizScores: {},
   bookmarks: [],
-  notes: {},
   theme: 'light',
   lastVisitedLesson: null,
 }
@@ -51,10 +45,7 @@ function sanitizePersistedState(value: unknown): PersistedAppState {
 
   return {
     completedLessons: uniqueStrings(data.completedLessons),
-    quizScores:
-      data.quizScores && typeof data.quizScores === 'object' ? { ...data.quizScores } : {},
     bookmarks: uniqueStrings(data.bookmarks),
-    notes: data.notes && typeof data.notes === 'object' ? { ...data.notes } : {},
     theme: data.theme === 'dark' ? 'dark' : 'light',
     lastVisitedLesson:
       typeof data.lastVisitedLesson === 'string' ? data.lastVisitedLesson : null,
@@ -80,34 +71,12 @@ export const useAppStore = create<AppStore>()(
             : [...state.completedLessons, lessonId],
         })),
 
-      setQuizScore: (lessonId, score) =>
-        set((state) => {
-          const clamped = Math.max(0, Math.min(100, Math.round(score)))
-          return {
-            quizScores: {
-              ...state.quizScores,
-              [lessonId]: Math.max(clamped, state.quizScores[lessonId] ?? 0),
-            },
-          }
-        }),
-
       toggleBookmark: (lessonId) =>
         set((state) => ({
           bookmarks: state.bookmarks.includes(lessonId)
             ? state.bookmarks.filter((id) => id !== lessonId)
             : [...state.bookmarks, lessonId],
         })),
-
-      setNote: (lessonId, note) =>
-        set((state) => {
-          const notes = { ...state.notes }
-          if (note.trim() === '') {
-            delete notes[lessonId]
-          } else {
-            notes[lessonId] = note
-          }
-          return { notes }
-        }),
 
       setTheme: (theme) => set({ theme }),
 
@@ -126,18 +95,11 @@ export const useAppStore = create<AppStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state): PersistedAppState => ({
         completedLessons: state.completedLessons,
-        quizScores: state.quizScores,
         bookmarks: state.bookmarks,
-        notes: state.notes,
         theme: state.theme,
         lastVisitedLesson: state.lastVisitedLesson,
       }),
-      migrate: (persistedState, version) => {
-        if (version < STORE_VERSION) {
-          return sanitizePersistedState(persistedState)
-        }
-        return sanitizePersistedState(persistedState)
-      },
+      migrate: (persistedState) => sanitizePersistedState(persistedState),
     },
   ),
 )
