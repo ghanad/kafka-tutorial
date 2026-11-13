@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Bookmark,
   Check,
-  CheckCircle2,
   Clock,
   Home,
   ChevronDown,
@@ -19,7 +18,6 @@ import type { LessonContent } from '../../content/lessons/types'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
 import { toPersianDigits } from '../../utils/persianDigits'
-import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
@@ -164,91 +162,85 @@ export function LessonLayout({
 
   return (
     <div className="mx-auto max-w-6xl">
-      <nav
-        aria-label="مسیر صفحه"
-        className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
-      >
-        <Link
-          to="/"
-          className="flex items-center gap-1 transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5">
+        <nav
+          aria-label="مسیر صفحه"
+          className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
         >
-          <Home className="h-3.5 w-3.5" aria-hidden="true" />
-          خانه
-        </Link>
-        <span aria-hidden="true">/</span>
-        {section && (
-          <>
-            <span>{section.title}</span>
-            <span aria-hidden="true">/</span>
-          </>
-        )}
-        <span className="font-semibold text-slate-700 dark:text-slate-200">{lesson.title}</span>
-      </nav>
+          <Link
+            to="/"
+            className="flex items-center gap-1 transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+          >
+            <Home className="h-3.5 w-3.5" aria-hidden="true" />
+            خانه
+          </Link>
+          <span aria-hidden="true">/</span>
+          {section && (
+            <>
+              <span>{section.title}</span>
+              <span aria-hidden="true">/</span>
+            </>
+          )}
+          <span className="font-semibold text-slate-700 dark:text-slate-200">{lesson.title}</span>
+        </nav>
+
+        <p className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+          {sectionIndex >= 0 && (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-primary-700 dark:text-primary-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary-500" aria-hidden="true" />
+              فصل {toPersianDigits(sectionIndex + 1)}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            {toPersianDigits(lesson.readingTime)} دقیقه مطالعه
+          </span>
+          {lesson.status === 'planned' && (
+            <span className="font-semibold text-amber-700 dark:text-amber-300">به‌زودی</span>
+          )}
+        </p>
+      </div>
 
       <article>
-        <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 sm:p-7">
-          <div
-            className="pointer-events-none absolute -end-16 -top-20 h-52 w-52 rounded-full bg-primary-500/15 blur-3xl"
-            aria-hidden="true"
-          />
-
-          <div className="relative">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                {sectionIndex >= 0 && (
-                  <Badge variant="primary">فصل {toPersianDigits(sectionIndex + 1)}</Badge>
-                )}
-                <Badge variant="neutral">
-                  <Clock className="h-3 w-3" aria-hidden="true" />
-                  {toPersianDigits(lesson.readingTime)} دقیقه مطالعه
-                </Badge>
-                {lesson.status === 'planned' && <Badge variant="neutral">به‌زودی</Badge>}
-                {isCompleted && (
-                  <Badge variant="success">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                    تکمیل شده
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 sm:ms-auto">
-                <Button
-                  size="sm"
-                  variant={isCompleted ? 'secondary' : 'primary'}
-                  onClick={() => toggleLessonComplete(lesson.id)}
-                  startIcon={
-                    isCompleted ? (
-                      <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-                    ) : (
-                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                    )
-                  }
-                >
-                  {isCompleted ? 'لغو تکمیل درس' : 'تکمیل درس'}
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => toggleBookmark(lesson.id)}
-                  startIcon={
-                    <Bookmark
-                      className={cn('h-3.5 w-3.5', isBookmarked && 'fill-current')}
-                      aria-hidden="true"
-                    />
-                  }
-                >
-                  {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
-                </Button>
-              </div>
-            </div>
-
-            <h1 className="mt-3.5 text-2xl font-extrabold leading-[1.5] text-slate-900 dark:text-white sm:text-3xl">
+        <header className="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+          <div className="flex flex-col xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:gap-x-6">
+            <h1 className="max-w-3xl text-balance text-[1.6rem] font-extrabold leading-[1.45] text-slate-900 dark:text-white md:text-[1.85rem] md:leading-[1.4] xl:col-start-1 xl:row-start-1 xl:self-center">
               {lesson.title}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-8 text-slate-600 dark:text-slate-300">
+            <p className="mt-1.5 max-w-2xl text-pretty text-sm leading-6 text-slate-600 dark:text-slate-300 md:mt-2 xl:col-start-1 xl:row-start-2">
               {lesson.description}
             </p>
+
+            <div className="mt-3.5 flex items-center gap-2 xl:col-start-2 xl:row-start-1 xl:mt-0 xl:self-center">
+              <Button
+                size="sm"
+                variant={isCompleted ? 'secondary' : 'primary'}
+                onClick={() => toggleLessonComplete(lesson.id)}
+                startIcon={
+                  isCompleted ? (
+                    <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                  )
+                }
+              >
+                {isCompleted ? 'لغو تکمیل درس' : 'تکمیل درس'}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => toggleBookmark(lesson.id)}
+                startIcon={
+                  <Bookmark
+                    className={cn('h-3.5 w-3.5', isBookmarked && 'fill-current')}
+                    aria-hidden="true"
+                  />
+                }
+              >
+                {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
+              </Button>
+            </div>
           </div>
         </header>
 
