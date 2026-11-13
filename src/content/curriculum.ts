@@ -39,10 +39,10 @@ export const sections: CourseSection[] = [
         slug: 'kafka-use-cases',
         title: 'کاربردهای واقعی Kafka',
         description:
-          'از لاگ و CDC تا event sourcing، متریک‌ها و ارتباط بین میکروسرویس‌ها؛ Kafka کجا واقعاً به کار می‌آید؟',
-        readingTime: 7,
+          'از فروشگاه‌های آنلاین و تاکسی‌های اینترنتی تا کشف تقلب بانکی و CDC؛ کافکا کجا واقعاً معجزه می‌کند؟',
+        readingTime: 6,
         sectionId: 'introduction',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'key-terms',
