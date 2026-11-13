@@ -3,6 +3,7 @@ import { WhatIsKafkaContent } from './whatIsKafka'
 import { KafkaUseCasesContent } from './kafkaUseCases'
 import { KeyTermsContent } from './keyTerms'
 import { DockerKraftSetupContent } from './dockerKraftSetup'
+import { TopicsPartitionsContent } from './topicsPartitions'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -16,6 +17,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'docker-kraft-setup': {
     Content: DockerKraftSetupContent,
+  },
+  'topics-partitions': {
+    Content: TopicsPartitionsContent,
   },
 }
 

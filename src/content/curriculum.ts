@@ -80,7 +80,7 @@ export const sections: CourseSection[] = [
           'چرا Topic به Partition تقسیم می‌شود، مقیاس‌پذیری چگونه به دست می‌آید و ترتیب پیام‌ها کجا تضمین می‌شود.',
         readingTime: 10,
         sectionId: 'architecture',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'log-segments',
