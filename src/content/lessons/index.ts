@@ -2,6 +2,7 @@ import type { LessonContent } from './types'
 import { WhatIsKafkaContent } from './whatIsKafka'
 import { KafkaUseCasesContent } from './kafkaUseCases'
 import { KeyTermsContent } from './keyTerms'
+import { DockerKraftSetupContent } from './dockerKraftSetup'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -12,6 +13,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'key-terms': {
     Content: KeyTermsContent,
+  },
+  'docker-kraft-setup': {
+    Content: DockerKraftSetupContent,
   },
 }
 

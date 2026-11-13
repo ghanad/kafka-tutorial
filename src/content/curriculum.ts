@@ -59,10 +59,10 @@ export const sections: CourseSection[] = [
         slug: 'docker-kraft-setup',
         title: 'نصب سریع با Docker Compose و KRaft',
         description:
-          'یک خوشه محلی Kafka را در حالت KRaft و بدون ZooKeeper بالا بیاورید و اولین پیام را بفرستید.',
+          'راه‌اندازی خوشه‌کافکا در حالت مدرن KRaft بدون نیاز به ZooKeeper به همراه ترمینال تعاملی درون مرورگر.',
         readingTime: 8,
         sectionId: 'introduction',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
