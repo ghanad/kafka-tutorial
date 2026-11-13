@@ -186,63 +186,69 @@ export function LessonLayout({
       </nav>
 
       <article>
-        <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
+        <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 sm:p-7">
           <div
             className="pointer-events-none absolute -end-16 -top-20 h-52 w-52 rounded-full bg-primary-500/15 blur-3xl"
             aria-hidden="true"
           />
 
           <div className="relative">
-            <div className="flex flex-wrap items-center gap-2">
-              {sectionIndex >= 0 && <Badge variant="primary">فصل {toPersianDigits(sectionIndex + 1)}</Badge>}
-              <Badge variant="neutral">
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                {toPersianDigits(lesson.readingTime)} دقیقه مطالعه
-              </Badge>
-              {lesson.status === 'planned' && <Badge variant="neutral">به‌زودی</Badge>}
-              {isCompleted && (
-                <Badge variant="success">
-                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                  تکمیل شده
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {sectionIndex >= 0 && (
+                  <Badge variant="primary">فصل {toPersianDigits(sectionIndex + 1)}</Badge>
+                )}
+                <Badge variant="neutral">
+                  <Clock className="h-3 w-3" aria-hidden="true" />
+                  {toPersianDigits(lesson.readingTime)} دقیقه مطالعه
                 </Badge>
-              )}
+                {lesson.status === 'planned' && <Badge variant="neutral">به‌زودی</Badge>}
+                {isCompleted && (
+                  <Badge variant="success">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                    تکمیل شده
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 sm:ms-auto">
+                <Button
+                  size="sm"
+                  variant={isCompleted ? 'secondary' : 'primary'}
+                  onClick={() => toggleLessonComplete(lesson.id)}
+                  startIcon={
+                    isCompleted ? (
+                      <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                    ) : (
+                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                    )
+                  }
+                >
+                  {isCompleted ? 'لغو تکمیل درس' : 'تکمیل درس'}
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleBookmark(lesson.id)}
+                  startIcon={
+                    <Bookmark
+                      className={cn('h-3.5 w-3.5', isBookmarked && 'fill-current')}
+                      aria-hidden="true"
+                    />
+                  }
+                >
+                  {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
+                </Button>
+              </div>
             </div>
 
-            <h1 className="mt-4 text-2xl font-extrabold leading-[1.5] text-slate-900 dark:text-white sm:text-3xl">
+            <h1 className="mt-3.5 text-2xl font-extrabold leading-[1.5] text-slate-900 dark:text-white sm:text-3xl">
               {lesson.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-8 text-slate-600 dark:text-slate-300">
+            <p className="mt-2 max-w-2xl text-sm leading-8 text-slate-600 dark:text-slate-300">
               {lesson.description}
             </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button
-                variant={isCompleted ? 'secondary' : 'primary'}
-                onClick={() => toggleLessonComplete(lesson.id)}
-                startIcon={
-                  isCompleted ? (
-                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                  ) : (
-                    <Check className="h-4 w-4" aria-hidden="true" />
-                  )
-                }
-              >
-                {isCompleted ? 'لغو تکمیل درس' : 'تکمیل درس'}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => toggleBookmark(lesson.id)}
-                startIcon={
-                  <Bookmark
-                    className={cn('h-4 w-4', isBookmarked && 'fill-current')}
-                    aria-hidden="true"
-                  />
-                }
-              >
-                {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
-              </Button>
-            </div>
           </div>
         </header>
 
