@@ -6,6 +6,8 @@ import { DockerKraftSetupContent } from './dockerKraftSetup'
 import { TopicsPartitionsContent } from './topicsPartitions'
 import { LogSegmentsContent } from './logSegments'
 import { RetentionCompactionContent } from './retentionCompaction'
+import { BrokersControllerKraftContent } from './brokersControllerKraft'
+import { LeaderFollowerContent } from './leaderFollower'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -28,6 +30,12 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'retention-compaction': {
     Content: RetentionCompactionContent,
+  },
+  'brokers-controller-kraft': {
+    Content: BrokersControllerKraftContent,
+  },
+  'leader-follower': {
+    Content: LeaderFollowerContent,
   },
 }
 

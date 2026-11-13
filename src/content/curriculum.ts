@@ -110,7 +110,7 @@ export const sections: CourseSection[] = [
           'نقش Broker و Controller، تفاوت معماری KRaft با دوره ZooKeeper و انتخاب کنترلر در خوشه.',
         readingTime: 10,
         sectionId: 'architecture',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'leader-follower',
@@ -120,7 +120,7 @@ export const sections: CourseSection[] = [
           'چرا هر Partition یک Leader دارد، Followerها چگونه همگام می‌شوند و خواندن از کجا انجام می‌شود.',
         readingTime: 8,
         sectionId: 'architecture',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
