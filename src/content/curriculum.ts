@@ -29,8 +29,8 @@ export const sections: CourseSection[] = [
         slug: 'what-is-kafka',
         title: 'Kafka چیست و چه مشکلی را حل می‌کند؟',
         description:
-          'با ایده اصلی Kafka، تفاوت آن با صف پیام سنتی و معنای واقعی event streaming آشنا شوید.',
-        readingTime: 8,
+          'کافکا را با داستان کلاس، تشبیه دفترچه جادویی، شبیه‌ساز زنده و شکل‌های متحرک مثل یک کودک ۸ ساله درک کنید.',
+        readingTime: 6,
         sectionId: 'introduction',
         status: 'published',
       },
