@@ -99,8 +99,8 @@ src/
 ## State and persistence
 
 - Storage key: `kafka-tutorial-store`.
-- Current schema version: `2` (`STORE_VERSION` in `src/store/useAppStore.ts`).
-- Persisted fields: `completedLessons`, `bookmarks`, `theme`,
+- Current schema version: `3` (`STORE_VERSION` in `src/store/useAppStore.ts`).
+- Persisted fields: `completedLessons`, `bookmarks`, `notes`, `theme`,
   `lastVisitedLesson`.
 - If the persisted schema changes, bump `STORE_VERSION` and update
   `sanitizePersistedState` so old data migrates safely.

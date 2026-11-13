@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Download,
   FileJson,
+  FileText,
   GraduationCap,
   RotateCcw,
   ShieldAlert,
@@ -51,6 +52,7 @@ const reportTimestamp = new Date()
 export function ProgressPage() {
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
+  const notes = useAppStore((state) => state.notes)
   const importData = useAppStore((state) => state.importData)
   const resetAllData = useAppStore((state) => state.resetAllData)
 
@@ -71,6 +73,13 @@ export function ProgressPage() {
   const bookmarkedLessons = bookmarks
     .map((id) => findLessonById(id))
     .filter((lesson): lesson is NonNullable<typeof lesson> => Boolean(lesson))
+
+  const notedLessons = publishedLessons
+    .map((lesson) => ({
+      lesson,
+      note: (notes[lesson.id] ?? '').trim(),
+    }))
+    .filter((item) => item.note.length > 0)
 
   const progressPercent = getProgressPercent(completedLessons)
   const completedCount = getCompletedLessonCount(completedLessons)
@@ -156,7 +165,7 @@ export function ProgressPage() {
         </div>
       </header>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
           {
             icon: CheckCircle2,
@@ -169,6 +178,12 @@ export function ProgressPage() {
             label: 'نشانک',
             value: toPersianDigits(bookmarkedLessons.length),
             tone: 'text-primary-600 dark:text-primary-300',
+          },
+          {
+            icon: FileText,
+            label: 'یادداشت',
+            value: toPersianDigits(notedLessons.length),
+            tone: 'text-indigo-600 dark:text-indigo-400',
           },
         ].map((stat) => {
           const Icon = stat.icon
@@ -287,6 +302,43 @@ export function ProgressPage() {
                   </ul>
                 ) : (
                   emptyState('هنوز نشانکی اضافه نکرده‌اید. در هر درس می‌توانید نشانک بگذارید.')
+                ),
+            },
+            {
+              id: 'notes',
+              label: `یادداشت‌ها (${toPersianDigits(notedLessons.length)})`,
+              content:
+                notedLessons.length > 0 ? (
+                  <ul className="space-y-3">
+                    {notedLessons.map(({ lesson, note }) => (
+                      <li key={lesson.id}>
+                        <Link
+                          to={`/lessons/${lesson.slug}`}
+                          className="group block rounded-xl border border-slate-200/80 p-4 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5">
+                              <FileText
+                                className="h-4 w-4 shrink-0 text-indigo-500"
+                                aria-hidden="true"
+                              />
+                              <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                                {lesson.title}
+                              </span>
+                            </div>
+                            <span className="shrink-0 text-[11px] text-slate-400">
+                              {toPersianDigits(lesson.readingTime)} دقیقه
+                            </span>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-xs leading-6 text-slate-600 dark:text-slate-300">
+                            {note}
+                          </p>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  emptyState('هنوز برای هیچ درسی یادداشتی ثبت نکرده‌اید. در صفحه هر درس می‌توانید نکات مدنظرتان را یادداشت کنید.')
                 ),
             },
           ]}

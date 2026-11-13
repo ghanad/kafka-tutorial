@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { BarChart3, CheckCircle2, Circle, Clock, Home, X } from 'lucide-react'
+import { BarChart3, CheckCircle2, Circle, Clock, FileText, Home, X } from 'lucide-react'
 import { allLessons, publishedLessons, sections } from '../../content/curriculum'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
@@ -20,6 +20,7 @@ interface SidebarBodyProps {
 
 function SidebarBody({ onNavigate }: SidebarBodyProps) {
   const completedLessons = useAppStore((state) => state.completedLessons)
+  const notes = useAppStore((state) => state.notes)
   const completedSet = new Set(completedLessons)
   const completedCount = getCompletedLessonCount(completedLessons)
   const progressPercent = getProgressPercent(completedLessons)
@@ -134,9 +135,20 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
                                   )}
                                   <span className="min-w-0 flex-1">
                                     <span className="block leading-5">{lesson.title}</span>
-                                    <span className="mt-0.5 flex items-center gap-1 text-[10px] font-normal text-slate-400">
-                                      <Clock className="h-3 w-3" aria-hidden="true" />
-                                      {toPersianDigits(lesson.readingTime)} دقیقه
+                                    <span className="mt-0.5 flex items-center justify-between gap-1 text-[10px] font-normal text-slate-400">
+                                      <span className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3" aria-hidden="true" />
+                                        {toPersianDigits(lesson.readingTime)} دقیقه
+                                      </span>
+                                      {Boolean(notes[lesson.id]?.trim()) && (
+                                        <span
+                                          className="flex items-center gap-0.5 text-primary-600 dark:text-primary-400"
+                                          title="دارای یادداشت شخصی"
+                                        >
+                                          <FileText className="h-3 w-3" aria-hidden="true" />
+                                          <span>یادداشت</span>
+                                        </span>
+                                      )}
                                     </span>
                                   </span>
                                 </>

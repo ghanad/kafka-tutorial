@@ -7,6 +7,7 @@ import {
   Bookmark,
   Check,
   Clock,
+  FileText,
   Home,
   ChevronDown,
   ListTree,
@@ -22,6 +23,7 @@ import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
 import { Ltr } from '../ui/Ltr'
+import { LessonNotes } from './LessonNotes'
 
 interface TocItem {
   id: string
@@ -51,12 +53,27 @@ export function LessonLayout({
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
+  const hasNote = Boolean(useAppStore((state) => state.notes[lesson.id]?.trim()))
   const toggleLessonComplete = useAppStore((state) => state.toggleLessonComplete)
   const toggleBookmark = useAppStore((state) => state.toggleBookmark)
 
   const isCompleted = completedLessons.includes(lesson.id)
   const isBookmarked = bookmarks.includes(lesson.id)
   const sectionIndex = section ? sections.findIndex((item) => item.id === section.id) : -1
+
+  function scrollToNotes() {
+    const el = document.getElementById('lesson-notes')
+    if (el) {
+      el.scrollIntoView({
+        behavior: shouldReduceMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
+      const textarea = document.getElementById('lesson-note-textarea')
+      if (textarea) {
+        textarea.focus()
+      }
+    }
+  }
 
   useEffect(() => {
     const root = contentRef.current
@@ -211,7 +228,7 @@ export function LessonLayout({
               {lesson.description}
             </p>
 
-            <div className="mt-3.5 flex items-center gap-2 xl:col-start-2 xl:row-start-1 xl:mt-0 xl:self-center">
+            <div className="mt-3.5 flex flex-wrap items-center gap-2 xl:col-start-2 xl:row-start-1 xl:mt-0 xl:self-center">
               <Button
                 size="sm"
                 variant={isCompleted ? 'secondary' : 'primary'}
@@ -240,6 +257,15 @@ export function LessonLayout({
               >
                 {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
               </Button>
+
+              <Button
+                size="sm"
+                variant={hasNote ? 'secondary' : 'outline'}
+                onClick={scrollToNotes}
+                startIcon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
+              >
+                {hasNote ? 'ویرایش یادداشت' : 'یادداشت'}
+              </Button>
             </div>
           </div>
         </header>
@@ -261,7 +287,6 @@ export function LessonLayout({
                 </CardContent>
               </Card>
             )}
-
           </div>
 
           <aside className="order-first xl:order-none">
@@ -304,6 +329,16 @@ export function LessonLayout({
             </div>
           </aside>
         </div>
+
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.3 }}
+          className="mt-8"
+        >
+          <LessonNotes lessonId={lesson.id} />
+        </motion.div>
 
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
