@@ -71,8 +71,9 @@ src/
   registered in `src/content/lessons/index.ts` via `getLessonContent`.
 - Lesson content should use `h2` and `h3` headings because the table of contents
   is generated automatically from them.
-- Keep content in Persian. This project intentionally has no per-lesson quiz or
-  personal notes feature; do not add them back unless explicitly requested.
+- Keep content in Persian. Personal notes are an existing feature: each lesson
+  has one general note plus inline notes anchored to selected text. Keep both
+  working when touching lesson pages; do not add quizzes.
 
 ## Content style
 
@@ -99,9 +100,9 @@ src/
 ## State and persistence
 
 - Storage key: `kafka-tutorial-store`.
-- Current schema version: `4` (`STORE_VERSION` in `src/store/useAppStore.ts`).
-- Persisted fields: `completedLessons`, `bookmarks`, `notes`, `theme`,
-  `lastVisitedLesson`, `fontSize`, `fontFamily`, `lineHeight`.
+- Current schema version: `5` (`STORE_VERSION` in `src/store/useAppStore.ts`).
+- Persisted fields: `completedLessons`, `bookmarks`, `notes`, `inlineNotes`,
+  `theme`, `lastVisitedLesson`, `fontSize`, `fontFamily`, `lineHeight`.
 - If the persisted schema changes, bump `STORE_VERSION` and update
   `sanitizePersistedState` so old data migrates safely.
 - Export/import of user data is implemented in `src/utils/dataTransfer.ts`.

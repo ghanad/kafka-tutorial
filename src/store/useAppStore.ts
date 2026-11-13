@@ -6,10 +6,33 @@ export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
 export type FontFamily = 'vazirmatn' | 'vazirmatn-ui' | 'system' | 'serif'
 export type LineHeight = 'compact' | 'normal' | 'relaxed'
 
+export interface NoteAnchor {
+  /** Exact text of the selection, kept in the same raw form as the DOM text index. */
+  quote: string
+  /** A short slice of text right before the quote, used to disambiguate matches. */
+  prefix: string
+  /** A short slice of text right after the quote, used to disambiguate matches. */
+  suffix: string
+  /** Character offset where the quote started, captured at selection time. */
+  startOffset?: number
+}
+
+export interface InlineNote {
+  id: string
+  body: string
+  anchor: NoteAnchor
+  createdAt: number
+  updatedAt: number
+}
+
+export const NOTE_QUOTE_MAX_LENGTH = 2000
+export const NOTE_CONTEXT_MAX_LENGTH = 120
+
 export interface AppStore {
   completedLessons: string[]
   bookmarks: string[]
   notes: Record<string, string>
+  inlineNotes: Record<string, InlineNote[]>
   theme: Theme
   lastVisitedLesson: string | null
   fontSize: FontSize
@@ -21,6 +44,9 @@ export interface AppStore {
   toggleBookmark: (lessonId: string) => void
   setLessonNote: (lessonId: string, note: string) => void
   deleteLessonNote: (lessonId: string) => void
+  addInlineNote: (lessonId: string, anchor: NoteAnchor, body: string) => string
+  updateInlineNote: (lessonId: string, noteId: string, body: string) => void
+  deleteInlineNote: (lessonId: string, noteId: string) => void
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
   setFontSize: (fontSize: FontSize) => void
@@ -38,6 +64,7 @@ export type PersistedAppState = Pick<
   | 'completedLessons'
   | 'bookmarks'
   | 'notes'
+  | 'inlineNotes'
   | 'theme'
   | 'lastVisitedLesson'
   | 'fontSize'
@@ -46,7 +73,7 @@ export type PersistedAppState = Pick<
 >
 
 export const STORAGE_KEY = 'kafka-tutorial-store'
-export const STORE_VERSION = 4
+export const STORE_VERSION = 5
 
 const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl']
 
@@ -63,11 +90,16 @@ const initialPersistedState: PersistedAppState = {
   completedLessons: [],
   bookmarks: [],
   notes: {},
+  inlineNotes: {},
   theme: 'light',
   lastVisitedLesson: null,
   fontSize: 'md',
   fontFamily: 'vazirmatn',
   lineHeight: 'normal',
+}
+
+function createInlineNoteId(): string {
+  return `note-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 function uniqueStrings(value: unknown): string[] {
@@ -86,6 +118,70 @@ function sanitizeNotes(value: unknown): Record<string, string> {
       }
     }
   }
+  return result
+}
+
+function sanitizeAnchor(value: unknown): NoteAnchor | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const data = value as Partial<NoteAnchor>
+  if (typeof data.quote !== 'string') return null
+
+  const quote = data.quote
+  if (quote.trim().length === 0 || quote.length > NOTE_QUOTE_MAX_LENGTH) return null
+
+  const startOffset =
+    typeof data.startOffset === 'number' &&
+    Number.isFinite(data.startOffset) &&
+    data.startOffset >= 0
+      ? Math.floor(data.startOffset)
+      : undefined
+
+  return {
+    quote,
+    prefix: typeof data.prefix === 'string' ? data.prefix.slice(0, NOTE_CONTEXT_MAX_LENGTH) : '',
+    suffix: typeof data.suffix === 'string' ? data.suffix.slice(0, NOTE_CONTEXT_MAX_LENGTH) : '',
+    startOffset,
+  }
+}
+
+function sanitizeInlineNotes(value: unknown): Record<string, InlineNote[]> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const result: Record<string, InlineNote[]> = {}
+
+  for (const [lessonId, list] of Object.entries(value)) {
+    if (!Array.isArray(list)) continue
+
+    const notes: InlineNote[] = []
+    const usedIds = new Set<string>()
+
+    for (const raw of list) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue
+      const data = raw as Partial<InlineNote>
+      const anchor = sanitizeAnchor(data.anchor)
+      const body = typeof data.body === 'string' ? data.body.trim() : ''
+      if (!anchor || body.length === 0) continue
+
+      let id = typeof data.id === 'string' && data.id.length > 0 ? data.id : createInlineNoteId()
+      if (usedIds.has(id)) id = createInlineNoteId()
+      usedIds.add(id)
+
+      const createdAt =
+        typeof data.createdAt === 'number' && Number.isFinite(data.createdAt)
+          ? data.createdAt
+          : Date.now()
+      const updatedAt =
+        typeof data.updatedAt === 'number' && Number.isFinite(data.updatedAt)
+          ? data.updatedAt
+          : createdAt
+
+      notes.push({ id, body, anchor, createdAt, updatedAt })
+    }
+
+    if (notes.length > 0) {
+      result[lessonId] = notes
+    }
+  }
+
   return result
 }
 
@@ -123,6 +219,7 @@ function sanitizePersistedState(value: unknown): PersistedAppState {
     completedLessons: uniqueStrings(data.completedLessons),
     bookmarks: uniqueStrings(data.bookmarks),
     notes: sanitizeNotes(data.notes),
+    inlineNotes: sanitizeInlineNotes(data.inlineNotes),
     theme: data.theme === 'dark' ? 'dark' : 'light',
     lastVisitedLesson:
       typeof data.lastVisitedLesson === 'string' ? data.lastVisitedLesson : null,
@@ -179,6 +276,67 @@ export const useAppStore = create<AppStore>()(
           return { notes: rest }
         }),
 
+      addInlineNote: (lessonId, anchor, body) => {
+        const text = body.trim()
+        if (text.length === 0) return ''
+        if (anchor.quote.trim().length === 0) return ''
+
+        const now = Date.now()
+        const note: InlineNote = {
+          id: createInlineNoteId(),
+          body: text,
+          anchor,
+          createdAt: now,
+          updatedAt: now,
+        }
+
+        set((state) => ({
+          inlineNotes: {
+            ...state.inlineNotes,
+            [lessonId]: [...(state.inlineNotes[lessonId] ?? []), note],
+          },
+        }))
+
+        return note.id
+      },
+
+      updateInlineNote: (lessonId, noteId, body) => {
+        const text = body.trim()
+        if (text.length === 0) return
+
+        set((state) => {
+          const list = state.inlineNotes[lessonId]
+          if (!list || !list.some((note) => note.id === noteId)) return state
+
+          return {
+            inlineNotes: {
+              ...state.inlineNotes,
+              [lessonId]: list.map((note) =>
+                note.id === noteId ? { ...note, body: text, updatedAt: Date.now() } : note,
+              ),
+            },
+          }
+        })
+      },
+
+      deleteInlineNote: (lessonId, noteId) =>
+        set((state) => {
+          const list = state.inlineNotes[lessonId]
+          if (!list) return state
+
+          const nextList = list.filter((note) => note.id !== noteId)
+          if (nextList.length === list.length) return state
+
+          const nextInlineNotes = { ...state.inlineNotes }
+          if (nextList.length > 0) {
+            nextInlineNotes[lessonId] = nextList
+          } else {
+            delete nextInlineNotes[lessonId]
+          }
+
+          return { inlineNotes: nextInlineNotes }
+        }),
+
       setTheme: (theme) => set({ theme }),
 
       toggleTheme: () =>
@@ -214,6 +372,7 @@ export const useAppStore = create<AppStore>()(
         completedLessons: state.completedLessons,
         bookmarks: state.bookmarks,
         notes: state.notes,
+        inlineNotes: state.inlineNotes,
         theme: state.theme,
         lastVisitedLesson: state.lastVisitedLesson,
         fontSize: state.fontSize,

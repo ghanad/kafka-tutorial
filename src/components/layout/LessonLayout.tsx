@@ -25,6 +25,8 @@ import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
 import { FontSettingsModal } from '../ui/FontSettingsModal'
 import { Ltr } from '../ui/Ltr'
+import { InlineNotesLayer } from '../notes/InlineNotesLayer'
+import type { InlineNotesLayerHandle } from '../notes/InlineNotesLayer'
 import { LessonNotes } from './LessonNotes'
 
 interface TocItem {
@@ -50,13 +52,18 @@ export function LessonLayout({
 }: LessonLayoutProps) {
   const shouldReduceMotion = useReducedMotion()
   const contentRef = useRef<HTMLDivElement>(null)
+  const inlineNotesRef = useRef<InlineNotesLayerHandle>(null)
   const [toc, setToc] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [fontModalOpen, setFontModalOpen] = useState(false)
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
-  const hasNote = Boolean(useAppStore((state) => state.notes[lesson.id]?.trim()))
+  const hasNote = useAppStore(
+    (state) =>
+      Boolean(state.notes[lesson.id]?.trim()) ||
+      Boolean(state.inlineNotes[lesson.id]?.length),
+  )
   const toggleLessonComplete = useAppStore((state) => state.toggleLessonComplete)
   const toggleBookmark = useAppStore((state) => state.toggleBookmark)
 
@@ -71,9 +78,11 @@ export function LessonLayout({
         behavior: shouldReduceMotion ? 'auto' : 'smooth',
         block: 'start',
       })
-      const textarea = document.getElementById('lesson-note-textarea')
-      if (textarea) {
-        textarea.focus()
+      if (!hasNote) {
+        const textarea = document.getElementById('lesson-note-textarea')
+        if (textarea) {
+          textarea.focus({ preventScroll: true })
+        }
       }
     }
   }
@@ -265,9 +274,10 @@ export function LessonLayout({
                 size="sm"
                 variant={hasNote ? 'secondary' : 'outline'}
                 onClick={scrollToNotes}
+                title={hasNote ? 'مشاهده یادداشت‌های این درس' : 'افزودن یادداشت برای این درس'}
                 startIcon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
               >
-                {hasNote ? 'ویرایش یادداشت' : 'یادداشت'}
+                {hasNote ? 'یادداشت‌ها' : 'یادداشت'}
               </Button>
 
               <Button
@@ -285,7 +295,7 @@ export function LessonLayout({
         </header>
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]">
-          <div className="min-w-0 scroll-mt-24" id="lesson-content-start">
+          <div className="relative min-w-0 scroll-mt-24" id="lesson-content-start">
             {Content ? (
               <div ref={contentRef} className="lesson-prose">
                 <Content />
@@ -302,6 +312,13 @@ export function LessonLayout({
               </Card>
             )}
 
+            {Content && (
+              <InlineNotesLayer
+                ref={inlineNotesRef}
+                lessonId={lesson.id}
+                contentRef={contentRef}
+              />
+            )}
           </div>
 
           <aside className="order-first xl:order-none">
@@ -352,7 +369,10 @@ export function LessonLayout({
           transition={{ duration: 0.3 }}
           className="mt-8"
         >
-          <LessonNotes lessonId={lesson.id} />
+          <LessonNotes
+            lessonId={lesson.id}
+            onOpenInlineNote={(noteId) => inlineNotesRef.current?.openNote(noteId)}
+          />
         </motion.div>
 
         <motion.div

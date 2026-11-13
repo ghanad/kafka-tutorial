@@ -7,6 +7,7 @@ export function getPersistedSnapshot(): PersistedAppState {
     completedLessons: state.completedLessons,
     bookmarks: state.bookmarks,
     notes: state.notes,
+    inlineNotes: state.inlineNotes,
     theme: state.theme,
     lastVisitedLesson: state.lastVisitedLesson,
     fontSize: state.fontSize,

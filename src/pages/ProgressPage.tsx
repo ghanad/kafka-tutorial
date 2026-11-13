@@ -9,6 +9,7 @@ import {
   FileJson,
   FileText,
   GraduationCap,
+  PencilLine,
   RotateCcw,
   ShieldAlert,
   Trash2,
@@ -29,6 +30,7 @@ import {
 } from '../content/curriculum'
 import { useAppStore } from '../store/useAppStore'
 import { cn } from '../utils/cn'
+import { previewQuote } from '../utils/inlineNoteAnchor'
 import {
   backupFileName,
   buildExportJson,
@@ -55,6 +57,7 @@ export function ProgressPage() {
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
   const notes = useAppStore((state) => state.notes)
+  const inlineNotes = useAppStore((state) => state.inlineNotes)
   const importData = useAppStore((state) => state.importData)
   const resetAllData = useAppStore((state) => state.resetAllData)
 
@@ -80,8 +83,9 @@ export function ProgressPage() {
     .map((lesson) => ({
       lesson,
       note: (notes[lesson.id] ?? '').trim(),
+      anchors: inlineNotes[lesson.id] ?? [],
     }))
-    .filter((item) => item.note.length > 0)
+    .filter((item) => item.note.length > 0 || item.anchors.length > 0)
 
   const progressPercent = getProgressPercent(completedLessons)
   const completedCount = getCompletedLessonCount(completedLessons)
@@ -312,7 +316,7 @@ export function ProgressPage() {
               content:
                 notedLessons.length > 0 ? (
                   <ul className="space-y-3">
-                    {notedLessons.map(({ lesson, note }) => (
+                    {notedLessons.map(({ lesson, note, anchors }) => (
                       <li key={lesson.id}>
                         <Link
                           to={`/lessons/${lesson.slug}`}
@@ -332,15 +336,29 @@ export function ProgressPage() {
                               {toPersianDigits(lesson.readingTime)} دقیقه
                             </span>
                           </div>
-                          <p className="mt-2 line-clamp-2 text-xs leading-6 text-slate-600 dark:text-slate-300">
-                            {note}
-                          </p>
+                          {note && (
+                            <p className="mt-2 line-clamp-2 text-xs leading-6 text-slate-600 dark:text-slate-300">
+                              {note}
+                            </p>
+                          )}
+                          {anchors.length > 0 && (
+                            <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-6 text-amber-700 dark:text-amber-300">
+                              <PencilLine
+                                className="mt-1 h-3.5 w-3.5 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span className="line-clamp-2">
+                                {toPersianDigits(anchors.length)} یادداشت روی متن: «
+                                {previewQuote(anchors[anchors.length - 1].anchor.quote, 70)}»
+                              </span>
+                            </p>
+                          )}
                         </Link>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  emptyState('هنوز برای هیچ درسی یادداشتی ثبت نکرده‌اید. در صفحه هر درس می‌توانید نکات مدنظرتان را یادداشت کنید.')
+                  emptyState('هنوز برای هیچ درسی یادداشتی ثبت نکرده‌اید. در صفحه هر درس، متن یا پاراگراف موردنظر را انتخاب کنید و همان‌جا یادداشت بگذارید.')
                 ),
             },
           ]}

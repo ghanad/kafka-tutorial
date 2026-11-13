@@ -21,6 +21,7 @@ interface SidebarBodyProps {
 function SidebarBody({ onNavigate }: SidebarBodyProps) {
   const completedLessons = useAppStore((state) => state.completedLessons)
   const notes = useAppStore((state) => state.notes)
+  const inlineNotes = useAppStore((state) => state.inlineNotes)
   const completedSet = new Set(completedLessons)
   const completedCount = getCompletedLessonCount(completedLessons)
   const progressPercent = getProgressPercent(completedLessons)
@@ -140,7 +141,8 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
                                         <Clock className="h-3 w-3" aria-hidden="true" />
                                         {toPersianDigits(lesson.readingTime)} دقیقه
                                       </span>
-                                      {Boolean(notes[lesson.id]?.trim()) && (
+                                      {(Boolean(notes[lesson.id]?.trim()) ||
+                                        Boolean(inlineNotes[lesson.id]?.length)) && (
                                         <span
                                           className="flex items-center gap-0.5 text-primary-600 dark:text-primary-400"
                                           title="دارای یادداشت شخصی"
