@@ -90,7 +90,7 @@ export const sections: CourseSection[] = [
           'ساختار append-only، فایل‌های .log و .index و .timeindex و اینکه Kafka چگونه روی دیسک می‌نویسد.',
         readingTime: 9,
         sectionId: 'architecture',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'retention-compaction',

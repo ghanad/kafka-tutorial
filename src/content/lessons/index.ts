@@ -4,6 +4,7 @@ import { KafkaUseCasesContent } from './kafkaUseCases'
 import { KeyTermsContent } from './keyTerms'
 import { DockerKraftSetupContent } from './dockerKraftSetup'
 import { TopicsPartitionsContent } from './topicsPartitions'
+import { LogSegmentsContent } from './logSegments'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -20,6 +21,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'topics-partitions': {
     Content: TopicsPartitionsContent,
+  },
+  'log-segments': {
+    Content: LogSegmentsContent,
   },
 }
 
