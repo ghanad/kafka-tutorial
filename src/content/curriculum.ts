@@ -100,7 +100,7 @@ export const sections: CourseSection[] = [
           'حذف داده‌های قدیمی، تفاوت retention بر اساس زمان و اندازه، و نگه‌داشتن آخرین مقدار هر Key.',
         readingTime: 9,
         sectionId: 'architecture',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'brokers-controller-kraft',

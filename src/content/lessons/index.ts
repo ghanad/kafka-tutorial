@@ -5,6 +5,7 @@ import { KeyTermsContent } from './keyTerms'
 import { DockerKraftSetupContent } from './dockerKraftSetup'
 import { TopicsPartitionsContent } from './topicsPartitions'
 import { LogSegmentsContent } from './logSegments'
+import { RetentionCompactionContent } from './retentionCompaction'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -24,6 +25,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'log-segments': {
     Content: LogSegmentsContent,
+  },
+  'retention-compaction': {
+    Content: RetentionCompactionContent,
   },
 }
 
