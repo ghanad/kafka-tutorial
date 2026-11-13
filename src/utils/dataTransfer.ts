@@ -9,6 +9,9 @@ export function getPersistedSnapshot(): PersistedAppState {
     notes: state.notes,
     theme: state.theme,
     lastVisitedLesson: state.lastVisitedLesson,
+    fontSize: state.fontSize,
+    fontFamily: state.fontFamily,
+    lineHeight: state.lineHeight,
   }
 }
 

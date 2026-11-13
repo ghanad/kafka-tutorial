@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { BarChart3, BookOpen, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { BarChart3, BookOpen, Menu, Moon, Search, Sun, Type, X } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
 import { useLessonSearch } from '../../hooks/useLessonSearch'
 import { useAppStore } from '../../store/useAppStore'
@@ -8,6 +8,7 @@ import { cn } from '../../utils/cn'
 import { toPersianDigits } from '../../utils/persianDigits'
 import { getProgressPercent } from '../../utils/progress'
 import { buttonClasses } from '../ui/buttonStyles'
+import { FontSettingsModal } from '../ui/FontSettingsModal'
 import { KafkaLogo } from '../ui/KafkaLogo'
 import { Ltr } from '../ui/Ltr'
 import { ProgressBar } from '../ui/ProgressBar'
@@ -22,6 +23,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const completedLessons = useAppStore((state) => state.completedLessons)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [fontModalOpen, setFontModalOpen] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
   const results = useLessonSearch(query)
   const progressPercent = getProgressPercent(completedLessons)
@@ -193,6 +195,19 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
           <button
             type="button"
+            onClick={() => setFontModalOpen(true)}
+            aria-label="تنظیمات قلم و خوانایی"
+            title="تنظیمات قلم و خوانایی"
+            className={cn(
+              buttonClasses({ variant: 'ghost', size: 'icon' }),
+              'border border-slate-200 dark:border-slate-800',
+            )}
+          >
+            <Type className="h-5 w-5 text-slate-700 dark:text-slate-300" aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
             title={theme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
@@ -209,6 +224,11 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           </button>
         </div>
       </div>
+
+      <FontSettingsModal
+        open={fontModalOpen}
+        onClose={() => setFontModalOpen(false)}
+      />
     </header>
   )
 }

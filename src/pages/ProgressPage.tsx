@@ -12,12 +12,14 @@ import {
   RotateCcw,
   ShieldAlert,
   Trash2,
+  Type,
   Upload,
 } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Callout } from '../components/ui/Callout'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
+import { FontSettingsPanel } from '../components/ui/FontSettingsPanel'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { Tabs } from '../components/ui/Tabs'
 import {
@@ -343,6 +345,23 @@ export function ProgressPage() {
             },
           ]}
         />
+      </section>
+
+      <section className="mt-6" aria-labelledby="typography-settings-title">
+        <Card>
+          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800">
+            <div>
+              <CardTitle id="typography-settings-title">شخصی‌سازی قلم و خوانایی</CardTitle>
+              <p className="mt-1 text-xs leading-6 text-slate-500 dark:text-slate-400">
+                اندازه قلم، نوع فونت و فاصله خطوط متن درس‌ها را مطابق سلیقه خود تنظیم کنید.
+              </p>
+            </div>
+            <Type className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          </CardHeader>
+          <CardContent className="p-5">
+            <FontSettingsPanel />
+          </CardContent>
+        </Card>
       </section>
 
       <section className="mt-6" aria-labelledby="backup-title">

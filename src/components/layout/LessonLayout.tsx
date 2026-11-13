@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ListTree,
   RotateCcw,
+  Type,
 } from 'lucide-react'
 import type { CourseSection, LessonMeta } from '../../content/curriculum'
 import { sections } from '../../content/curriculum'
@@ -22,6 +23,7 @@ import { toPersianDigits } from '../../utils/persianDigits'
 import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
+import { FontSettingsModal } from '../ui/FontSettingsModal'
 import { Ltr } from '../ui/Ltr'
 import { LessonNotes } from './LessonNotes'
 
@@ -50,6 +52,7 @@ export function LessonLayout({
   const contentRef = useRef<HTMLDivElement>(null)
   const [toc, setToc] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [fontModalOpen, setFontModalOpen] = useState(false)
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
@@ -266,6 +269,17 @@ export function LessonLayout({
               >
                 {hasNote ? 'ویرایش یادداشت' : 'یادداشت'}
               </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setFontModalOpen(true)}
+                title="شخصی‌سازی قلم و اندازه متن"
+                aria-label="شخصی‌سازی قلم و اندازه متن"
+                startIcon={<Type className="h-3.5 w-3.5" aria-hidden="true" />}
+              >
+                قلم
+              </Button>
             </div>
           </div>
         </header>
@@ -287,6 +301,7 @@ export function LessonLayout({
                 </CardContent>
               </Card>
             )}
+
           </div>
 
           <aside className="order-first xl:order-none">
@@ -435,6 +450,11 @@ export function LessonLayout({
           مرورگر نگهداری می‌شوند.
         </p>
       </article>
+
+      <FontSettingsModal
+        open={fontModalOpen}
+        onClose={() => setFontModalOpen(false)}
+      />
     </div>
   )
 }

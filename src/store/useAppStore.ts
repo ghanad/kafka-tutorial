@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark'
+export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
+export type FontFamily = 'vazirmatn' | 'vazirmatn-ui' | 'system' | 'serif'
+export type LineHeight = 'compact' | 'normal' | 'relaxed'
 
 export interface AppStore {
   completedLessons: string[]
@@ -9,6 +12,9 @@ export interface AppStore {
   notes: Record<string, string>
   theme: Theme
   lastVisitedLesson: string | null
+  fontSize: FontSize
+  fontFamily: FontFamily
+  lineHeight: LineHeight
 
   toggleLessonComplete: (lessonId: string) => void
   markLessonComplete: (lessonId: string) => void
@@ -17,6 +23,11 @@ export interface AppStore {
   deleteLessonNote: (lessonId: string) => void
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
+  setFontSize: (fontSize: FontSize) => void
+  setFontFamily: (fontFamily: FontFamily) => void
+  setLineHeight: (lineHeight: LineHeight) => void
+  stepFontSize: (direction: 'increase' | 'decrease') => void
+  resetFontSettings: () => void
   setLastVisitedLesson: (lessonId: string) => void
   importData: (data: unknown) => void
   resetAllData: () => void
@@ -24,11 +35,29 @@ export interface AppStore {
 
 export type PersistedAppState = Pick<
   AppStore,
-  'completedLessons' | 'bookmarks' | 'notes' | 'theme' | 'lastVisitedLesson'
+  | 'completedLessons'
+  | 'bookmarks'
+  | 'notes'
+  | 'theme'
+  | 'lastVisitedLesson'
+  | 'fontSize'
+  | 'fontFamily'
+  | 'lineHeight'
 >
 
 export const STORAGE_KEY = 'kafka-tutorial-store'
-export const STORE_VERSION = 3
+export const STORE_VERSION = 4
+
+const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl']
+
+function stepSize(current: FontSize, direction: 'increase' | 'decrease'): FontSize {
+  const index = fontSizes.indexOf(current)
+  if (index === -1) return 'md'
+  if (direction === 'increase') {
+    return fontSizes[Math.min(fontSizes.length - 1, index + 1)]
+  }
+  return fontSizes[Math.max(0, index - 1)]
+}
 
 const initialPersistedState: PersistedAppState = {
   completedLessons: [],
@@ -36,6 +65,9 @@ const initialPersistedState: PersistedAppState = {
   notes: {},
   theme: 'light',
   lastVisitedLesson: null,
+  fontSize: 'md',
+  fontFamily: 'vazirmatn',
+  lineHeight: 'normal',
 }
 
 function uniqueStrings(value: unknown): string[] {
@@ -57,6 +89,32 @@ function sanitizeNotes(value: unknown): Record<string, string> {
   return result
 }
 
+function sanitizeFontSize(value: unknown): FontSize {
+  if (value === 'sm' || value === 'md' || value === 'lg' || value === 'xl') {
+    return value
+  }
+  return 'md'
+}
+
+function sanitizeFontFamily(value: unknown): FontFamily {
+  if (
+    value === 'vazirmatn' ||
+    value === 'vazirmatn-ui' ||
+    value === 'system' ||
+    value === 'serif'
+  ) {
+    return value
+  }
+  return 'vazirmatn'
+}
+
+function sanitizeLineHeight(value: unknown): LineHeight {
+  if (value === 'compact' || value === 'normal' || value === 'relaxed') {
+    return value
+  }
+  return 'normal'
+}
+
 function sanitizePersistedState(value: unknown): PersistedAppState {
   if (!value || typeof value !== 'object') return initialPersistedState
   const data = value as Partial<PersistedAppState>
@@ -68,6 +126,9 @@ function sanitizePersistedState(value: unknown): PersistedAppState {
     theme: data.theme === 'dark' ? 'dark' : 'light',
     lastVisitedLesson:
       typeof data.lastVisitedLesson === 'string' ? data.lastVisitedLesson : null,
+    fontSize: sanitizeFontSize(data.fontSize),
+    fontFamily: sanitizeFontFamily(data.fontFamily),
+    lineHeight: sanitizeLineHeight(data.lineHeight),
   }
 }
 
@@ -123,6 +184,22 @@ export const useAppStore = create<AppStore>()(
       toggleTheme: () =>
         set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
+      setFontSize: (fontSize) => set({ fontSize }),
+
+      setFontFamily: (fontFamily) => set({ fontFamily }),
+
+      setLineHeight: (lineHeight) => set({ lineHeight }),
+
+      stepFontSize: (direction) =>
+        set((state) => ({ fontSize: stepSize(state.fontSize, direction) })),
+
+      resetFontSettings: () =>
+        set({
+          fontSize: 'md',
+          fontFamily: 'vazirmatn',
+          lineHeight: 'normal',
+        }),
+
       setLastVisitedLesson: (lessonId) => set({ lastVisitedLesson: lessonId }),
 
       importData: (data) => set({ ...sanitizePersistedState(data) }),
@@ -139,6 +216,9 @@ export const useAppStore = create<AppStore>()(
         notes: state.notes,
         theme: state.theme,
         lastVisitedLesson: state.lastVisitedLesson,
+        fontSize: state.fontSize,
+        fontFamily: state.fontFamily,
+        lineHeight: state.lineHeight,
       }),
       migrate: (persistedState) => sanitizePersistedState(persistedState),
     },

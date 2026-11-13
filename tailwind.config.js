@@ -20,7 +20,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Vazirmatn', 'Tahoma', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-family-current)', 'Vazirmatn', 'Tahoma', 'system-ui', 'sans-serif'],
         mono: [
           'ui-monospace',
           'SFMono-Regular',

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useTypography } from '../../hooks/useTypography'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 
 export function Layout() {
+  useTypography()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const closeSidebar = useCallback(() => setSidebarOpen(false), [])
