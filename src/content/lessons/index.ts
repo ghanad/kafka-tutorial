@@ -1,6 +1,7 @@
 import type { LessonContent } from './types'
 import { WhatIsKafkaContent } from './whatIsKafka'
 import { KafkaUseCasesContent } from './kafkaUseCases'
+import { KeyTermsContent } from './keyTerms'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -8,6 +9,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'kafka-use-cases': {
     Content: KafkaUseCasesContent,
+  },
+  'key-terms': {
+    Content: KeyTermsContent,
   },
 }
 

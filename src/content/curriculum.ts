@@ -49,10 +49,10 @@ export const sections: CourseSection[] = [
         slug: 'key-terms',
         title: 'مفاهیم کلیدی: Event، Topic، Partition و Offset',
         description:
-          'واژه‌نامه بنیادی دوره: Record، Key، Value، Header، Topic، Partition، Broker، Cluster و Offset.',
-        readingTime: 9,
+          'کالبدشکافی پیام، نحوه توزیع کلیدها در پارتیشن‌ها و نقش حیاتی آفست‌ها به همراه شبیه‌ساز زنده.',
+        readingTime: 7,
         sectionId: 'introduction',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'docker-kraft-setup',
