@@ -216,51 +216,51 @@ export function LogSegmentsContent() {
       <table>
         <thead>
           <tr>
-            <th>تنظیم</th>
-            <th>پیش‌فرض</th>
             <th>اثر تغییر</th>
+            <th dir="ltr" className="text-left">Default</th>
+            <th dir="ltr" className="text-left">تنظیم</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              <Ltr>log.segment.bytes</Ltr>
-            </td>
-            <td>۱۰۷۳۷۴۱۸۲۴ (۱ گیبی‌بایت)</td>
-            <td>
               کوچک‌تر = چرخش بیشتر، فایل‌های بیشتر و حذف ریزتر؛ بزرگ‌تر = فایل‌های
               بزرگ‌تر و بازیابی کندتر.
             </td>
+            <td dir="ltr" className="text-left">1073741824 (1 GiB)</td>
+            <td dir="ltr" className="text-left">
+              <Ltr>log.segment.bytes</Ltr>
+            </td>
           </tr>
           <tr>
-            <td>
+            <td>حداکثر عمر سگمنت فعال را تعیین می‌کند.</td>
+            <td dir="ltr" className="text-left">168 hours</td>
+            <td dir="ltr" className="text-left">
               <Ltr>log.roll.ms</Ltr> / <Ltr>log.roll.hours</Ltr>
             </td>
-            <td>۱۶۸ ساعت</td>
-            <td>حداکثر عمر سگمنت فعال را تعیین می‌کند.</td>
           </tr>
           <tr>
-            <td>
-              <Ltr>log.index.interval.bytes</Ltr>
-            </td>
-            <td>۴۰۹۶</td>
             <td>
               فاصله ورودی‌های ایندکس؛ کوچک‌تر = ایندکس بزرگ‌تر و اسکن کوتاه‌تر.
             </td>
+            <td dir="ltr" className="text-left">4096</td>
+            <td dir="ltr" className="text-left">
+              <Ltr>log.index.interval.bytes</Ltr>
+            </td>
           </tr>
           <tr>
-            <td>
+            <td>سقف حجم فایل ایندکس هر سگمنت.</td>
+            <td dir="ltr" className="text-left">10485760 (10 MB)</td>
+            <td dir="ltr" className="text-left">
               <Ltr>log.index.size.max.bytes</Ltr>
             </td>
-            <td>۱۰۴۸۵۷۶۰ (۱۰ مگابایت)</td>
-            <td>سقف حجم فایل ایندکس هر سگمنت.</td>
           </tr>
           <tr>
-            <td>
+            <td>مدت نگهداری داده؛ در درس بعدی مفصل بررسی می‌شود.</td>
+            <td dir="ltr" className="text-left">168 hours</td>
+            <td dir="ltr" className="text-left">
               <Ltr>log.retention.hours</Ltr>
             </td>
-            <td>۱۶۸ ساعت</td>
-            <td>مدت نگهداری داده؛ در درس بعدی مفصل بررسی می‌شود.</td>
           </tr>
         </tbody>
       </table>
