@@ -2,6 +2,7 @@ import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
 import { LogSegmentVisualizer } from '../../components/simulators/LogSegmentVisualizer'
+import { SparseIndexExplainer } from '../../components/simulators/SparseIndexExplainer'
 
 const inspectSegmentFiles = `# نگاه سریع به فایل‌های یک پارتیشن روی دیسک
 ls -lh /var/lib/kafka/data/orders-0/
@@ -192,6 +193,14 @@ export function LogSegmentsContent() {
         فیزیکی چند رکورد را جلو می‌رود تا به آفست دقیق برسد. به این روش{' '}
         <Ltr>Index + Scan</Ltr> می‌گویند.
       </p>
+      <p>
+        اگر این مسیر هنوز برایتان مبهم است، توضیح تعاملی زیر را گام‌به‌گام جلو
+        ببرید: می‌بینید ایندکس چطور همراه نوشتن ساخته می‌شود، چرا برای هر رکورد
+        ورودی ندارد، و یک درخواست <Ltr>fetch</Ltr> چطور از یک ورودی ایندکس به
+        اسکن کوتاه در فایل لاگ می‌رسد.
+      </p>
+
+      <SparseIndexExplainer />
 
       <h2>۶. فایل .timeindex: پیدا کردن بر اساس زمان</h2>
       <p>
