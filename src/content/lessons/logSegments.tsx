@@ -2,6 +2,7 @@ import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
 import { SparseIndexExplainer } from '../../components/simulators/SparseIndexExplainer'
+import { TimeIndexExplainer } from '../../components/simulators/TimeIndexExplainer'
 
 const inspectSegmentFiles = `# نگاه سریع به فایل‌های یک پارتیشن روی دیسک
 ls -lh /var/lib/kafka/data/orders-0/
@@ -20,6 +21,36 @@ const dumpSegments = `# دیدن محتوای داخلی یک سگمنت شام�
 kafka-dump-log.sh \\
   --files /var/lib/kafka/data/orders-0/00000000000000000000.log \\
   --print-data-log | head -20`
+
+const getOffsetsByTime = `# آفست اولین رکوردی که timestamp آن >= زمان داده‌شده است
+# زمان همیشه به میلی‌ثانیه از epoch و بر مبنای UTC است
+kafka-get-offsets.sh \\
+  --bootstrap-server localhost:9092 \\
+  --topic orders \\
+  --time 1731928200000
+
+# نمونه خروجی: نام پارتیشن و آفست پیدا شده
+# orders:0:142857
+# orders:1:98311
+
+# دو مقدار ویژه در همین پارامتر:
+#   --time -1   آخرین آفست یعنی log end offset
+#   --time -2   اولین آفست در دسترس یعنی log start offset`
+
+const seekByTime = `// جست‌وجوی آفست بر اساس زمان، سمت مصرف‌کننده
+TopicPartition tp = new TopicPartition("orders", 0);
+
+// آفست اولین رکوردی که timestamp آن >= زمان هدف است
+Map<TopicPartition, OffsetAndTimestamp> found =
+    consumer.offsetsForTimes(Map.of(tp, targetEpochMs));
+
+OffsetAndTimestamp result = found.get(tp);
+if (result == null) {
+    // هنوز هیچ رکوردی با این زمان یا بعد از آن نوشته نشده
+    consumer.seekToEnd(Set.of(tp));
+} else {
+    consumer.seek(tp, result.offset());
+}`
 
 const segmentConfig = `# نمونه تنظیمات مرتبط با سگمنت‌ها در server.properties
 log.dir=/var/lib/kafka/data
@@ -102,7 +133,7 @@ export function LogSegmentsContent() {
               <Ltr>.timeindex</Ltr>
             </td>
             <td>نگاشت timestamp به آفست</td>
-            <td>برای جست‌وجو بر اساس زمان و سیاست‌های نگهداری.</td>
+            <td>مبنای جست‌وجوی بر اساس زمان و سیاست نگهداری.</td>
           </tr>
           <tr>
             <td>
@@ -170,6 +201,7 @@ export function LogSegmentsContent() {
         سیستم‌عامل تحویل می‌دهد و خودش منتظر <Ltr>fsync</Ltr> هر پیام نمی‌ماند؛
         دوام نهایی از طریق کپی‌برداری روی چند بروکر تامین می‌شود.
       </p>
+      <CodeBlock code={dumpSegments} language="bash" filename="dump-segment.sh" />
 
       <h2>۵. فایل .index: جست‌وجوی متراکم، نه کامل</h2>
       <p>
@@ -202,15 +234,305 @@ export function LogSegmentsContent() {
       <SparseIndexExplainer />
 
       <h2>۶. فایل .timeindex: پیدا کردن بر اساس زمان</h2>
-      <p>
-        گاهی مصرف‌کننده آفست نمی‌خواهد؛ می‌خواهد بداند «پیام‌های بعد از ساعت ۱۰
-        صبح» کجاست. برای این کار کافکا <Ltr>.timeindex</Ltr> را نگه می‌دارد که
-        timestamp را به آفست نگاشت می‌کند. این ایندکس مبنای APIهایی مثل{' '}
-        <Ltr>offsetsForTimes</Ltr> است و به سیاست‌های نگهداری بر اساس زمان هم کمک
-        می‌کند. مثل <Ltr>.index</Ltr>، این هم متراکم است و برای هر رکورد ورودی
-        ندارد.
+      <p className="text-base font-medium leading-8 text-slate-800 dark:text-slate-200">
+        ایندکس بخش قبل همیشه با «آفست» شروع می‌شد: آفست را داریم و موقعیت فیزیکی را
+        می‌خواهیم. اما بسیاری از پرس‌وجوهای واقعی با <strong>زمان</strong> شروع
+        می‌شوند: «مصرف‌کننده‌ای یک ساعت قطع بوده؛ از پیام‌های ساعت ۱۰:۱۵ به بعد را از
+        کجا بخواند؟» در این لحظه مصرف‌کننده هیچ آفستی ندارد. فایل{' '}
+        <Ltr>.timeindex</Ltr> دقیقاً برای همین سؤال ساخته شده است: نگاشت زمان به
+        آفست.
       </p>
-      <CodeBlock code={dumpSegments} language="bash" filename="dump-segment.sh" />
+
+      <h3>چرا .index اینجا به کار نمی‌آید؟</h3>
+      <p>
+        کلید <Ltr>.index</Ltr> آفست است؛ برای جست‌وجو باید آفست هدف را از قبل
+        بدانید، ولی در پرس‌وجوی زمانی دقیقاً همان را نداریم. اگر{' '}
+        <Ltr>.timeindex</Ltr> وجود نداشت، تنها راه این بود که از ابتدای سگمنت، هدر
+        همه <Ltr>Record Batch</Ltr>ها خوانده شود تا اولین دسته‌ای با{' '}
+        <Ltr>maxTimestamp</Ltr> بزرگ‌تر از هدف پیدا شود. برای یک سگمنت ۱ گیبی‌بایتی
+        با ورودی هر ۴۰۹۶ بایت، این یعنی تا ۲۶۲٬۱۴۴ هدر batch و حدود ۱۶ مگابایت
+        خواندن، آن هم فقط برای پیدا کردن «نقطه شروع» جست‌وجو و برای هر پارتیشن.
+      </p>
+      <p>
+        با <Ltr>.timeindex</Ltr> همین کار با حدود ۱۸ مقایسه روی یک فایل چند مگابایتی
+        که در حافظه map شده انجام می‌شود. این همان الگوی آشنای بخش قبل است: یک ایندکس
+        کوچک و متراکم، به‌علاوه یک اسکن کوتاه.
+      </p>
+
+      <h3>داخل .timeindex چه ثبت می‌شود؟</h3>
+      <p>
+        هر ورودی <strong>۱۲ بایت</strong> است: ۸ بایت timestamp (میلی‌ثانیه از{' '}
+        <Ltr>epoch</Ltr>) و ۴ بایت آفست نسبی (نسبت به <Ltr>baseOffset</Ltr> همان
+        سگمنت، درست مثل <Ltr>.index</Ltr> که در بخش ۵ دیدیم). معنی هر ورودی
+        <span dir="ltr" className="mx-1 font-mono">
+          (T, O)
+        </span>
+        یک جمله کوتاه است:
+      </p>
+      <p className="rounded-xl bg-slate-100 p-4 text-center font-bold text-slate-800 dark:bg-slate-800/80 dark:text-slate-200">
+        «بزرگ‌ترین timestamp دیده‌شده تا آفست O برابر T است؛ پس هر رکوردی با
+        timestamp بزرگ‌تر از T حتماً بعد از O نوشته شده است.»
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>ویژگی</th>
+            <th>
+              <Ltr>.index</Ltr>
+            </th>
+            <th>
+              <Ltr>.timeindex</Ltr>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>کلید ورودی</td>
+            <td>
+              آفست نسبی (۴ بایت)
+            </td>
+            <td>timestamp (۸ بایت)</td>
+          </tr>
+          <tr>
+            <td>مقدار ورودی</td>
+            <td>position در فایل <Ltr>.log</Ltr> (۴ بایت)</td>
+            <td>آفست نسبی (۴ بایت)</td>
+          </tr>
+          <tr>
+            <td>اندازه هر ورودی</td>
+            <td>۸ بایت</td>
+            <td>۱۲ بایت</td>
+          </tr>
+          <tr>
+            <td>ترتیب کلیدها</td>
+            <td>صعودی؛ چون آفست همیشه زیاد می‌شود</td>
+            <td>
+              اکیداً صعودی؛ چون «بزرگ‌ترین timestamp تا اینجا» ذخیره می‌شود
+            </td>
+          </tr>
+          <tr>
+            <td>پرس‌وجوی اصلی</td>
+            <td>
+              خواندن از یک آفست (<Ltr>fetch</Ltr>)
+            </td>
+            <td>
+              یافتن آفست از یک زمان (<Ltr>ListOffsets</Ltr>)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>چرا «بزرگ‌ترین timestamp تا اینجا» و نه timestamp همان رکورد؟</h3>
+      <p>
+        اگر ترتیب timestampها همیشه صعودی بود، ثبت timestamp خود رکورد کافی بود.
+        اما timestamp پیش‌فرض کافکا <Ltr>CreateTime</Ltr> است؛ یعنی همان زمانی که
+        تولیدکننده (<Ltr>Producer</Ltr>) هنگام ساختن پیام داشته است. ساعت
+        تولیدکننده‌ها هماهنگ نیست، پیام می‌تواند با تاخیر برسد و timestamp
+        قدیمی‌تری داشته باشد. اگر ورودی‌های ایندکس
+        هم مثل خود لاگ می‌توانستند عقب بروند، فایل مرتب نبود و جست‌وجوی دودویی
+        بی‌معنا می‌شد.
+      </p>
+      <p>
+        کافکا با ثبت «بزرگ‌ترین timestamp دیده‌شده تا این آفست» تضمین می‌کند
+        ورودی‌های <Ltr>.timeindex</Ltr> همیشه <strong>اکیداً صعودی</strong> بمانند و
+        ورودی تکراری هم ساخته نشود. همین دو ویژگی است که جمله بالا را معتبر نگه
+        می‌دارد و جست‌وجوی دودویی را ممکن می‌کند. به همین دلیل تعداد ورودی‌های
+        <Ltr>.timeindex</Ltr> می‌تواند از <Ltr>.index</Ltr> کمتر باشد: هر دو با یک
+        تریگر (هر <Ltr>log.index.interval.bytes</Ltr> بایت) ساخته می‌شوند، اما
+        <Ltr>.timeindex</Ltr> فقط وقتی ورودی می‌گیرد که timestamp تازه‌ای از
+        بزرگ‌ترین مقدار قبلی بزرگ‌تر شده باشد.
+      </p>
+
+      <h3>الگوریتم کامل: از timestamp تا رکورد</h3>
+      <p>
+        یک درخواست <Ltr>offsetsForTimes</Ltr> در عمل از پنج گام می‌گذرد. توجه کنید
+        که دو ایندکس اینجا دست‌به‌دست هم می‌دهند: یکی زمان را به آفست تبدیل می‌کند،
+        دیگری آفست را به موقعیت فیزیکی.
+      </p>
+      <ol>
+        <li>
+          <strong>انتخاب سگمنت:</strong> کافکا اولین سگمنتی را برمی‌دارد که
+          بزرگ‌ترین timestamp آن از هدف بزرگ‌تر یا مساوی باشد. سگمنت‌های قدیمی‌تر
+          اصلاً باز نمی‌شوند. اگر هیچ سگمنتی این شرط را نداشته باشد، یعنی هنوز
+          رکوردی با آن زمان نوشته نشده و پاسخ خالی است.
+        </li>
+        <li>
+          <strong>جست‌وجوی دودویی در <Ltr>.timeindex</Ltr>:</strong> بزرگ‌ترین
+          ورودی با timestamp کوچک‌تر یا مساوی هدف پیدا می‌شود؛ یعنی{' '}
+          <span dir="ltr" className="mx-1 font-mono">
+            (T, O)
+          </span>
+          . اگر هدف از اولین ورودی هم قدیمی‌تر باشد، کافکا از ابتدای همان سگمنت
+          شروع می‌کند.
+        </li>
+        <li>
+          <strong>پرش فیزیکی با <Ltr>.index</Ltr>:</strong> آفست O در{' '}
+          <Ltr>.index</Ltr> به position تبدیل می‌شود. این دقیقاً همان مسیری است که
+          در بخش ۵ طی کردیم.
+        </li>
+        <li>
+          <strong>اسکن دسته‌محور:</strong> از آن position به بعد، هدر هر{' '}
+          <Ltr>Record Batch</Ltr> خوانده می‌شود. اگر <Ltr>maxTimestamp</Ltr> دسته
+          کمتر از هدف باشد، کل دسته یک‌جا رد می‌شود؛ بدون باز کردن تک‌تک رکوردها. در
+          اولین دسته‌ای که شرط را دارد، رکوردها خوانده می‌شوند تا اولین رکورد با
+          timestamp بزرگ‌تر یا مساوی هدف در <strong>ترتیب آفست</strong> پیدا شود.
+        </li>
+        <li>
+          <strong>در صورت نبود جواب:</strong> اگر سگمنت تمام شد و رکورد واجد شرطی
+          نبود، جست‌وجو در سگمنت بعدی تکرار می‌شود.
+        </li>
+      </ol>
+      <p>
+        اگر این مسیر برایتان مبهم است، توضیح تعاملی زیر را گام‌به‌گام جلو ببرید:
+        می‌بینید ایندکس زمانی چطور همراه نوشتن ساخته می‌شود، چرا رکوردی با timestamp
+        قدیمی‌تر باعث ساخت ورودی جدید نمی‌شود، و یک <Ltr>ListOffsets</Ltr> چطور از
+        یک ورودی زمان به یک ورودی آفست و بعد به یک اسکن کوتاه می‌رسد.
+      </p>
+
+      <TimeIndexExplainer />
+
+      <h3>محاسبه عددی: چرا این طراحی مقیاس‌پذیر است</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>مورد</th>
+            <th>مقدار</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>حداکثر ورودی ایندکس در سگمنت ۱ گیبی‌بایتی</td>
+            <td>۱ گیبی‌بایت ÷ ۴۰۹۶ بایت = ۲۶۲٬۱۴۴</td>
+          </tr>
+          <tr>
+            <td>حجم <Ltr>.timeindex</Ltr></td>
+            <td>۲۶۲٬۱۴۴ × ۱۲ بایت = ۳٬۱۴۵٬۷۲۸ بایت ≈ ۳ مگابایت</td>
+          </tr>
+          <tr>
+            <td>حجم <Ltr>.index</Ltr></td>
+            <td>۲۶۲٬۱۴۴ × ۸ بایت = ۲٬۰۹۷٬۱۵۲ بایت ≈ ۲ مگابایت</td>
+          </tr>
+          <tr>
+            <td>سربار ایندکس‌ها نسبت به داده</td>
+            <td>حدود ۵ مگابایت، یعنی کمتر از ۰٫۵ درصد</td>
+          </tr>
+          <tr>
+            <td>عمق جست‌وجوی دودویی</td>
+            <td>۱۸ مقایسه (۲ به توان ۱۸ = ۲۶۲٬۱۴۴)</td>
+          </tr>
+          <tr>
+            <td>بدون <Ltr>.timeindex</Ltr></td>
+            <td>خواندن تا ۲۶۲٬۱۴۴ هدر batch برای هر پرس‌وجو</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        به همین دلیل سقف پیش‌فرض <Ltr>log.index.size.max.bytes</Ltr> که ۱۰ مگابایت
+        است برای یک سگمنت ۱ گیبی‌بایتی کافی است. البته اگر{' '}
+        <Ltr>log.index.interval.bytes</Ltr> را کم کنید، تعداد ورودی‌ها زیاد می‌شود و
+        پر شدن ایندکس می‌تواند باعث چرخش زودتر سگمنت شود.
+      </p>
+
+      <h3>این ایندکس کجا به کار می‌آید؟</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>کاربرد</th>
+            <th>توضیح</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <Ltr>consumer.offsetsForTimes</Ltr>
+            </td>
+            <td>
+              مصرف‌کننده می‌پرسد «از زمان X به بعد کدام آفست؟» و همان را{' '}
+              <Ltr>seek</Ltr> می‌کند.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Ltr>AdminClient.listOffsets</Ltr>
+            </td>
+            <td>
+              همان پرس‌وجو در سطح ادمین؛ مبنای ابزارهای پایش و بازپخش.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Ltr>kafka-get-offsets.sh --time</Ltr>
+            </td>
+            <td>معادل خط فرمان همین جست‌وجو، برای عیب‌یابی سریع.</td>
+          </tr>
+          <tr>
+            <td>Retention بر اساس زمان</td>
+            <td>
+              کافکا برای تصمیم «کل این سگمنت حذف شود یا نه» به بزرگ‌ترین timestamp
+              سگمنت نگاه می‌کند که همان آخرین ورودی <Ltr>.timeindex</Ltr> آن است.
+            </td>
+          </tr>
+          <tr>
+            <td>ابزارهای پردازش جریانی</td>
+            <td>
+              Kafka Streams و Flink برای «شروع از یک timestamp» از همین API استفاده
+              می‌کنند.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <CodeBlock
+        code={getOffsetsByTime}
+        language="bash"
+        filename="get-offsets-by-time.sh"
+      />
+      <CodeBlock code={seekByTime} language="java" filename="SeekByTime.java" />
+
+      <h3>رفتارهای مرزی که در عمل غافلگیرکننده‌اند</h3>
+      <ul>
+        <li>
+          <strong>هدف بعد از آخرین رکورد:</strong> پاسخ خالی است (در پروتکل آفست
+          برابر با <Ltr>-1</Ltr>)، چون چنین رکوردی هنوز نوشته نشده. مصرف‌کننده باید{' '}
+          <Ltr>seekToEnd</Ltr> کند یا بعداً دوباره بپرسد.
+        </li>
+        <li>
+          <strong>هدف قدیمی‌تر از ابتدای لاگ:</strong> کافکا از ابتدای لاگِ در دسترس
+          شروع می‌کند و اولین رکورد موجود را برمی‌گرداند، چون timestamp آن از هدف
+          بزرگ‌تر است.
+        </li>
+        <li>
+          <strong>ترتیب زمانی بعد از پاسخ تضمین نمی‌شود:</strong> آفست برگشتی
+          اولین رکورد با timestamp بزرگ‌تر یا مساوی هدف در ترتیب آفست است؛ اما
+          رکوردهای بعد از آن می‌توانند timestamp کوچک‌تری داشته باشند. اگر منطق شما
+          به ترتیب زمانی نیاز دارد، باید خودتان بافر یا مرتب‌سازی کنید.
+        </li>
+        <li>
+          <strong>timestampهای یکسان:</strong> ورودی فقط وقتی ساخته می‌شود که
+          timestamp جدید اکیداً بزرگ‌تر باشد. اگر همه رکوردهای یک سگمنت دقیقاً یک
+          timestamp داشته باشند، ایندکس عملاً یک ورودی دارد و جست‌وجو به اسکن از
+          ابتدای سگمنت تبدیل می‌شود.
+        </li>
+        <li>
+          <strong>نوع timestamp:</strong> با <Ltr>LogAppendTime</Ltr> زمان لحظه
+          نوشتن روی بروکر ثبت می‌شود؛ نتیجه ترتیب زمانی تضمین‌شده و جست‌وجوی زمانی
+          دقیق‌تری دارد، ولی زمان اصلی رویداد از دست می‌رود. با <Ltr>CreateTime</Ltr>{' '}
+          زمان رویداد حفظ می‌شود اما بی‌نظمی ممکن است.
+        </li>
+      </ul>
+      <Callout variant="danger" title="فرستادن ساعت محلی به‌جای epoch میلی‌ثانیه">
+        timestamp در کافکا یک عدد ۸ بایتی است: میلی‌ثانیه از{' '}
+        <Ltr>1970-01-01 UTC</Ltr>. نه رشته تاریخ، نه ساعت محلی، نه ثانیه. اگر ساعت
+        ۱۰:۱۵ تهران را بدون تبدیل منطقه زمانی به میلی‌ثانیه تبدیل کنید، جست‌وجو ۳
+        ساعت و ۳۰ دقیقه جابه‌جا می‌شود. همیشه از <Ltr>Instant</Ltr> یا{' '}
+        <Ltr>ZonedDateTime.toInstant()</Ltr> استفاده کنید.
+      </Callout>
+      <Callout variant="warning" title="null یعنی «هنوز نیست»، نه «خطا»">
+        خروجی <Ltr>offsetsForTimes</Ltr> برای پارتیشنی که رکورد واجد شرط ندارد{' '}
+        <Ltr>null</Ltr> است. این یک خطا نیست؛ یعنی تا این لحظه رکوردی با آن زمان یا
+        بعد از آن نوشته نشده. کدهایی که این حالت را مدیریت نمی‌کنند هنگام
+        فراخوانی <Ltr>result.offset()</Ltr> با <Ltr>NullPointerException</Ltr>{' '}
+        غافلگیر می‌شوند.
+      </Callout>
 
       <h2>۷. تنظیمات مهم سگمنت</h2>
       <table>
@@ -298,6 +620,14 @@ export function LogSegmentsContent() {
         <li>نام سگمنت با آفست پایه ۲۰ رقمی مشخص می‌شود.</li>
         <li>نوشتن ترتیبی و استفاده از Page Cache، رمز سرعت کافکا است.</li>
         <li>ایندکس متراکم است؛ خواندن = جست‌وجوی دودویی + اسکن کوتاه.</li>
+        <li>
+          <Ltr>.timeindex</Ltr> هر ۴۰۹۶ بایت یک ورودی ۱۲ بایتی دارد و ورودی‌هایش
+          همیشه اکیداً صعودی‌اند.
+        </li>
+        <li>
+          جست‌وجوی زمانی = انتخاب سگمنت، جست‌وجوی دودویی در زمان، پرش با{' '}
+          <Ltr>.index</Ltr> و اسکن چند batch.
+        </li>
       </ul>
       <p>
         حالا که می‌دانیم داده‌ها در کدام فایل‌ها می‌نشینند، در درس بعدی به سراغ

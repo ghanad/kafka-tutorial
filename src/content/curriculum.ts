@@ -88,7 +88,7 @@ export const sections: CourseSection[] = [
         title: 'Log و Segmentها در دیسک',
         description:
           'ساختار append-only، فایل‌های .log و .index و .timeindex و اینکه Kafka چگونه روی دیسک می‌نویسد.',
-        readingTime: 9,
+        readingTime: 13,
         sectionId: 'architecture',
         status: 'published',
       },
