@@ -1,7 +1,6 @@
 import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
-import { LogSegmentVisualizer } from '../../components/simulators/LogSegmentVisualizer'
 import { SparseIndexExplainer } from '../../components/simulators/SparseIndexExplainer'
 
 const inspectSegmentFiles = `# نگاه سریع به فایل‌های یک پارتیشن روی دیسک
@@ -213,16 +212,7 @@ export function LogSegmentsContent() {
       </p>
       <CodeBlock code={dumpSegments} language="bash" filename="dump-segment.sh" />
 
-      <h2>۷. شبیه‌ساز تعاملی: نوشتن، چرخش و خواندن</h2>
-      <p>
-        در شبیه‌ساز زیر رکورد اضافه کنید تا سگمنت‌ها پر شوند و چرخش را ببینید. با
-        کلیک روی هر رکورد، مسیر خواندن آن را از روی ایندکس متراکم دنبال کنید:
-        کافکا از کدام ورودی ایندکس شروع می‌کند و چند رکورد را خطی می‌خواند؟
-      </p>
-
-      <LogSegmentVisualizer />
-
-      <h2>۸. تنظیمات مهم سگمنت</h2>
+      <h2>۷. تنظیمات مهم سگمنت</h2>
       <table>
         <thead>
           <tr>
