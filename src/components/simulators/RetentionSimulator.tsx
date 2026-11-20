@@ -494,17 +494,20 @@ export function RetentionSimulator() {
                 <span className={`text-xs font-extrabold ${badgeClass}`}>
                   {badgeLabel}
                 </span>
-                <Ltr className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                  {base}.log
-                </Ltr>
+                <span className="flex items-baseline gap-1.5 font-mono text-[10px] text-slate-400 dark:text-slate-500">
+                  <span>base offset</span>
+                  <Ltr className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                    {base}
+                  </Ltr>
+                </span>
               </div>
 
               <p
                 dir="ltr"
                 className="m-0 mt-1 text-start font-mono text-[10px] leading-5 text-slate-400 dark:text-slate-500"
               >
-                {base}.log{suffix} · {base}.index{suffix} · {base}
-                .timeindex{suffix}
+                <span className="opacity-70">files:</span>
+                {` .log${suffix} · .index${suffix} · .timeindex${suffix}`}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-1.5">
