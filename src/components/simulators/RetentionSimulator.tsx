@@ -332,16 +332,16 @@ export function RetentionSimulator() {
 
   return (
     <div className="my-8 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-col items-start gap-2 border-b border-slate-200 pb-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">
+      <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-2.5 dark:border-slate-800">
+        <div className="min-w-0">
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">
             شبیه‌ساز گام‌به‌گام
           </span>
-          <h3 className="m-0 text-lg font-extrabold text-slate-900 dark:text-white">
+          <h3 className="m-0 text-[15px] font-extrabold leading-6 text-slate-900 dark:text-white">
             از اولین رکورد تا حذف اولین سگمنت
           </h3>
         </div>
-        <Badge variant="primary">
+        <Badge variant="primary" size="sm" className="mt-0.5 shrink-0">
           گام {toPersianDigits(stepIndex + 1)} از{' '}
           {toPersianDigits(STEPS.length)}
         </Badge>
@@ -349,7 +349,7 @@ export function RetentionSimulator() {
 
       <div
         dir="ltr"
-        className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2.5 text-start font-mono text-[11px] text-slate-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400"
+        className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-start font-mono text-[11px] text-slate-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400"
       >
         <span>
           topic:{' '}
@@ -373,7 +373,7 @@ export function RetentionSimulator() {
         ))}
       </div>
 
-      <div className="mt-4">
+      <div className="mt-3">
         <div
           className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
           role="progressbar"
@@ -390,7 +390,7 @@ export function RetentionSimulator() {
           />
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -433,7 +433,7 @@ export function RetentionSimulator() {
 
       <div
         aria-live="polite"
-        className="mt-3 rounded-xl border border-slate-200 border-s-4 border-s-primary-500 bg-white p-3 dark:border-slate-800 dark:border-s-primary-400"
+        className="mt-2.5 rounded-xl border border-slate-200 border-s-4 border-s-primary-500 bg-white p-3 dark:border-slate-800 dark:border-s-primary-400"
       >
         <p
           dir="ltr"
@@ -449,7 +449,7 @@ export function RetentionSimulator() {
         </p>
       </div>
 
-      <div className="mt-4 space-y-2">
+      <div className="mt-3 space-y-2">
         {state.segments.map((segment) => {
           const isActive = !segment.closed
           const newest = segment.records[segment.records.length - 1]
@@ -573,7 +573,7 @@ export function RetentionSimulator() {
         })}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-500 dark:text-slate-400">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded border-2 border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40" />
           سگمنت فعال
@@ -592,7 +592,7 @@ export function RetentionSimulator() {
         </span>
       </div>
 
-      <p className="mt-3 text-[10px] leading-5 text-slate-400 dark:text-slate-500">
+      <p className="mt-2.5 text-[10px] leading-5 text-slate-400 dark:text-slate-500">
         برای خوانایی، تعداد رکوردها و فاصله‌های زمانی کم گرفته شده‌اند؛ منطق همان
         چیزی است که کافکا اجرا می‌کند: بسته‌شدن سگمنت با{' '}
         <Ltr>segment.ms</Ltr>، بررسی دوره‌ای سگمنت‌های بسته، و حذف کل سگمنت بر
