@@ -13,6 +13,7 @@ export function getPersistedSnapshot(): PersistedAppState {
     fontSize: state.fontSize,
     fontFamily: state.fontFamily,
     lineHeight: state.lineHeight,
+    collapsedSections: state.collapsedSections,
   }
 }
 

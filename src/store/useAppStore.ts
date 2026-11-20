@@ -38,6 +38,8 @@ export interface AppStore {
   fontSize: FontSize
   fontFamily: FontFamily
   lineHeight: LineHeight
+  /** Section ids whose lesson list is collapsed in the sidebar. */
+  collapsedSections: string[]
 
   toggleLessonComplete: (lessonId: string) => void
   markLessonComplete: (lessonId: string) => void
@@ -54,6 +56,8 @@ export interface AppStore {
   setLineHeight: (lineHeight: LineHeight) => void
   stepFontSize: (direction: 'increase' | 'decrease') => void
   resetFontSettings: () => void
+  toggleSectionCollapsed: (sectionId: string) => void
+  setCollapsedSections: (sectionIds: string[]) => void
   setLastVisitedLesson: (lessonId: string) => void
   importData: (data: unknown) => void
   resetAllData: () => void
@@ -70,10 +74,11 @@ export type PersistedAppState = Pick<
   | 'fontSize'
   | 'fontFamily'
   | 'lineHeight'
+  | 'collapsedSections'
 >
 
 export const STORAGE_KEY = 'kafka-tutorial-store'
-export const STORE_VERSION = 5
+export const STORE_VERSION = 6
 
 const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl']
 
@@ -96,6 +101,7 @@ const initialPersistedState: PersistedAppState = {
   fontSize: 'md',
   fontFamily: 'vazirmatn',
   lineHeight: 'normal',
+  collapsedSections: [],
 }
 
 function createInlineNoteId(): string {
@@ -226,6 +232,7 @@ function sanitizePersistedState(value: unknown): PersistedAppState {
     fontSize: sanitizeFontSize(data.fontSize),
     fontFamily: sanitizeFontFamily(data.fontFamily),
     lineHeight: sanitizeLineHeight(data.lineHeight),
+    collapsedSections: uniqueStrings(data.collapsedSections),
   }
 }
 
@@ -358,6 +365,16 @@ export const useAppStore = create<AppStore>()(
           lineHeight: 'normal',
         }),
 
+      toggleSectionCollapsed: (sectionId) =>
+        set((state) => ({
+          collapsedSections: state.collapsedSections.includes(sectionId)
+            ? state.collapsedSections.filter((id) => id !== sectionId)
+            : [...state.collapsedSections, sectionId],
+        })),
+
+      setCollapsedSections: (sectionIds) =>
+        set({ collapsedSections: uniqueStrings(sectionIds) }),
+
       setLastVisitedLesson: (lessonId) => set({ lastVisitedLesson: lessonId }),
 
       importData: (data) => set({ ...sanitizePersistedState(data) }),
@@ -378,6 +395,7 @@ export const useAppStore = create<AppStore>()(
         fontSize: state.fontSize,
         fontFamily: state.fontFamily,
         lineHeight: state.lineHeight,
+        collapsedSections: state.collapsedSections,
       }),
       migrate: (persistedState) => sanitizePersistedState(persistedState),
     },

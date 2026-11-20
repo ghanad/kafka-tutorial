@@ -1,7 +1,18 @@
-import { useEffect } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useEffect, useId } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { BarChart3, CheckCircle2, Circle, Clock, FileText, Home, X } from 'lucide-react'
+import {
+  BarChart3,
+  CheckCircle2,
+  ChevronDown,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Circle,
+  Clock,
+  FileText,
+  Home,
+  X,
+} from 'lucide-react'
 import { allLessons, publishedLessons, sections } from '../../content/curriculum'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
@@ -19,12 +30,28 @@ interface SidebarBodyProps {
 }
 
 function SidebarBody({ onNavigate }: SidebarBodyProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const sectionPanelId = useId()
+  const { pathname } = useLocation()
   const completedLessons = useAppStore((state) => state.completedLessons)
   const notes = useAppStore((state) => state.notes)
   const inlineNotes = useAppStore((state) => state.inlineNotes)
+  const collapsedSections = useAppStore((state) => state.collapsedSections)
+  const toggleSectionCollapsed = useAppStore((state) => state.toggleSectionCollapsed)
+  const setCollapsedSections = useAppStore((state) => state.setCollapsedSections)
   const completedSet = new Set(completedLessons)
+  const collapsedSet = new Set(collapsedSections)
   const completedCount = getCompletedLessonCount(completedLessons)
   const progressPercent = getProgressPercent(completedLessons)
+  const allCollapsed = sections.every((section) => collapsedSet.has(section.id))
+
+  const activeSlug = pathname.startsWith('/lessons/')
+    ? decodeURIComponent(pathname.slice('/lessons/'.length))
+    : null
+  const activeSection = activeSlug
+    ? sections.find((section) => section.lessons.some((lesson) => lesson.slug === activeSlug))
+    : undefined
+  const activeLesson = activeSection?.lessons.find((lesson) => lesson.slug === activeSlug)
 
   return (
     <div className="flex h-full flex-col">
@@ -52,116 +79,203 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto p-3" aria-label="فصل‌ها و درس‌ها">
-        <ol className="space-y-4">
+        <div className="mb-2 flex items-center justify-between gap-2 px-1">
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">فصل‌ها</span>
+          <button
+            type="button"
+            onClick={() =>
+              setCollapsedSections(allCollapsed ? [] : sections.map((section) => section.id))
+            }
+            aria-label={allCollapsed ? 'باز کردن همه فصل‌ها' : 'بستن همه فصل‌ها'}
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-slate-100"
+          >
+            {allCollapsed ? (
+              <ChevronsUpDown className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <ChevronsDownUp className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {allCollapsed ? 'باز کردن همه' : 'بستن همه'}
+          </button>
+        </div>
+
+        <ol className="space-y-2">
           {sections.map((section, index) => {
             const sectionProgress = getSectionProgress(section, completedLessons)
+            const isCollapsed = collapsedSet.has(section.id)
+            const isActiveSection = section.id === activeSection?.id
+            const panelId = `${sectionPanelId}-${section.id}`
 
             return (
               <li key={section.id}>
-                <div className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-[11px] font-extrabold text-primary-700 dark:bg-primary-950 dark:text-primary-200">
+                <button
+                  type="button"
+                  onClick={() => toggleSectionCollapsed(section.id)}
+                  aria-expanded={!isCollapsed}
+                  aria-controls={isCollapsed ? undefined : panelId}
+                  aria-current={isActiveSection ? 'location' : undefined}
+                  className={cn(
+                    'flex w-full items-start gap-2 rounded-xl px-1 py-1 text-start transition-colors',
+                    isActiveSection
+                      ? 'bg-primary-50/80 dark:bg-primary-950/40'
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-800/60',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[11px] font-extrabold',
+                      isActiveSection
+                        ? 'bg-primary-600 text-white dark:bg-primary-500 dark:text-slate-950'
+                        : 'bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-200',
+                    )}
+                  >
                     {toPersianDigits(index + 1)}
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-xs font-extrabold leading-6 text-slate-700 dark:text-slate-200">
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2">
+                      <span
+                        className={cn(
+                          'text-xs font-extrabold leading-6',
+                          isActiveSection
+                            ? 'text-primary-700 dark:text-primary-200'
+                            : 'text-slate-700 dark:text-slate-200',
+                        )}
+                      >
                         {section.title}
-                      </h3>
-                      {sectionProgress.published > 0 ? (
-                        <span className="shrink-0 text-[10px] font-medium text-slate-400">
-                          {toPersianDigits(sectionProgress.completed)}/
-                          {toPersianDigits(sectionProgress.published)}
-                        </span>
-                      ) : (
-                        <Badge variant="neutral" size="sm" className="shrink-0">
-                          به‌زودی
-                        </Badge>
-                      )}
-                    </div>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        {sectionProgress.published > 0 ? (
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {toPersianDigits(sectionProgress.completed)}/
+                            {toPersianDigits(sectionProgress.published)}
+                          </span>
+                        ) : (
+                          <Badge variant="neutral" size="sm">
+                            به‌زودی
+                          </Badge>
+                        )}
+                        <ChevronDown
+                          className={cn(
+                            'h-4 w-4 text-slate-400 transition-transform duration-200',
+                            isCollapsed && 'rotate-90',
+                          )}
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </span>
+                  </span>
+                </button>
 
-                    <ul className="mt-1.5 space-y-0.5 border-s border-slate-200 ps-2 dark:border-slate-800">
-                      {section.lessons.map((lesson) => {
-                        const isCompleted = completedSet.has(lesson.id)
+                {isCollapsed && isActiveSection && activeLesson && (
+                  <NavLink
+                    to={`/lessons/${activeLesson.slug}`}
+                    onClick={onNavigate}
+                    title={activeLesson.title}
+                    className="ms-8 me-1 mt-1 flex items-center gap-1.5 rounded-lg bg-primary-50 px-2 py-1.5 text-[11px] font-bold text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-200 dark:hover:bg-primary-950"
+                  >
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 dark:bg-primary-300"
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 flex-1 truncate">{activeLesson.title}</span>
+                    <span className="sr-only">در حال مطالعه</span>
+                  </NavLink>
+                )}
 
-                        if (lesson.status === 'planned') {
-                          return (
-                            <li key={lesson.id}>
-                              <div className="flex items-start gap-2 rounded-lg px-2 py-2 text-xs text-slate-400 dark:text-slate-500">
-                                <Clock
-                                  className="mt-0.5 h-4 w-4 shrink-0 opacity-70"
-                                  aria-hidden="true"
-                                />
-                                <span className="min-w-0 flex-1">
-                                  <span className="block leading-5">{lesson.title}</span>
-                                  <Badge variant="neutral" size="sm" className="mt-1">
-                                    به‌زودی
-                                  </Badge>
-                                </span>
-                              </div>
-                            </li>
-                          )
-                        }
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.div
+                      key="panel"
+                      id={panelId}
+                      initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <ul className="mt-1.5 space-y-0.5 border-s border-slate-200 ps-2 dark:border-slate-800">
+                        {section.lessons.map((lesson) => {
+                          const isCompleted = completedSet.has(lesson.id)
 
-                        return (
-                          <li key={lesson.id}>
-                            <NavLink
-                              to={`/lessons/${lesson.slug}`}
-                              onClick={onNavigate}
-                              className={({ isActive }) =>
-                                cn(
-                                  'group flex items-start gap-2 rounded-lg px-2 py-2 text-xs transition-colors',
-                                  isActive
-                                    ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
-                                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70',
-                                )
-                              }
-                            >
-                              {({ isActive }) => (
-                                <>
-                                  {isCompleted ? (
-                                    <CheckCircle2
-                                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
-                                      aria-label="تکمیل شده"
-                                    />
-                                  ) : (
-                                    <Circle
-                                      className={cn(
-                                        'mt-0.5 h-4 w-4 shrink-0',
-                                        isActive
-                                          ? 'text-primary-500'
-                                          : 'text-slate-300 dark:text-slate-600',
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                  )}
+                          if (lesson.status === 'planned') {
+                            return (
+                              <li key={lesson.id}>
+                                <div className="flex items-start gap-2 rounded-lg px-2 py-2 text-xs text-slate-400 dark:text-slate-500">
+                                  <Clock
+                                    className="mt-0.5 h-4 w-4 shrink-0 opacity-70"
+                                    aria-hidden="true"
+                                  />
                                   <span className="min-w-0 flex-1">
                                     <span className="block leading-5">{lesson.title}</span>
-                                    <span className="mt-0.5 flex items-center justify-between gap-1 text-[10px] font-normal text-slate-400">
-                                      <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" aria-hidden="true" />
-                                        {toPersianDigits(lesson.readingTime)} دقیقه
-                                      </span>
-                                      {(Boolean(notes[lesson.id]?.trim()) ||
-                                        Boolean(inlineNotes[lesson.id]?.length)) && (
-                                        <span
-                                          className="flex items-center gap-0.5 text-primary-600 dark:text-primary-400"
-                                          title="دارای یادداشت شخصی"
-                                        >
-                                          <FileText className="h-3 w-3" aria-hidden="true" />
-                                          <span>یادداشت</span>
-                                        </span>
-                                      )}
-                                    </span>
+                                    <Badge variant="neutral" size="sm" className="mt-1">
+                                      به‌زودی
+                                    </Badge>
                                   </span>
-                                </>
-                              )}
-                            </NavLink>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                </div>
+                                </div>
+                              </li>
+                            )
+                          }
+
+                          return (
+                            <li key={lesson.id}>
+                              <NavLink
+                                to={`/lessons/${lesson.slug}`}
+                                onClick={onNavigate}
+                                className={({ isActive }) =>
+                                  cn(
+                                    'group flex items-start gap-2 rounded-lg px-2 py-2 text-xs transition-colors',
+                                    isActive
+                                      ? 'bg-primary-50 font-bold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70',
+                                  )
+                                }
+                              >
+                                {({ isActive }) => (
+                                  <>
+                                    {isCompleted ? (
+                                      <CheckCircle2
+                                        className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
+                                        aria-label="تکمیل شده"
+                                      />
+                                    ) : (
+                                      <Circle
+                                        className={cn(
+                                          'mt-0.5 h-4 w-4 shrink-0',
+                                          isActive
+                                            ? 'text-primary-500'
+                                            : 'text-slate-300 dark:text-slate-600',
+                                        )}
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block leading-5">{lesson.title}</span>
+                                      <span className="mt-0.5 flex items-center justify-between gap-1 text-[10px] font-normal text-slate-400">
+                                        <span className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" aria-hidden="true" />
+                                          {toPersianDigits(lesson.readingTime)} دقیقه
+                                        </span>
+                                        {(Boolean(notes[lesson.id]?.trim()) ||
+                                          Boolean(inlineNotes[lesson.id]?.length)) && (
+                                          <span
+                                            className="flex items-center gap-0.5 text-primary-600 dark:text-primary-400"
+                                            title="دارای یادداشت شخصی"
+                                          >
+                                            <FileText className="h-3 w-3" aria-hidden="true" />
+                                            <span>یادداشت</span>
+                                          </span>
+                                        )}
+                                      </span>
+                                    </span>
+                                  </>
+                                )}
+                              </NavLink>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </li>
             )
           })}
