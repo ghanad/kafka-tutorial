@@ -468,46 +468,54 @@ export function LogSegmentsContent() {
       <table>
         <thead>
           <tr>
-            <th>کاربرد</th>
             <th>توضیح</th>
+            <th>لایه</th>
+            <th dir="ltr" className="text-left">API</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              <Ltr>consumer.offsetsForTimes</Ltr>
-            </td>
-            <td>
               مصرف‌کننده می‌پرسد «از زمان X به بعد کدام آفست؟» و همان را{' '}
               <Ltr>seek</Ltr> می‌کند.
             </td>
+            <td>مصرف‌کننده</td>
+            <td dir="ltr" className="text-left">
+              <Ltr>consumer.offsetsForTimes</Ltr>
+            </td>
           </tr>
           <tr>
-            <td>
+            <td>همان پرس‌وجو در سطح ادمین؛ مبنای ابزارهای پایش و بازپخش.</td>
+            <td>ادمین</td>
+            <td dir="ltr" className="text-left">
               <Ltr>AdminClient.listOffsets</Ltr>
             </td>
-            <td>
-              همان پرس‌وجو در سطح ادمین؛ مبنای ابزارهای پایش و بازپخش.
-            </td>
           </tr>
           <tr>
-            <td>
+            <td>معادل خط فرمان همین جست‌وجو، برای عیب‌یابی سریع.</td>
+            <td>خط فرمان</td>
+            <td dir="ltr" className="text-left">
               <Ltr>kafka-get-offsets.sh --time</Ltr>
             </td>
-            <td>معادل خط فرمان همین جست‌وجو، برای عیب‌یابی سریع.</td>
           </tr>
           <tr>
-            <td>Retention بر اساس زمان</td>
             <td>
               کافکا برای تصمیم «کل این سگمنت حذف شود یا نه» به بزرگ‌ترین timestamp
               سگمنت نگاه می‌کند که همان آخرین ورودی <Ltr>.timeindex</Ltr> آن است.
             </td>
+            <td>داخلی بروکر</td>
+            <td dir="ltr" className="text-left">
+              <Ltr>log.retention.ms</Ltr>
+            </td>
           </tr>
           <tr>
-            <td>ابزارهای پردازش جریانی</td>
             <td>
-              Kafka Streams و Flink برای «شروع از یک timestamp» از همین API استفاده
-              می‌کنند.
+              برای «شروع از یک timestamp» از همین API استفاده می‌کنند و بعد خودشان
+              جریان را پردازش می‌کنند.
+            </td>
+            <td>کتابخانه</td>
+            <td dir="ltr" className="text-left">
+              <Ltr>Kafka Streams</Ltr> / <Ltr>Flink</Ltr>
             </td>
           </tr>
         </tbody>
