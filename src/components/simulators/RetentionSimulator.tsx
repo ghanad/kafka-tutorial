@@ -33,6 +33,7 @@ interface DemoSegment {
 
 interface DemoState {
   segments: DemoSegment[]
+  pending: DemoSegment[]
   nextOffset: number
   newOffset: number
   now: number
@@ -141,75 +142,79 @@ const STEPS: Step[] = [
   {
     at: '2026-11-13T18:50',
     op: 'mark',
-    title: 'سگمنت صفر واجد شرایط حذف می‌شود',
+    title: 'سگمنت صفر از لاگ خارج و برای حذف علامت می‌خورد',
     body: (
       <>
         حالا جدیدترین رکورد سگمنت صفر از ۷ روز قدیمی‌تر شده است. کل سگمنت، یعنی
-        آفست‌های ۰ تا ۳، با هم برای حذف علامت می‌خورد و پسوند فایل‌هایش به{' '}
-        <Ltr>.deleted</Ltr> تغییر می‌کند. این فایل‌ها هنوز روی دیسک هستند.
+        آفست‌های ۰ تا ۳، از فهرست سگمنت‌های لاگ خارج می‌شود و{' '}
+        <Ltr>log-start-offset</Ltr> از ۰ به ۴ می‌رسد. از همین لحظه خواندن
+        آفست‌های ۰ تا ۳ خطای <Ltr>OffsetOutOfRange</Ltr> می‌دهد. فایل‌ها به{' '}
+        <Ltr>.deleted</Ltr> تغییر نام می‌دهند و هنوز روی دیسک هستند.
       </>
     ),
   },
   {
     at: '2026-11-13T18:51',
     op: 'purge',
-    title: 'فایل‌ها واقعاً پاک می‌شوند',
+    title: 'فایل‌های .deleted فیزیکی پاک می‌شوند',
     body: (
       <>
         بعد از <Ltr>file.delete.delay.ms</Ltr> (پیش‌فرض ۶۰ ثانیه) فایل‌ها از دیسک
-        حذف می‌شوند و <Ltr>log-start-offset</Ltr> از ۰ به ۴ می‌رسد. مصرف‌کننده‌ای
-        که آفستش کمتر از ۴ باشد حالا خطای <Ltr>OffsetOutOfRange</Ltr> می‌گیرد و
-        طبق <Ltr>auto.offset.reset</Ltr> رفتار می‌کند.
+        حذف می‌شوند. <Ltr>log-start-offset</Ltr> از قبل ۴ شده بود؛ این تأخیر فقط
+        فرصت می‌دهد خواندن‌های در جریان تمام شوند و <Ltr>.deleted</Ltr> مکانیزم
+        undo نیست.
       </>
     ),
   },
   {
     at: '2026-11-18T12:05',
-    op: 'check',
-    title: 'سگمنت فعال دست‌نخورده می‌ماند',
+    op: 'mark',
+    title: 'سگمنت فعال هم اگر کاملاً کهنه باشد حذف می‌شود',
     body: (
       <>
-        جدیدترین رکورد سگمنت ۴ الان ۷ روز و ۵ دقیقه قدمت دارد، یعنی از نظر زمانی
-        مشمول حذف است. ولی این سگمنت هنوز <strong>فعال</strong> است و کافکا
-        سگمنت فعال را هرگز حذف نمی‌کند.
+        جدیدترین رکورد سگمنت ۴ الان ۷ روز و ۵ دقیقه قدمت دارد و{' '}
+        <Ltr>high watermark</Ltr> به انتهای لاگ رسیده است. کافکا اول یک سگمنت
+        خالی جدید با base offset ۶ می‌سازد، بعد سگمنت ۴ را از فهرست خارج می‌کند و{' '}
+        <Ltr>log-start-offset</Ltr> را به ۶ می‌رساند. فایل‌های سگمنت ۴ به{' '}
+        <Ltr>.deleted</Ltr> تغییر نام می‌دهند.
+      </>
+    ),
+  },
+  {
+    at: '2026-11-18T12:06',
+    op: 'purge',
+    title: 'فایل‌های سگمنت ۴ پاک می‌شوند',
+    body: (
+      <>
+        بعد از <Ltr>file.delete.delay.ms</Ltr> فایل‌های <Ltr>.deleted</Ltr>{' '}
+        فیزیکی حذف می‌شوند. <Ltr>log-start-offset</Ltr> از قبل ۶ شده و خواندن
+        آفست‌های ۴ و ۵ خطای <Ltr>OffsetOutOfRange</Ltr> می‌دهد.
       </>
     ),
   },
   {
     at: '2026-11-19T08:00',
     op: 'append',
-    title: 'سگمنت فعال بسته می‌شود',
+    title: 'رکورد بعدی در سگمنت فعال تازه',
     body: (
       <>
-        رکورد با آفست ۶ می‌رسد. عمر سگمنت ۴ از{' '}
-        <Ltr className="font-mono">2026-11-10 09:30</Ltr> حدود ۹ روز است و از{' '}
-        <Ltr>segment.ms</Ltr> بیشتر، پس بسته می‌شود و سگمنت{' '}
-        <Ltr className="font-mono">00000000000000000006.log</Ltr> ساخته می‌شود.
-        حالا سگمنت ۴ «بسته» است و می‌تواند حذف شود.
+        رکورد با آفست ۶ در سگمنت خالی{' '}
+        <Ltr className="font-mono">00000000000000000006.log</Ltr> نوشته می‌شود.
+        سگمنت فعال قبلی حذف شد، چون همه رکوردهایش از retention قدیمی‌تر بودند.
       </>
     ),
   },
   {
     at: '2026-11-19T08:05',
-    op: 'mark',
-    title: 'سگمنت ۴ علامت می‌خورد',
-    body: (
-      <>
-        در بررسی بعدی Log Cleaner، جدیدترین رکورد سگمنت ۴ بیش از ۷ روز و ۲۰ ساعت
-        قدمت دارد. آفست‌های ۴ و ۵ برای حذف علامت می‌خورند.
-      </>
-    ),
-  },
-  {
-    at: '2026-11-19T08:06',
-    op: 'purge',
+    op: 'check',
     title: 'پایان: لاگ فقط سگمنت فعال را دارد',
     body: (
       <>
-        فایل‌های سگمنت ۴ هم پاک شدند و <Ltr>log-start-offset</Ltr> به ۶ رسید.
-        خلاصه: رکوردها فقط به انتها اضافه می‌شوند، سگمنت‌ها وقتی پر یا کهنه شوند
-        بسته می‌شوند، و retention همیشه کل یک سگمنت بسته را بر اساس جدیدترین
-        رکوردش حذف می‌کند.
+        سگمنت ۶ یک رکورد تازه دارد و واجد شرط حذف نیست. خلاصه: رکوردها فقط به
+        انتها اضافه می‌شوند، سگمنت‌ها وقتی پر یا کهنه شوند بسته می‌شوند، و
+        retention همیشه کل یک سگمنت را بر اساس جدیدترین رکوردش حذف می‌کند؛ سگمنت
+        فعال هم اگر همه رکوردهایش کهنه باشند، پس از ساخته‌شدن سگمنت جدید حذف
+        می‌شود.
       </>
     ),
   },
@@ -219,6 +224,7 @@ const CONFIG: { key: string; value: string }[] = [
   { key: 'retention.ms', value: '7 days' },
   { key: 'segment.ms', value: '7 days' },
   { key: 'segment.bytes', value: '1 GiB' },
+  { key: 'file.delete.delay.ms', value: '60 s' },
   { key: 'log.retention.check.interval.ms', value: '5 min' },
 ]
 
@@ -254,6 +260,7 @@ function formatAge(ms: number): string {
 function buildState(stepIndex: number): DemoState {
   const state: DemoState = {
     segments: [{ base: 0, records: [], closed: false, marked: false }],
+    pending: [],
     nextOffset: 0,
     newOffset: -1,
     now: parseStamp(STEPS[0].at),
@@ -287,6 +294,23 @@ function buildState(stepIndex: number): DemoState {
     state.newOffset = -1
 
     if (step.op === 'mark') {
+      const active = state.segments[state.segments.length - 1]
+      const activeNewest = active.records[active.records.length - 1]
+      const activeEligible =
+        Boolean(activeNewest) && state.now - activeNewest.time > RETENTION_MS
+
+      // Kafka rolls a fresh active segment before deleting the current one.
+      if (activeEligible) {
+        active.closed = true
+        state.segments.push({
+          base: state.nextOffset,
+          records: [],
+          closed: false,
+          marked: false,
+        })
+      }
+
+      const remaining: DemoSegment[] = []
       for (const segment of state.segments) {
         const newest = segment.records[segment.records.length - 1]
         if (
@@ -295,12 +319,16 @@ function buildState(stepIndex: number): DemoState {
           state.now - newest.time > RETENTION_MS
         ) {
           segment.marked = true
+          state.pending.push(segment)
+        } else {
+          remaining.push(segment)
         }
       }
+      state.segments = remaining
     }
 
     if (step.op === 'purge') {
-      state.segments = state.segments.filter((segment) => !segment.marked)
+      state.pending = []
     }
   }
 
@@ -361,6 +389,12 @@ export function RetentionSimulator() {
           partition:{' '}
           <span className="font-bold text-slate-700 dark:text-slate-200">
             0
+          </span>
+        </span>
+        <span>
+          log-start-offset:{' '}
+          <span className="font-bold text-slate-700 dark:text-slate-200">
+            {state.segments[0]?.base ?? 0}
           </span>
         </span>
         {CONFIG.map((item) => (
@@ -561,7 +595,7 @@ export function RetentionSimulator() {
                   </div>
                   {overdue && isActive ? (
                     <p className="m-0 mt-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400">
-                      از ۷ روز گذشته، اما چون فعال است حذف نمی‌شود.
+                      از ۷ روز گذشته؛ در بررسی retention چرخانده و حذف می‌شود.
                     </p>
                   ) : null}
                   {overdue && segment.marked ? (
@@ -576,6 +610,30 @@ export function RetentionSimulator() {
         })}
       </div>
 
+      {state.pending.length > 0 ? (
+        <div className="mt-3 rounded-xl border-2 border-dashed border-rose-300 bg-rose-50/60 p-3 dark:border-rose-800 dark:bg-rose-950/25">
+          <p className="m-0 text-xs font-extrabold text-rose-700 dark:text-rose-300">
+            فایل‌های .deleted در انتظار حذف فیزیکی
+          </p>
+          <p className="m-0 mt-1 text-[11px] leading-6 text-rose-700/80 dark:text-rose-300/80">
+            این سگمنت‌ها از فهرست لاگ خارج شده‌اند و دیگر خوانده نمی‌شوند؛ فقط
+            فایل‌هایشان تا پایان <Ltr>file.delete.delay.ms</Ltr> روی دیسک مانده
+            است.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {state.pending.map((segment) => (
+              <span
+                key={segment.base}
+                dir="ltr"
+                className="rounded-md border border-rose-300 bg-white px-2 py-0.5 font-mono text-[10px] text-rose-700 dark:border-rose-800 dark:bg-slate-900 dark:text-rose-300"
+              >
+                {padOffset(segment.base)}.log.deleted
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded border-2 border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40" />
@@ -587,7 +645,7 @@ export function RetentionSimulator() {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded border-2 border-dashed border-rose-300 bg-rose-50 dark:border-rose-800 dark:bg-rose-950/40" />
-          علامت‌خورده برای حذف
+          خارج‌شده از لاگ، فایل .deleted
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded border-2 border-amber-400 bg-white dark:bg-slate-900" />
@@ -598,8 +656,8 @@ export function RetentionSimulator() {
       <p className="mt-2.5 text-[10px] leading-5 text-slate-400 dark:text-slate-500">
         برای خوانایی، تعداد رکوردها و فاصله‌های زمانی کم گرفته شده‌اند؛ منطق همان
         چیزی است که کافکا اجرا می‌کند: بسته‌شدن سگمنت با{' '}
-        <Ltr>segment.ms</Ltr>، بررسی دوره‌ای سگمنت‌های بسته، و حذف کل سگمنت بر
-        اساس جدیدترین رکوردش.
+        <Ltr>segment.ms</Ltr>، بررسی دوره‌ای سگمنت‌ها (و چرخاندن سگمنت فعال در
+        صورت کهنه‌بودن)، و حذف کل سگمنت بر اساس جدیدترین رکوردش.
       </p>
     </div>
   )

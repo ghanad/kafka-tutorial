@@ -141,6 +141,35 @@ const STEPS: Step[] = [
     ),
   },
   {
+    at: '2026-11-09T10:05',
+    op: 'scan',
+    title: 'Log Cleaner: عبور اول',
+    body: (
+      <>
+        سگمنت اول dirty است و نسبت dirty برابر ۱۰۰٪، یعنی از{' '}
+        <Ltr>min.cleanable.dirty.ratio</Ltr> (۰.۵) بیشتر. Cleaner یک{' '}
+        <strong>offset map</strong> می‌سازد: آخرین آفست هر کلید در بخش dirty (
+        <Ltr className="font-mono">u1→2</Ltr>، <Ltr className="font-mono">u2→4</Ltr>
+        ، <Ltr className="font-mono">u3→3</Ltr>). رکوردهای ۰ (
+        <Ltr className="font-mono">u1</Ltr>) و ۱ (<Ltr className="font-mono">u2</Ltr>)
+        منسوخ‌اند. سگمنت فعال (آفست ۵) اسکن نمی‌شود.
+      </>
+    ),
+  },
+  {
+    at: '2026-11-09T10:06',
+    op: 'clean',
+    title: 'سگمنت اول بازنویسی می‌شود',
+    body: (
+      <>
+        رکوردهای ۰ و ۱ حذف شدند. <strong>آفست رکوردهای باقی‌مانده تغییر
+        نمی‌کند</strong>؛ سگمنت اول حالا آفست‌های ۲، ۳ و ۴ را دارد و در بخش clean
+        است. Tombstone
+        (آفست ۵) در سگمنت دوم است و فعلاً دست‌نخورده می‌ماند.
+      </>
+    ),
+  },
+  {
     at: '2026-11-10T12:00',
     op: 'append',
     key: 'u4',
@@ -162,44 +191,28 @@ const STEPS: Step[] = [
     ),
   },
   {
-    at: '2026-11-12T09:00',
-    op: 'scan',
-    title: 'Log Cleaner لاگ را اسکن می‌کند',
+    at: '2026-11-13T08:00',
+    op: 'append',
+    key: 'u2',
+    value: 'Sara, Yazd',
+    title: 'آخرین رکورد سگمنت دوم',
     body: (
       <>
-        لاگ دو بخش دارد: <strong>clean</strong> (قبلاً فشرده شده) و{' '}
-        <strong>dirty</strong> (هنوز نشده). الان سگمنت اول dirty است و نسبت dirty
-        برابر ۱۰۰٪ است، یعنی از <Ltr>min.cleanable.dirty.ratio</Ltr> (۰.۵) بیشتر؛
-        پس Log Cleaner کارش را شروع می‌کند. سگمنت فعال اسکن نمی‌شود. Cleaner یک{' '}
-        <strong>offset map</strong> می‌سازد: آخرین آفست هر کلید در بخش dirty (
-        <Ltr className="font-mono">u1→2</Ltr>، <Ltr className="font-mono">u2→4</Ltr>
-        ، <Ltr className="font-mono">u3→3</Ltr>). رکوردهایی که آفست‌شان کمتر از
-        این نقشه است منسوخ‌اند (کم‌رنگ).
-      </>
-    ),
-  },
-  {
-    at: '2026-11-12T09:02',
-    op: 'clean',
-    title: 'سگمنت بازنویسی می‌شود',
-    body: (
-      <>
-        رکوردهای ۰ و ۱ کنار گذاشته شدند.{' '}
-        <strong>آفست رکوردهای باقی‌مانده تغییر نمی‌کند</strong>؛ فقط بین آن‌ها
-        فاصله می‌افتد (۲، ۳، ۴). حالا این سگمنت در بخش clean است.
+        رکورد <Ltr className="font-mono">u2</Ltr> با آفست ۸ در سگمنت دوم می‌نشیند.
+        این سگمنت هنوز بسته نشده است.
       </>
     ),
   },
   {
     at: '2026-11-17T08:00',
     op: 'append',
-    key: 'u2',
-    value: 'Sara, Yazd',
-    title: 'سگمنت بسته می‌شود و رکورد جدید می‌آید',
+    key: 'u1',
+    value: 'Ali, Qom',
+    title: 'سگمنت دوم بسته می‌شود',
     body: (
       <>
-        سگمنت دوم (از ۲۰۲۶-۱۱-۰۹ ۱۰:۰۰) نزدیک ۸ روز عمر دارد و بسته می‌شود. رکورد
-        آفست ۸ در سگمنت فعال جدید می‌نشیند.
+        عمر سگمنت دوم (از ۲۰۲۶-۱۱-۰۹ ۱۰:۰۰) نزدیک ۸ روز است و بسته می‌شود. رکورد
+        آفست ۹ در سگمنت فعال جدید می‌نشیند.
       </>
     ),
   },
@@ -209,109 +222,85 @@ const STEPS: Step[] = [
     title: 'Log Cleaner: عبور دوم',
     body: (
       <>
-        بخش clean سه رکورد دارد (۲، ۳، ۴) و بخش dirty سه رکورد (۵، ۶، ۷). نسبت
-        dirty برابر ۰.۵ است و به آستانه می‌رسد. offset map از بخش dirty:{' '}
+        بخش clean سه رکورد دارد (۲، ۳، ۴) و بخش dirty چهار رکورد (۵ تا ۸). نسبت
+        dirty برابر ۴/۷ ≈ ۰٫۵۷ است و از آستانه ۰٫۵ بیشتر. offset map از بخش dirty:{' '}
         <Ltr className="font-mono">u3→5</Ltr>، <Ltr className="font-mono">u4→6</Ltr>
-        ، <Ltr className="font-mono">u1→7</Ltr>. پس رکورد ۲ (
-        <Ltr className="font-mono">u1</Ltr>) و رکورد ۳ (<Ltr className="font-mono">u3</Ltr>
-        ) منسوخ‌اند. اما رکورد ۴ (<Ltr className="font-mono">u2</Ltr>) منسوخ نیست!
-        مقدار تازه <Ltr className="font-mono">u2</Ltr> در آفست ۸ است ولی در سگمنت
-        فعال می‌نشیند و اسکن نمی‌شود. Tombstone در آفست ۵ آخرین رکورد{' '}
-        <Ltr className="font-mono">u3</Ltr> است و فعلاً می‌ماند.
+        ، <Ltr className="font-mono">u1→7</Ltr>،{' '}
+        <Ltr className="font-mono">u2→8</Ltr>. پس رکوردهای ۲ (
+        <Ltr className="font-mono">u1</Ltr>) ، ۳ (<Ltr className="font-mono">u3</Ltr>)
+        و ۴ (<Ltr className="font-mono">u2</Ltr>) منسوخ‌اند. Tombstone در آفست ۵
+        آخرین رکورد <Ltr className="font-mono">u3</Ltr> است و فعلاً می‌ماند.
+        سگمنت فعال (آفست ۹) اسکن نمی‌شود.
       </>
     ),
   },
   {
     at: '2026-11-17T08:06',
     op: 'clean',
-    title: 'بازنویسی و نگه‌داری Tombstone',
+    title: 'سگمنت اول خالی و حذف می‌شود',
     body: (
       <>
-        رکوردهای ۲ و ۳ حذف شدند. Tombstone (آفست ۵) هنوز مانده، چون مصرف‌کننده‌ای
-        که عقب است باید بفهمد <Ltr className="font-mono">u3</Ltr> حذف شده است.
-        کافکا آن را دست‌کم <Ltr>delete.retention.ms</Ltr> (۱ روز) بعد از اولین
-        عبور Cleaner نگه می‌دارد، یعنی تا ۲۰۲۶-۱۱-۱۸ ۰۸:۰۶.
+        رکوردهای ۲، ۳ و ۴ حذف شدند و سگمنت اول خالی شد و از لاگ خارج شد. سگمنت
+        دوم (آفست‌های ۵ تا ۸) دست‌نخورده ماند. <strong>آفست رکوردهای باقی‌مانده
+        تغییر نمی‌کند</strong>؛ فقط بین آن‌ها فاصله می‌افتد. Tombstone (آفست ۵)
+        هنوز مانده، چون مصرف‌کننده‌ای که عقب است باید بفهمد{' '}
+        <Ltr className="font-mono">u3</Ltr> حذف شده است.
       </>
     ),
   },
   {
-    at: '2026-11-20T14:00',
-    op: 'append',
-    key: 'u1',
-    value: 'Ali, Qom',
-    title: 'رکورد جدید',
-    body: (
-      <>
-        <Ltr className="font-mono">u1</Ltr> مقدار تازه‌ای می‌گیرد (آفست ۹).
-      </>
-    ),
-  },
-  {
-    at: '2026-11-22T10:00',
+    at: '2026-11-18T10:00',
     op: 'append',
     key: 'u5',
     value: 'Omid, Ahvaz',
     title: 'کاربر پنجم',
     body: (
       <>
-        کلید <Ltr className="font-mono">u5</Ltr> برای اولین بار می‌آید.
+        کلید <Ltr className="font-mono">u5</Ltr> برای اولین بار می‌آید و در سگمنت
+        فعال می‌نشیند.
       </>
     ),
   },
   {
-    at: '2026-11-24T07:00',
+    at: '2026-11-19T11:00',
     op: 'append',
-    key: 'u4',
-    value: 'Mina, Tabriz',
-    title: 'مقدار u4 عوض می‌شود',
+    key: 'u1',
+    value: 'Ali, Kerman',
+    title: 'مقدار u1 باز هم عوض می‌شود',
     body: (
       <>
-        مقدار تازه <Ltr className="font-mono">u4</Ltr> با آفست ۱۱ اضافه می‌شود.
+        <Ltr className="font-mono">u1</Ltr> مقدار تازه‌ای می‌گیرد (آفست ۱۱). حالا{' '}
+        <Ltr className="font-mono">u1</Ltr> سه رکورد دارد: ۷ در سگمنت بسته و ۹ و
+        ۱۱ در سگمنت فعال.
       </>
     ),
   },
   {
-    at: '2026-11-25T09:00',
-    op: 'append',
-    key: 'u2',
-    value: 'Sara, Kerman',
-    title: 'سگمنت فعال بسته می‌شود',
-    body: (
-      <>
-        عمر سگمنت فعال از ۷ روز گذشت (از ۲۰۲۶-۱۱-۱۷ ۰۸:۰۰). بسته می‌شود و رکورد
-        ۱۲ اولین رکورد سگمنت فعال تازه است.
-      </>
-    ),
-  },
-  {
-    at: '2026-11-25T09:05',
+    at: '2026-11-20T09:00',
     op: 'scan',
-    title: 'Log Cleaner: عبور سوم',
+    title: 'Log Cleaner: Tombstone منقضی شده',
     body: (
       <>
-        بخش clean چهار رکورد دارد و بخش dirty چهار رکورد (۸ تا ۱۱). نسبت dirty
-        برابر ۰.۵ است. offset map:{' '}
-        <Ltr className="font-mono">u2→8</Ltr>، <Ltr className="font-mono">u1→9</Ltr>
-        ، <Ltr className="font-mono">u5→10</Ltr>،{' '}
-        <Ltr className="font-mono">u4→11</Ltr>. رکوردهای ۴، ۶ و ۷ منسوخ‌اند.
-        Tombstone (آفست ۵) هم منسوخ می‌شود، چون زمان نگه‌داری‌اش (تا ۲۰۲۶-۱۱-۱۸)
-        گذشته و رکورد جدیدتری برای <Ltr className="font-mono">u3</Ltr> نیست.
+        سگمنت دوم از نظر Cleaner در بخش clean است (آفست‌های ۵ تا ۸ قبل از
+        cleanedTo=۹). هیچ سگمنت بسته‌ای dirty نیست. Tombstone (آفست ۵) از{' '}
+        <Ltr>delete.retention.ms</Ltr> (۱ روز) قدیمی‌تر شده و کاندید حذف است.
+        سگمنت فعال اسکن نمی‌شود؛ <Ltr className="font-mono">u1</Ltr> با آفست‌های
+        ۹ و ۱۱ هر دو می‌مانند.
       </>
     ),
   },
   {
-    at: '2026-11-25T09:06',
+    at: '2026-11-20T09:01',
     op: 'clean',
-    title: 'پایان: برای هر کلید یک مقدار',
+    title: 'پایان: Tombstone حذف می‌شود، تکراری‌های فعال می‌مانند',
     body: (
       <>
-        سگمنت‌هایی که خالی شدند از بین رفتند و <Ltr className="font-mono">u3</Ltr>{' '}
-        به‌کلی از لاگ ناپدید شد. برای <Ltr className="font-mono">u1</Ltr>،{' '}
-        <Ltr className="font-mono">u4</Ltr> و <Ltr className="font-mono">u5</Ltr>{' '}
-        فقط آخرین مقدار مانده است. <Ltr className="font-mono">u2</Ltr> دو رکورد
-        دارد (۸ و ۱۲) چون رکورد ۱۲ در سگمنت فعال است؛ رکورد ۸ در عبور بعدی حذف
-        می‌شود. خروجی برای مصرف‌کننده‌ای که از ابتدا بخواند، همان آخرین مقدار هر
-        کلید است.
+        Tombstone (آفست ۵) حذف شد و <Ltr className="font-mono">u3</Ltr> به‌کلی از
+        لاگ ناپدید شد. سگمنت دوم حالا آفست‌های ۶، ۷ و ۸ را دارد. برای{' '}
+        <Ltr className="font-mono">u1</Ltr> سه رکورد مانده: ۷ در سگمنت بسته clean،
+        و ۹ و ۱۱ در سگمنت فعال. چون سگمنت فعال Compaction نمی‌شود، ۹ و ۱۱ هر دو
+        می‌مانند و مصرف‌کننده باید تکراری موقت را تحمل کند. رکورد ۷ در عبور بعدی
+        Cleaner حذف می‌شود.
       </>
     ),
   },
@@ -513,14 +502,14 @@ export function CompactionSimulator() {
   )
 
   return (
-    <div className="my-8 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+    <div className="my-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-2.5 dark:border-slate-800">
         <div className="min-w-0">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">
             شبیه‌ساز گام‌به‌گام
           </span>
           <h3 className="m-0 text-[15px] font-extrabold leading-6 text-slate-900 dark:text-white">
-            Log Compaction: فقط آخرین مقدار هر کلید
+            Log Compaction: نگه‌داشتن آخرین مقدار هر کلید
           </h3>
         </div>
         <Badge variant="primary" size="sm" className="mt-0.5 shrink-0">
@@ -548,7 +537,7 @@ export function CompactionSimulator() {
         ))}
       </div>
 
-      <div className="mt-3">
+      <div className="sticky top-16 z-20 mt-3 rounded-xl border border-slate-200 bg-white/90 px-2.5 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
         <div
           className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
           role="progressbar"
@@ -563,7 +552,7 @@ export function CompactionSimulator() {
           />
         </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
           <Button
             size="sm"
             variant="outline"
@@ -591,8 +580,16 @@ export function CompactionSimulator() {
           >
             از اول
           </Button>
-          <span className="ms-auto text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-            گام {toPersianDigits(stepIndex + 1)} از {toPersianDigits(STEPS.length)}
+          <span className="ms-auto flex min-w-0 items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="shrink-0 tabular-nums">
+              گام {toPersianDigits(stepIndex + 1)} از {toPersianDigits(STEPS.length)}
+            </span>
+            <span aria-hidden="true" className="shrink-0 text-slate-300 dark:text-slate-600">
+              |
+            </span>
+            <span className="truncate font-semibold text-slate-700 dark:text-slate-200">
+              {step.title}
+            </span>
           </span>
         </div>
       </div>
