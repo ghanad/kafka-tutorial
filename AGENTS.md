@@ -87,6 +87,13 @@ src/
   and a "common mistakes" section.
 - Use the existing `Callout` variants (`info`, `tip`, `warning`, `danger`)
   instead of inventing new box styles.
+- Keep the main reading path short. Details that are not required to use a
+  feature (file formats, byte-level layout, numeric proofs, internal
+  algorithms) belong in a collapsible `DeepDive` block from
+  `src/components/ui/DeepDive.tsx`; the practical part (what it is for, how to
+  use it, common pitfalls) stays outside. The `DeepDive` title renders as an
+  `h3` and appears in the table of contents; its inner parts use
+  `DeepDiveSection`, which renders `h4` and stays out of the table of contents.
 
 ## UI and RTL rules
 
