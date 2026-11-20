@@ -13,6 +13,7 @@ import {
   ListTree,
   RotateCcw,
   Type,
+  X,
 } from 'lucide-react'
 import type { CourseSection, LessonMeta } from '../../content/curriculum'
 import { sections } from '../../content/curriculum'
@@ -66,6 +67,9 @@ export function LessonLayout({
   )
   const toggleLessonComplete = useAppStore((state) => state.toggleLessonComplete)
   const toggleBookmark = useAppStore((state) => state.toggleBookmark)
+  const tocCollapsed = useAppStore((state) => state.tocCollapsed)
+  const toggleTocCollapsed = useAppStore((state) => state.toggleTocCollapsed)
+  const setTocCollapsed = useAppStore((state) => state.setTocCollapsed)
 
   const isCompleted = completedLessons.includes(lesson.id)
   const isBookmarked = bookmarks.includes(lesson.id)
@@ -190,7 +194,7 @@ export function LessonLayout({
     )
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className={cn('mx-auto max-w-6xl', tocCollapsed && 'xl:max-w-4xl')}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5">
         <nav
           aria-label="مسیر صفحه"
@@ -290,11 +294,33 @@ export function LessonLayout({
               >
                 قلم
               </Button>
+
+              <Button
+                size="sm"
+                variant={tocCollapsed ? 'outline' : 'secondary'}
+                onClick={toggleTocCollapsed}
+                aria-expanded={!tocCollapsed}
+                aria-controls={tocCollapsed ? undefined : 'lesson-toc'}
+                title={
+                  tocCollapsed
+                    ? 'نمایش فهرست مطالب درس'
+                    : 'پنهان کردن فهرست مطالب برای مطالعه متمرکز'
+                }
+                aria-label={tocCollapsed ? 'نمایش فهرست مطالب درس' : 'پنهان کردن فهرست مطالب درس'}
+                startIcon={<ListTree className="h-3.5 w-3.5" aria-hidden="true" />}
+              >
+                فهرست
+              </Button>
             </div>
           </div>
         </header>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <div
+          className={cn(
+            'mt-6 grid gap-6',
+            !tocCollapsed && 'xl:grid-cols-[minmax(0,1fr)_16rem]',
+          )}
+        >
           <div className="relative min-w-0 scroll-mt-24" id="lesson-content-start">
             {Content ? (
               <div ref={contentRef} className="lesson-prose">
@@ -321,45 +347,58 @@ export function LessonLayout({
             )}
           </div>
 
-          <aside className="order-first xl:order-none">
-            <div className="space-y-3 xl:sticky xl:top-20">
-              <nav aria-label="فهرست مطالب درس" className="xl:hidden">
-                <details className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-soft dark:border-slate-800 dark:bg-slate-900/70">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 focus-visible:outline-none">
-                    <span className="flex items-center gap-2">
-                      <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
-                      <span className="text-sm font-extrabold text-slate-900 dark:text-white">
-                        در این درس
+          {!tocCollapsed && (
+            <aside id="lesson-toc" className="order-first xl:order-none">
+              <div className="space-y-3 xl:sticky xl:top-20">
+                <nav aria-label="فهرست مطالب درس" className="xl:hidden">
+                  <details className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-soft dark:border-slate-800 dark:bg-slate-900/70">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 focus-visible:outline-none">
+                      <span className="flex items-center gap-2">
+                        <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
+                        <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                          در این درس
+                        </span>
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                          {toPersianDigits(toc.length)} سرفصل
+                        </span>
                       </span>
-                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                        {toPersianDigits(toc.length)} سرفصل
-                      </span>
-                    </span>
-                    <ChevronDown
-                      className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                      aria-hidden="true"
-                    />
-                  </summary>
-                  <div className="border-t border-slate-200/80 p-3 dark:border-slate-800">
-                    {tocList}
-                  </div>
-                </details>
-              </nav>
+                      <ChevronDown
+                        className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                        aria-hidden="true"
+                      />
+                    </summary>
+                    <div className="border-t border-slate-200/80 p-3 dark:border-slate-800">
+                      {tocList}
+                    </div>
+                  </details>
+                </nav>
 
-              <nav
-                aria-label="فهرست مطالب درس"
-                className="hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 xl:block"
-              >
-                <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800">
-                  <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
-                  <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                    در این درس
-                  </h2>
-                </div>
-                {tocList}
-              </nav>
-            </div>
-          </aside>
+                <nav
+                  aria-label="فهرست مطالب درس"
+                  className="hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 xl:block"
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <ListTree className="h-4 w-4 text-primary-500" aria-hidden="true" />
+                      <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        در این درس
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTocCollapsed(true)}
+                      aria-label="بستن فهرست مطالب درس"
+                      title="بستن فهرست مطالب درس"
+                      className="-me-1 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                  {tocList}
+                </nav>
+              </div>
+            </aside>
+          )}
         </div>
 
         <motion.div

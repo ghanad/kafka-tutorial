@@ -14,6 +14,8 @@ export function getPersistedSnapshot(): PersistedAppState {
     fontFamily: state.fontFamily,
     lineHeight: state.lineHeight,
     collapsedSections: state.collapsedSections,
+    sidebarCollapsed: state.sidebarCollapsed,
+    tocCollapsed: state.tocCollapsed,
   }
 }
 

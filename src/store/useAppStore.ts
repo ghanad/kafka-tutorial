@@ -40,6 +40,10 @@ export interface AppStore {
   lineHeight: LineHeight
   /** Section ids whose lesson list is collapsed in the sidebar. */
   collapsedSections: string[]
+  /** Hides the course lesson list (right column) on wide screens. */
+  sidebarCollapsed: boolean
+  /** Hides the in-lesson table of contents (left column). */
+  tocCollapsed: boolean
 
   toggleLessonComplete: (lessonId: string) => void
   markLessonComplete: (lessonId: string) => void
@@ -58,6 +62,10 @@ export interface AppStore {
   resetFontSettings: () => void
   toggleSectionCollapsed: (sectionId: string) => void
   setCollapsedSections: (sectionIds: string[]) => void
+  toggleSidebarCollapsed: () => void
+  setSidebarCollapsed: (collapsed: boolean) => void
+  toggleTocCollapsed: () => void
+  setTocCollapsed: (collapsed: boolean) => void
   setLastVisitedLesson: (lessonId: string) => void
   importData: (data: unknown) => void
   resetAllData: () => void
@@ -75,10 +83,12 @@ export type PersistedAppState = Pick<
   | 'fontFamily'
   | 'lineHeight'
   | 'collapsedSections'
+  | 'sidebarCollapsed'
+  | 'tocCollapsed'
 >
 
 export const STORAGE_KEY = 'kafka-tutorial-store'
-export const STORE_VERSION = 6
+export const STORE_VERSION = 7
 
 const fontSizes: FontSize[] = ['sm', 'md', 'lg', 'xl']
 
@@ -102,6 +112,8 @@ const initialPersistedState: PersistedAppState = {
   fontFamily: 'vazirmatn',
   lineHeight: 'normal',
   collapsedSections: [],
+  sidebarCollapsed: false,
+  tocCollapsed: false,
 }
 
 function createInlineNoteId(): string {
@@ -233,6 +245,8 @@ function sanitizePersistedState(value: unknown): PersistedAppState {
     fontFamily: sanitizeFontFamily(data.fontFamily),
     lineHeight: sanitizeLineHeight(data.lineHeight),
     collapsedSections: uniqueStrings(data.collapsedSections),
+    sidebarCollapsed: data.sidebarCollapsed === true,
+    tocCollapsed: data.tocCollapsed === true,
   }
 }
 
@@ -375,6 +389,15 @@ export const useAppStore = create<AppStore>()(
       setCollapsedSections: (sectionIds) =>
         set({ collapsedSections: uniqueStrings(sectionIds) }),
 
+      toggleSidebarCollapsed: () =>
+        set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
+      toggleTocCollapsed: () => set((state) => ({ tocCollapsed: !state.tocCollapsed })),
+
+      setTocCollapsed: (collapsed) => set({ tocCollapsed: collapsed }),
+
       setLastVisitedLesson: (lessonId) => set({ lastVisitedLesson: lessonId }),
 
       importData: (data) => set({ ...sanitizePersistedState(data) }),
@@ -396,6 +419,8 @@ export const useAppStore = create<AppStore>()(
         fontFamily: state.fontFamily,
         lineHeight: state.lineHeight,
         collapsedSections: state.collapsedSections,
+        sidebarCollapsed: state.sidebarCollapsed,
+        tocCollapsed: state.tocCollapsed,
       }),
       migrate: (persistedState) => sanitizePersistedState(persistedState),
     },

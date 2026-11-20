@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { BarChart3, BookOpen, Menu, Moon, Search, Sun, Type, X } from 'lucide-react'
+import {
+  BarChart3,
+  BookOpen,
+  Menu,
+  Moon,
+  PanelRightClose,
+  PanelRightOpen,
+  Search,
+  Sun,
+  Type,
+  X,
+} from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
 import { useLessonSearch } from '../../hooks/useLessonSearch'
 import { useAppStore } from '../../store/useAppStore'
@@ -21,6 +32,8 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const completedLessons = useAppStore((state) => state.completedLessons)
+  const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed)
+  const toggleSidebarCollapsed = useAppStore((state) => state.toggleSidebarCollapsed)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [fontModalOpen, setFontModalOpen] = useState(false)
@@ -68,6 +81,27 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           className={buttonClasses({ variant: 'ghost', size: 'icon', className: 'lg:hidden' })}
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          onClick={toggleSidebarCollapsed}
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="course-sidebar"
+          aria-label={
+            sidebarCollapsed ? 'نمایش فهرست دوره' : 'پنهان کردن فهرست دوره برای مطالعه متمرکز'
+          }
+          title={sidebarCollapsed ? 'نمایش فهرست دوره' : 'پنهان کردن فهرست دوره'}
+          className={cn(
+            buttonClasses({ variant: 'ghost', size: 'icon' }),
+            'hidden border border-slate-200 lg:inline-flex dark:border-slate-800',
+          )}
+        >
+          {sidebarCollapsed ? (
+            <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <PanelRightClose className="h-5 w-5" aria-hidden="true" />
+          )}
         </button>
 
         <Link

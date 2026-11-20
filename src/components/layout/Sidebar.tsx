@@ -27,9 +27,11 @@ import { ProgressBar } from '../ui/ProgressBar'
 
 interface SidebarBodyProps {
   onNavigate?: () => void
+  /** When provided, the panel header gets a button that hides the lesson list. */
+  onCollapse?: () => void
 }
 
-function SidebarBody({ onNavigate }: SidebarBodyProps) {
+function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
   const shouldReduceMotion = useReducedMotion()
   const sectionPanelId = useId()
   const { pathname } = useLocation()
@@ -58,9 +60,22 @@ function SidebarBody({ onNavigate }: SidebarBodyProps) {
       <div className="shrink-0 border-b border-slate-200/70 p-4 dark:border-slate-800">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">فهرست دوره</h2>
-          <Badge variant="neutral" size="sm">
-            {toPersianDigits(allLessons.length)} درس
-          </Badge>
+          <span className="flex shrink-0 items-center gap-1.5">
+            <Badge variant="neutral" size="sm">
+              {toPersianDigits(allLessons.length)} درس
+            </Badge>
+            {onCollapse && (
+              <button
+                type="button"
+                onClick={onCollapse}
+                aria-label="بستن فهرست دوره"
+                title="بستن فهرست دوره"
+                className="-me-1 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            )}
+          </span>
         </div>
 
         <div className="mt-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/60">
@@ -311,6 +326,8 @@ interface SidebarProps {
 
 export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const shouldReduceMotion = useReducedMotion()
+  const collapsed = useAppStore((state) => state.sidebarCollapsed)
+  const setSidebarCollapsed = useAppStore((state) => state.setSidebarCollapsed)
 
   useEffect(() => {
     if (!mobileOpen) return
@@ -331,9 +348,15 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className="hidden w-72 shrink-0 border-e border-slate-200/70 lg:block dark:border-slate-800">
+      <aside
+        id="course-sidebar"
+        className={cn(
+          'hidden w-72 shrink-0 border-e border-slate-200/70 dark:border-slate-800',
+          collapsed ? 'lg:hidden' : 'lg:block',
+        )}
+      >
         <div className="sticky top-16 h-[calc(100vh-4rem)]">
-          <SidebarBody />
+          <SidebarBody onCollapse={() => setSidebarCollapsed(true)} />
         </div>
       </aside>
 
