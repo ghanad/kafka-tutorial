@@ -30,7 +30,7 @@ export const sections: CourseSection[] = [
         title: 'Kafka چیست و چه مشکلی را حل می‌کند؟',
         description:
           'کافکا را با داستان کلاس، تشبیه دفترچه جادویی، شبیه‌ساز زنده و شکل‌های متحرک مثل یک کودک ۸ ساله درک کنید.',
-        readingTime: 6,
+        readingTime: 7,
         sectionId: 'introduction',
         status: 'published',
       },
@@ -503,10 +503,10 @@ export const sections: CourseSection[] = [
         slug: 'kafka-vs-alternatives',
         title: 'Kafka در برابر RabbitMQ، Pulsar و Redis Streams',
         description:
-          'مقایسه مدل‌ها، نقاط قوت و ضعف و اینکه برای هر مسئله کدام گزینه منطقی‌تر است.',
-        readingTime: 9,
+          'چهار مدل پیام‌رسانی را معیاربه‌معیار مقایسه کنید: مسیریابی، بازپخش، اولویت پیام، دوام و هزینه عملیاتی؛ همراه با راهنمای انتخاب.',
+        readingTime: 11,
         sectionId: 'patterns',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'interview-questions',

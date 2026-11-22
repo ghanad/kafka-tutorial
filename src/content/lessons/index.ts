@@ -8,6 +8,7 @@ import { LogSegmentsContent } from './logSegments'
 import { RetentionCompactionContent } from './retentionCompaction'
 import { BrokersControllerKraftContent } from './brokersControllerKraft'
 import { LeaderFollowerContent } from './leaderFollower'
+import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -36,6 +37,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'leader-follower': {
     Content: LeaderFollowerContent,
+  },
+  'kafka-vs-alternatives': {
+    Content: KafkaVsAlternativesContent,
   },
 }
 
