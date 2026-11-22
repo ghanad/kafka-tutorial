@@ -95,6 +95,102 @@ src/
   `h3` and appears in the table of contents; its inner parts use
   `DeepDiveSection`, which renders `h4` and stays out of the table of contents.
 
+## Interactive step-by-step explainers
+
+Some lessons embed a narrated walkthrough instead of an open-ended playground:
+the reader moves through a small number of steps and one self-contained figure
+changes with each step. This is the preferred model for new interactive visual
+explainers — simple, explanatory, and free of extra chrome. Reference
+implementations:
+
+- `src/components/simulators/SparseIndexExplainer.tsx` and
+  `src/components/simulators/TimeIndexExplainer.tsx` (lesson `log-segments`)
+- `src/components/simulators/RetentionSimulator.tsx` and
+  `src/components/simulators/CompactionSimulator.tsx` (lesson
+  `retention-compaction`)
+
+Read at least one of these before writing a new one, and follow its structure
+rather than inventing a new layout. Name a pure walkthrough `*Explainer`.
+
+### Model
+
+- Freeze one concrete scenario (one topic, one partition, a handful of records)
+  and narrate it. No randomness, no user-provided input, no network, no state
+  that survives a reload.
+- Make the picture a pure function of a step index. Either precompute a snapshot
+  array at module scope (`buildSnapshots()` in the `*Explainer` components) or
+  replay a declarative `STEPS` list into a state object (`buildState(stepIndex)`
+  in the `*Simulator` components). Keep this logic outside the component so
+  every step renders identically every time.
+- One step = one event (one append, one roll, one index entry, one cleaner pass).
+  Highlight exactly what that event changed and dim the rest.
+- Keep the sequence short enough to finish (roughly 8–15 steps). If the story
+  has two phases, split it into stage tabs (e.g. «نوشتن» / «جست‌وجو») instead of
+  one long sequence.
+
+### Anatomy
+
+Follow this order and reuse existing components and tokens:
+
+1. Card: `my-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900`.
+2. Header: small Persian eyebrow («توضیح تعاملی گام‌به‌گام» or
+   «شبیه‌ساز گام‌به‌گام»), an `h3` title phrased as the question the explainer
+   answers, and a `Badge variant="primary"` with «گام X از Y» in Persian digits.
+3. Optional read-only context strip in `dir="ltr"` monospace: topic, partition,
+   and only the config values this explainer depends on.
+4. Controls: «گام قبل» (`ChevronRight`, mirrored for RTL), «گام بعد»
+   (`ChevronLeft`), «از اول» (`RotateCcw`). Add autoplay + speed, or a scrub
+   `input[type="range"]`, only for longer explainers. Do not add config inputs,
+   sliders, toggles, or legends.
+5. Progress: a thin `bg-primary-500` bar with `role="progressbar"` and
+   `aria-valuenow`, or the styled range input the reference explainers use.
+6. Caption panel: `aria-live="polite"` and `border-s-4 border-s-primary-500`,
+   with one 2–4 sentence paragraph about the current step.
+7. Figure: a single inline SVG with `role="img"` and a Persian `aria-label`,
+   wrapped in `dir="ltr"` + `overflow-x-auto` + a `min-w-[...]` so it stays LTR
+   and scrolls on small screens; add the «نمودار را افقی بکشید» hint on mobile.
+8. Muted footnote: which values are scaled down for readability, and that the
+   logic matches what Kafka really does.
+
+### Visual language
+
+- Color carries meaning only: `slate` for idle, `primary` for the active item,
+  `emerald` for the answer or success, `amber` for a caveat (out-of-order
+  timestamp, dirty segment), `rose` for discarded or deleted, `slate-100` for
+  skipped. Reuse the `boxClass(mark)` mapping from the reference files.
+- Show flow with thin dashed connectors between the log, the index files, and
+  the query; make the active connector `primary` and thicker.
+- Put the numbers that matter (`offset`, `position`, `timestamp`) in short
+  `font-mono` labels inside the figure. No icons, gradients, or decorative
+  legend boxes: the caption does the explaining.
+- Every color needs a dark-theme counterpart (`dark:fill-*`, `dark:stroke-*`,
+  `dark:bg-*`).
+
+### Step captions
+
+- State the concrete values of this step, then the reason for it, e.g. «رکورد
+  offset ۱۰۰۶ در position ۶۴۰۰ نوشته شد (۱۴۰۰ بایت).»
+- Use Persian digits for plain prose counts (step numbers, record counts), but
+  keep config keys, offsets, positions, timestamps, and formulas in Latin script
+  inside `<Ltr>` or monospace spans. If you convert a technical value to Persian
+  digits, do it for every occurrence of that value in the same explainer.
+- When a value does not change as the reader might expect (no new index entry,
+  no deletion, an out-of-order timestamp not indexed), explain why in the same
+  step.
+- End with one or two sentences stating the general rule, not a summary table.
+- Keep the surrounding lesson readable on its own: introduce the explainer with
+  a sentence about what the reader will see, and refer back to a specific step
+  when it clarifies a subtle point, as the two reference lessons do.
+
+### Constraints
+
+- Reuse `Button`, `Badge`, `Ltr`, and `toPersianDigits` from
+  `src/utils/persianDigits.ts`; add no dependencies and no new UI primitives.
+- Every animated property needs `motion-reduce:transition-none`, and controls
+  must be labelled and keyboard-reachable.
+- Must work in both themes, fully offline after build, and needs no
+  `localStorage`.
+
 ## UI and RTL rules
 
 - Use Tailwind logical utilities: `ms-*`, `me-*`, `ps-*`, `pe-*`, `start-*`,
