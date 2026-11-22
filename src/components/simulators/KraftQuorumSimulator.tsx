@@ -11,7 +11,6 @@ import {
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { Ltr } from '../ui/Ltr'
-import { toPersianDigits } from '../../utils/persianDigits'
 
 interface ControllerNode {
   id: number
@@ -55,11 +54,7 @@ export function KraftQuorumSimulator() {
     )
     setCommitted(nextLog)
     setStatus(
-      `رکورد متادیتا (مثلاً «ایجاد تاپیک orders») در لاگ کنترلر نوشته شد و با تأیید ${toPersianDigits(
-        QUORUM,
-      )} نود از ${toPersianDigits(nodes.length)} نود، در ایندکس ${toPersianDigits(
-        nextLog,
-      )} commit شد.`,
+      `رکورد متادیتا (مثلاً «ایجاد تاپیک orders») در لاگ کنترلر نوشته شد و با تأیید ${QUORUM} نود از ${nodes.length} نود، در ایندکس ${nextLog} commit شد.`,
     )
   }
 
@@ -80,9 +75,7 @@ export function KraftQuorumSimulator() {
       setLeaderId(null)
       setEpoch((value) => value + 1)
       setStatus(
-        `کنترلر ${toPersianDigits(failedId)} خاموش شد و فقط ${toPersianDigits(
-          nextAlive.length,
-        )} نود زنده ماند؛ اکثریت از دست رفت و خوشه نمی‌تواند کنترلر جدید انتخاب کند.`,
+        `کنترلر ${failedId} خاموش شد و فقط ${nextAlive.length} نود زنده ماند؛ اکثریت از دست رفت و خوشه نمی‌تواند کنترلر جدید انتخاب کند.`,
       )
       return
     }
@@ -94,9 +87,7 @@ export function KraftQuorumSimulator() {
     setLeaderId(nextLeader.id)
     setEpoch((value) => value + 1)
     setStatus(
-      `کنترلر ${toPersianDigits(failedId)} خاموش شد. نودها با رأی اکثریت، کنترلر ${toPersianDigits(
-        nextLeader.id,
-      )} را با لاگ به‌روزتر انتخاب کردند؛ epoch به ${toPersianDigits(epoch + 1)} رسید.`,
+      `کنترلر ${failedId} خاموش شد. نودها با رأی اکثریت، کنترلر ${nextLeader.id} را با لاگ به‌روزتر انتخاب کردند؛ epoch به ${epoch + 1} رسید.`,
     )
   }
 
@@ -121,9 +112,7 @@ export function KraftQuorumSimulator() {
     setNodes(nextNodes)
     setLeaderId(nextLeader)
     setStatus(
-      `کنترلر ${toPersianDigits(deadNode.id)} دوباره روشن شد و لاگ خود را تا ایندکس ${toPersianDigits(
-        leaderNode ? leaderNode.log : deadNode.log,
-      )} از کنترلر فعال همگام کرد.`,
+      `کنترلر ${deadNode.id} دوباره روشن شد و لاگ خود را تا ایندکس ${leaderNode ? leaderNode.log : deadNode.log} از کنترلر فعال همگام کرد.`,
     )
   }
 
@@ -132,7 +121,7 @@ export function KraftQuorumSimulator() {
     setLeaderId(1)
     setCommitted(5)
     setEpoch(1)
-    setStatus('وضعیت خوشه به حالت اولیه برگشت: هر سه نود روشن و کنترلر ۱ فعال است.')
+    setStatus('وضعیت خوشه به حالت اولیه برگشت: هر سه نود روشن و کنترلر 1 فعال است.')
   }
 
   return (
@@ -148,7 +137,7 @@ export function KraftQuorumSimulator() {
         </div>
         <Badge variant={hasQuorum ? 'success' : 'danger'}>
           <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-          Quorum: {toPersianDigits(aliveNodes.length)} از {toPersianDigits(nodes.length)} (نیاز: {toPersianDigits(QUORUM)})
+          Quorum: {aliveNodes.length} از {nodes.length} (نیاز: {QUORUM})
         </Badge>
       </div>
 
@@ -205,7 +194,7 @@ export function KraftQuorumSimulator() {
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-black text-slate-800 dark:text-slate-200">
                   <Server className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                  Controller {toPersianDigits(node.id)}
+                  Controller {node.id}
                 </span>
                 {isLeader ? (
                   <Badge variant="primary">
@@ -239,7 +228,7 @@ export function KraftQuorumSimulator() {
                 })}
               </div>
               <p className="mt-1.5 font-mono text-[10px] text-slate-500 dark:text-slate-400">
-                log entries: {toPersianDigits(node.log)} / commit: {toPersianDigits(committed)}
+                log entries: {node.log} / commit: {committed}
               </p>
             </div>
           )
@@ -250,19 +239,19 @@ export function KraftQuorumSimulator() {
         <div className="rounded-xl border border-slate-200 p-2 dark:border-slate-800">
           <p className="text-[10px] text-slate-500 dark:text-slate-400">Commit Index</p>
           <p className="font-mono text-lg font-black text-slate-900 dark:text-white">
-            {toPersianDigits(committed)}
+            {committed}
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 p-2 dark:border-slate-800">
           <p className="text-[10px] text-slate-500 dark:text-slate-400">Epoch کنترلر</p>
           <p className="font-mono text-lg font-black text-slate-900 dark:text-white">
-            {toPersianDigits(epoch)}
+            {epoch}
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 p-2 dark:border-slate-800">
           <p className="text-[10px] text-slate-500 dark:text-slate-400">بلندترین لاگ</p>
           <p className="font-mono text-lg font-black text-slate-900 dark:text-white">
-            {toPersianDigits(maxLog)}
+            {maxLog}
           </p>
         </div>
       </div>
