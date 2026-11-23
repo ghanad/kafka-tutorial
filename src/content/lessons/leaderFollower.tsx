@@ -2,6 +2,8 @@ import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
 import { IsrExplainer } from '../../components/simulators/IsrExplainer'
+import { LeoHwExplainer } from '../../components/simulators/LeoHwExplainer'
+import { HwDurabilityExplainer } from '../../components/simulators/HwDurabilityExplainer'
 import { ReplicationSimulator } from '../../components/simulators/ReplicationSimulator'
 
 const createReplicatedTopic = `# ساخت تاپیک با ۳ نسخه از هر پارتیشن و حداقل ۲ نسخه همگام
@@ -121,18 +123,39 @@ export function LeaderFollowerContent() {
         روی همه نسخه‌های ISR نوشته شده باشد.
       </p>
       <p>
-        مثال: لیدر LEO برابر ۱۰، نسخه دوم ۱۰ و نسخه سوم ۸ دارد و هر سه در ISR
-        هستند. HW برابر ۸ است. مصرف‌کننده رکوردهای آفست ۰ تا ۷ را می‌بیند و
-        رکوردهای ۸ و ۹ برایش نامرئی‌اند. اگر نسخه سوم از ISR خارج شود، HW می‌تواند
-        تا ۱۰ جلو برود. اگر <Ltr>min.insync.replicas=1</Ltr> باشد و ISR فقط لیدر
-        بماند، HW تا انتهای لاگ لیدر جلو می‌رود و رکوردهای commitشده فقط یک کپی
-        دارند؛ برای همین در تاپیک‌های مهم مقدار ۲ توصیه می‌شود.
+        توضیح تعاملی زیر همین محاسبه را گام‌به‌گام جلو می‌برد: لیدر چند رکورد
+        می‌نویسد، فالوورها با سرعت‌های مختلف آن‌ها را می‌گیرند و می‌بینید{' '}
+        <Ltr>HW</Ltr> چطور فقط وقتی جلو می‌رود که کندترین عضو <Ltr>ISR</Ltr> هم
+        رسیده باشد.
+      </p>
+
+      <LeoHwExplainer />
+
+      <p>
+        در گام ۱ توضیح بالا، لیدر <Ltr>LEO = 11</Ltr> و فالوورها <Ltr>9</Ltr> و{' '}
+        <Ltr>7</Ltr> داشتند، پس <Ltr>HW = 7</Ltr> بود و مصرف‌کننده{' '}
+        <Ltr>offset 0..6</Ltr> را می‌دید. وقتی هر سه به <Ltr>11</Ltr> رسیدند،{' '}
+        <Ltr>HW</Ltr> هم <Ltr>11</Ltr> شد. اگر نسخه سوم از <Ltr>ISR</Ltr> خارج
+        شود، دیگر در این محاسبه نمی‌آید و <Ltr>HW</Ltr> می‌تواند تا{' '}
+        <Ltr>LEO</Ltr> لیدر جلو برود.
       </p>
       <p>
         همین جهش را در گام ۵ توضیح تعاملی بخش قبل دیدید: تا وقتی فالوور کند عضو{' '}
         <Ltr>ISR</Ltr> بود، <Ltr>HW</Ltr> را عقب نگه می‌داشت؛ با خارج شدنش از{' '}
         <Ltr>ISR</Ltr>، <Ltr>HW</Ltr> یک‌باره جلو رفت.
       </p>
+      <p>
+        اما جلو رفتن <Ltr>HW</Ltr> همیشه خبر خوبی نیست. اگر{' '}
+        <Ltr>min.insync.replicas=1</Ltr> باشد و <Ltr>ISR</Ltr> فقط لیدر بماند،{' '}
+        <Ltr>HW</Ltr> تا انتهای لاگ لیدر جلو می‌رود و رکوردهای «commitشده» فقط یک
+        کپی دارند. توضیح تعاملی زیر نشان می‌دهد همین اتفاق چطور به از دست رفتن
+        داده تأییدشده می‌رسد و چرا <Ltr>min.insync.replicas=2</Ltr> جلوی آن را
+        می‌گیرد. در گام‌های آخر، همان لحظه یک بار دیگر با{' '}
+        <Ltr>min.insync.replicas=2</Ltr> تکرار می‌شود تا تفاوت را کنار هم
+        ببینید.
+      </p>
+
+      <HwDurabilityExplainer />
       <table>
         <thead>
           <tr>
