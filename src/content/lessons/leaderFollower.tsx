@@ -1,6 +1,7 @@
 import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
+import { IsrExplainer } from '../../components/simulators/IsrExplainer'
 import { ReplicationSimulator } from '../../components/simulators/ReplicationSimulator'
 
 const createReplicatedTopic = `# ساخت تاپیک با ۳ نسخه از هر پارتیشن و حداقل ۲ نسخه همگام
@@ -92,6 +93,15 @@ export function LeaderFollowerContent() {
         کپی دارند و با مرگ لیدر از بین می‌روند. برای همین در تاپیک‌های مهم مقدار
         ۲ توصیه می‌شود.
       </p>
+      <p>
+        برای دیدن اینکه <Ltr>ISR</Ltr> چطور در طول زمان کوچک و بزرگ می‌شود،
+        توضیح تعاملی زیر را گام‌به‌گام جلو ببرید: یک فالوور کند می‌شود و از{' '}
+        <Ltr>ISR</Ltr> خارج می‌شود، بعد نسخه دیگری هم عقب می‌ماند؛ می‌بینید چه
+        زمانی نوشتن با <Ltr>acks=all</Ltr> متوقف می‌شود و چطور با همگام‌شدن
+        دوباره برمی‌گردد.
+      </p>
+
+      <IsrExplainer />
 
       <h2>۳. LEO و High Watermark</h2>
       <p>
@@ -117,6 +127,11 @@ export function LeaderFollowerContent() {
         تا ۱۰ جلو برود. اگر <Ltr>min.insync.replicas=1</Ltr> باشد و ISR فقط لیدر
         بماند، HW تا انتهای لاگ لیدر جلو می‌رود و رکوردهای commitشده فقط یک کپی
         دارند؛ برای همین در تاپیک‌های مهم مقدار ۲ توصیه می‌شود.
+      </p>
+      <p>
+        همین جهش را در گام ۵ توضیح تعاملی بخش قبل دیدید: تا وقتی فالوور کند عضو{' '}
+        <Ltr>ISR</Ltr> بود، <Ltr>HW</Ltr> را عقب نگه می‌داشت؛ با خارج شدنش از{' '}
+        <Ltr>ISR</Ltr>، <Ltr>HW</Ltr> یک‌باره جلو رفت.
       </p>
       <table>
         <thead>
