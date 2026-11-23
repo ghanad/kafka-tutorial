@@ -12,7 +12,6 @@ import {
   ChevronDown,
   ListTree,
   RotateCcw,
-  Type,
   X,
 } from 'lucide-react'
 import type { CourseSection, LessonMeta } from '../../content/curriculum'
@@ -24,7 +23,6 @@ import { toPersianDigits } from '../../utils/persianDigits'
 import { Button } from '../ui/Button'
 import { Callout } from '../ui/Callout'
 import { Card, CardContent } from '../ui/Card'
-import { FontSettingsModal } from '../ui/FontSettingsModal'
 import { Ltr } from '../ui/Ltr'
 import { InlineNotesLayer } from '../notes/InlineNotesLayer'
 import type { InlineNotesLayerHandle } from '../notes/InlineNotesLayer'
@@ -56,7 +54,6 @@ export function LessonLayout({
   const inlineNotesRef = useRef<InlineNotesLayerHandle>(null)
   const [toc, setToc] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [fontModalOpen, setFontModalOpen] = useState(false)
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
@@ -260,57 +257,58 @@ export function LessonLayout({
                 {isCompleted ? 'لغو تکمیل درس' : 'تکمیل درس'}
               </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => toggleBookmark(lesson.id)}
-                startIcon={
+              <div className="flex items-center gap-1.5 border-s border-slate-200/80 ps-2 dark:border-slate-800">
+                <Button
+                  size="sm"
+                  variant={isBookmarked ? 'secondary' : 'outline'}
+                  onClick={() => toggleBookmark(lesson.id)}
+                  title={isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
+                  aria-label={isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
+                  className="h-9 w-9 p-0"
+                >
                   <Bookmark
-                    className={cn('h-3.5 w-3.5', isBookmarked && 'fill-current')}
+                    className={cn(
+                      'h-4 w-4',
+                      isBookmarked && 'fill-current text-primary-600 dark:text-primary-400',
+                    )}
                     aria-hidden="true"
                   />
-                }
-              >
-                {isBookmarked ? 'حذف نشانک' : 'افزودن نشانک'}
-              </Button>
+                </Button>
 
-              <Button
-                size="sm"
-                variant={hasNote ? 'secondary' : 'outline'}
-                onClick={scrollToNotes}
-                title={hasNote ? 'مشاهده یادداشت‌های این درس' : 'افزودن یادداشت برای این درس'}
-                startIcon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
-              >
-                {hasNote ? 'یادداشت‌ها' : 'یادداشت'}
-              </Button>
+                <Button
+                  size="sm"
+                  variant={hasNote ? 'secondary' : 'outline'}
+                  onClick={scrollToNotes}
+                  title={hasNote ? 'مشاهده یادداشت‌های این درس' : 'افزودن یادداشت برای این درس'}
+                  aria-label={hasNote ? 'مشاهده یادداشت‌های این درس' : 'افزودن یادداشت برای این درس'}
+                  className="relative h-9 w-9 p-0"
+                >
+                  <FileText className="h-4 w-4" aria-hidden="true" />
+                  {hasNote && (
+                    <span
+                      className="absolute end-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary-600 dark:bg-primary-400"
+                      aria-hidden="true"
+                    />
+                  )}
+                </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setFontModalOpen(true)}
-                title="شخصی‌سازی قلم و اندازه متن"
-                aria-label="شخصی‌سازی قلم و اندازه متن"
-                startIcon={<Type className="h-3.5 w-3.5" aria-hidden="true" />}
-              >
-                قلم
-              </Button>
-
-              <Button
-                size="sm"
-                variant={tocCollapsed ? 'outline' : 'secondary'}
-                onClick={toggleTocCollapsed}
-                aria-expanded={!tocCollapsed}
-                aria-controls={tocCollapsed ? undefined : 'lesson-toc'}
-                title={
-                  tocCollapsed
-                    ? 'نمایش فهرست مطالب درس'
-                    : 'پنهان کردن فهرست مطالب برای مطالعه متمرکز'
-                }
-                aria-label={tocCollapsed ? 'نمایش فهرست مطالب درس' : 'پنهان کردن فهرست مطالب درس'}
-                startIcon={<ListTree className="h-3.5 w-3.5" aria-hidden="true" />}
-              >
-                فهرست
-              </Button>
+                <Button
+                  size="sm"
+                  variant={tocCollapsed ? 'outline' : 'secondary'}
+                  onClick={toggleTocCollapsed}
+                  aria-expanded={!tocCollapsed}
+                  aria-controls={tocCollapsed ? undefined : 'lesson-toc'}
+                  title={
+                    tocCollapsed
+                      ? 'نمایش فهرست مطالب درس'
+                      : 'پنهان کردن فهرست مطالب برای مطالعه متمرکز'
+                  }
+                  aria-label={tocCollapsed ? 'نمایش فهرست مطالب درس' : 'پنهان کردن فهرست مطالب درس'}
+                  className="h-9 w-9 p-0"
+                >
+                  <ListTree className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -509,11 +507,6 @@ export function LessonLayout({
           مرورگر نگهداری می‌شوند.
         </p>
       </article>
-
-      <FontSettingsModal
-        open={fontModalOpen}
-        onClose={() => setFontModalOpen(false)}
-      />
     </div>
   )
 }
