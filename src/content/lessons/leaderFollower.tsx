@@ -4,7 +4,6 @@ import { Ltr } from '../../components/ui/Ltr'
 import { IsrExplainer } from '../../components/simulators/IsrExplainer'
 import { LeoHwExplainer } from '../../components/simulators/LeoHwExplainer'
 import { HwDurabilityExplainer } from '../../components/simulators/HwDurabilityExplainer'
-import { ReplicationSimulator } from '../../components/simulators/ReplicationSimulator'
 
 const createReplicatedTopic = `# ساخت تاپیک با ۳ نسخه از هر پارتیشن و حداقل ۲ نسخه همگام
 kafka-topics.sh --bootstrap-server localhost:9092 \\
@@ -57,7 +56,7 @@ export function LeaderFollowerContent() {
         می‌توانید <Ltr>RF=3</Ltr> بسازید. در تولید معمولاً <Ltr>RF=3</Ltr> همراه
         با <Ltr>min.insync.replicas=2</Ltr> و <Ltr>acks=all</Ltr> انتخاب می‌شود؛
         با این ترکیب خرابی یک بروکر نه نوشتن را متوقف می‌کند و نه داده تأییدشده
-        را از بین می‌برد. جزئیات این تنظیمات در بخش ۶ آمده است.
+        را از بین می‌برد. جزئیات این تنظیمات در بخش ۵ آمده است.
       </p>
       <CodeBlock
         code={createReplicatedTopic}
@@ -193,17 +192,12 @@ export function LeaderFollowerContent() {
         </tbody>
       </table>
 
-      <h2>۴. شبیه‌ساز تعاملی: لیدر را بکشید</h2>
+      <h2>۴. وقتی لیدر می‌میرد چه می‌شود؟</h2>
       <p>
-        در شبیه‌ساز زیر رکورد تولید کنید، یک فالوور را کند کنید و ببینید HW چه
-        می‌کند. سپس لیدر را خاموش کنید تا انتخاب لیدر جدید از میان ISR را ببینید.
-        در پایان، Unclean Election را روشن کنید و سناریوی از دست رفتن داده را
-        بسازید.
+        تا اینجا دیدیم <Ltr>HW</Ltr> و <Ltr>ISR</Ltr> چطور داده را از خرابی
+        محافظت می‌کنند. حالا همان مسیر را از سمت خرابی دنبال می‌کنیم: از لحظه‌ای که
+        ارتباط لیدر قطع می‌شود تا وقتی کلاینت‌ها به لیدر جدید وصل می‌شوند.
       </p>
-
-      <ReplicationSimulator />
-
-      <h2>۵. وقتی لیدر می‌میرد چه می‌شود؟</h2>
       <ol>
         <li>بروکر لیدر از کار می‌افتد و ارتباطش قطع می‌شود.</li>
         <li>کنترلر متوجه خرابی می‌شود و به‌روزرسانی متادیتا را آغاز می‌کند.</li>
@@ -222,12 +216,13 @@ export function LeaderFollowerContent() {
         برگشت یک نسخه (پارتیشن موقتاً آفلاین می‌شود)، یا اجازه دادن به یک نسخه
         عقب‌مانده برای لیدر شدن که به آن{' '}
         <strong><Ltr>Unclean Leader Election</Ltr></strong> می‌گویند. گزینه دوم
-        دسترس‌پذیری را برمی‌گرداند، اما ممکن است رکوردهای commitنشده را از دست
-        بدهد. مقدار پیش‌فرض <Ltr>unclean.leader.election.enable</Ltr> در کافکای
-        مدرن <Ltr>false</Ltr> است.
+        دسترس‌پذیری را برمی‌گرداند، اما ممکن است رکوردهایی را که قبلاً commitشده
+        بودند از دست بدهد. مقدار پیش‌فرض{' '}
+        <Ltr>unclean.leader.election.enable</Ltr> در کافکای مدرن{' '}
+        <Ltr>false</Ltr> است.
       </p>
 
-      <h2>۶. ترکیب RF، acks و min.insync.replicas</h2>
+      <h2>۵. ترکیب RF، acks و min.insync.replicas</h2>
       <p>
         این سه تنظیم با هم تعیین می‌کنند در برابر خرابی چه رفتاری داشته باشید.
         جدول زیر فرض می‌کند خوشه سه بروکر دارد و <Ltr>RF=3</Ltr> است:
