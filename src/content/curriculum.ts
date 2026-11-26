@@ -156,9 +156,9 @@ export const sections: CourseSection[] = [
         title: 'تنظیم acks و دوام پیام',
         description:
           'سه سطح acks=0، acks=1 و acks=all؛ چه چیزی قربانی می‌شود و چه زمانی هر کدام را انتخاب کنیم.',
-        readingTime: 9,
+        readingTime: 10,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'producer-batching',

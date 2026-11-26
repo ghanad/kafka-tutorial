@@ -10,6 +10,7 @@ import { BrokersControllerKraftContent } from './brokersControllerKraft'
 import { LeaderFollowerContent } from './leaderFollower'
 import { ProducerBasicsContent } from './producerBasics'
 import { ProducerPartitionerContent } from './producerPartitioner'
+import { ProducerAcksContent } from './producerAcks'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 
 export const lessonContents: Record<string, LessonContent> = {
@@ -45,6 +46,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'producer-partitioner': {
     Content: ProducerPartitionerContent,
+  },
+  'producer-acks': {
+    Content: ProducerAcksContent,
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,
