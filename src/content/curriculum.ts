@@ -246,7 +246,7 @@ export const sections: CourseSection[] = [
           'Lag چگونه اندازه‌گیری می‌شود، چه زمانی خطرناک است و چه راه‌هایی برای کاهش آن وجود دارد.',
         readingTime: 8,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'consumer-assignment',
@@ -256,7 +256,7 @@ export const sections: CourseSection[] = [
           'Range، RoundRobin، Sticky و Cooperative Sticky؛ تفاوت‌ها، هزینه Rebalance و انتخاب درست.',
         readingTime: 9,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

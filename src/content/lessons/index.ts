@@ -20,6 +20,8 @@ import { ConsumerGroupsContent } from './consumerGroups'
 import { ConsumerOffsetsContent } from './consumerOffsets'
 import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
 import { ReplicationIsrContent } from './replicationIsr'
+import { ConsumerLagContent } from './consumerLag'
+import { ConsumerAssignmentContent } from './consumerAssignment'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -81,6 +83,12 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'consumer-delivery-semantics': {
     Content: ConsumerDeliverySemanticsContent,
+  },
+  'consumer-lag': {
+    Content: ConsumerLagContent,
+  },
+  'consumer-assignment': {
+    Content: ConsumerAssignmentContent,
   },
   'replication-isr': {
     Content: ReplicationIsrContent,
