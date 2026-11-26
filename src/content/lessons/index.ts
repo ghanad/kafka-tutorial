@@ -17,6 +17,7 @@ import { ProducerTransactionsContent } from './producerTransactions'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 import { ConsumerPollLoopContent } from './consumerPollLoop'
 import { ConsumerGroupsContent } from './consumerGroups'
+import { ConsumerOffsetsContent } from './consumerOffsets'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -72,6 +73,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'consumer-groups': {
     Content: ConsumerGroupsContent,
+  },
+  'consumer-offsets': {
+    Content: ConsumerOffsetsContent,
   },
 }
 

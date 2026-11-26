@@ -226,7 +226,7 @@ export const sections: CourseSection[] = [
           'تفاوت position و committed offset، commit خودکار و دستی و اینکه Kafka پیشرفت گروه را کجا ذخیره می‌کند.',
         readingTime: 9,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'consumer-delivery-semantics',
