@@ -22,6 +22,7 @@ import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
 import { ReplicationIsrContent } from './replicationIsr'
 import { MinInsyncReplicasContent } from './minInsyncReplicas'
 import { LeaderElectionContent } from './leaderElection'
+import { FailureRecoveryContent } from './failureRecovery'
 import { ConsumerLagContent } from './consumerLag'
 import { ConsumerAssignmentContent } from './consumerAssignment'
 
@@ -100,6 +101,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'leader-election': {
     Content: LeaderElectionContent,
+  },
+  'failure-recovery': {
+    Content: FailureRecoveryContent,
   },
 }
 

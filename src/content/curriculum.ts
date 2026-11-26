@@ -304,7 +304,7 @@ export const sections: CourseSection[] = [
           'مرگ Broker، قطع شبکه، از دست رفتن دیسک و بازگشت گره؛ رفتار خوشه را مرحله‌به‌مرحله ببینید.',
         readingTime: 10,
         sectionId: 'reliability',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'durability-design',
