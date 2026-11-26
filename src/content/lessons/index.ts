@@ -11,6 +11,7 @@ import { LeaderFollowerContent } from './leaderFollower'
 import { ProducerBasicsContent } from './producerBasics'
 import { ProducerPartitionerContent } from './producerPartitioner'
 import { ProducerAcksContent } from './producerAcks'
+import { ProducerBatchingContent } from './producerBatching'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 
 export const lessonContents: Record<string, LessonContent> = {
@@ -49,6 +50,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'producer-acks': {
     Content: ProducerAcksContent,
+  },
+  'producer-batching': {
+    Content: ProducerBatchingContent,
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,

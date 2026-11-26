@@ -166,9 +166,9 @@ export const sections: CourseSection[] = [
         title: 'Batching و Compression',
         description:
           'اثر linger.ms، batch.size و compression.type بر توان عملیاتی، تأخیر و مصرف پهنای باند.',
-        readingTime: 9,
+        readingTime: 11,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'producer-idempotence',
