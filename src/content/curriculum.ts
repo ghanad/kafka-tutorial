@@ -314,7 +314,7 @@ export const sections: CourseSection[] = [
           'ترکیب پیشنهادی RF، acks، min.insync.replicas و نظارت، برای سیستمی که داده را جدی می‌گیرد.',
         readingTime: 9,
         sectionId: 'reliability',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

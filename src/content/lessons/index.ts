@@ -23,6 +23,7 @@ import { ReplicationIsrContent } from './replicationIsr'
 import { MinInsyncReplicasContent } from './minInsyncReplicas'
 import { LeaderElectionContent } from './leaderElection'
 import { FailureRecoveryContent } from './failureRecovery'
+import { DurabilityDesignContent } from './durabilityDesign'
 import { ConsumerLagContent } from './consumerLag'
 import { ConsumerAssignmentContent } from './consumerAssignment'
 
@@ -104,6 +105,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'failure-recovery': {
     Content: FailureRecoveryContent,
+  },
+  'durability-design': {
+    Content: DurabilityDesignContent,
   },
 }
 
