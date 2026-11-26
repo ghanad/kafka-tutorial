@@ -16,6 +16,7 @@ import { ProducerIdempotenceContent } from './producerIdempotence'
 import { ProducerTransactionsContent } from './producerTransactions'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 import { ConsumerPollLoopContent } from './consumerPollLoop'
+import { ConsumerGroupsContent } from './consumerGroups'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -68,6 +69,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'consumer-poll-loop': {
     Content: ConsumerPollLoopContent,
+  },
+  'consumer-groups': {
+    Content: ConsumerGroupsContent,
   },
 }
 

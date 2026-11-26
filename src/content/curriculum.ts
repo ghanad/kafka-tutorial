@@ -214,9 +214,9 @@ export const sections: CourseSection[] = [
         title: 'Consumer Groupها و Rebalance',
         description:
           'چگونه Consumerها کار را بین خود تقسیم می‌کنند و وقتی عضوی اضافه یا حذف می‌شود چه اتفاقی می‌افتد.',
-        readingTime: 10,
+        readingTime: 12,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'consumer-offsets',
