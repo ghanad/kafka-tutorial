@@ -18,6 +18,7 @@ import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 import { ConsumerPollLoopContent } from './consumerPollLoop'
 import { ConsumerGroupsContent } from './consumerGroups'
 import { ConsumerOffsetsContent } from './consumerOffsets'
+import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -76,6 +77,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'consumer-offsets': {
     Content: ConsumerOffsetsContent,
+  },
+  'consumer-delivery-semantics': {
+    Content: ConsumerDeliverySemanticsContent,
   },
 }
 

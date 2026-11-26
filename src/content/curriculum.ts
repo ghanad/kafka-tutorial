@@ -236,7 +236,7 @@ export const sections: CourseSection[] = [
           'پیام ممکن است گم شود یا تکراری برسد؛ بسته به ترتیب پردازش و commit چه تضمینی داریم.',
         readingTime: 9,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'consumer-lag',
