@@ -294,7 +294,7 @@ export const sections: CourseSection[] = [
           'وقتی Leader از دست می‌رود چه کسی جای او را می‌گیرد و unclean election چه بهایی دارد.',
         readingTime: 9,
         sectionId: 'reliability',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'failure-recovery',
