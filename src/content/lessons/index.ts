@@ -12,6 +12,7 @@ import { ProducerBasicsContent } from './producerBasics'
 import { ProducerPartitionerContent } from './producerPartitioner'
 import { ProducerAcksContent } from './producerAcks'
 import { ProducerBatchingContent } from './producerBatching'
+import { ProducerIdempotenceContent } from './producerIdempotence'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 
 export const lessonContents: Record<string, LessonContent> = {
@@ -53,6 +54,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'producer-batching': {
     Content: ProducerBatchingContent,
+  },
+  'producer-idempotence': {
+    Content: ProducerIdempotenceContent,
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,

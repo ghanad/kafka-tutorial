@@ -178,7 +178,7 @@ export const sections: CourseSection[] = [
           'چرا Retry ساده می‌تواند پیام تکراری بسازد و enable.idempotence چگونه دقیقاً یک‌بار نوشتن را تضمین می‌کند.',
         readingTime: 10,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'producer-transactions',
