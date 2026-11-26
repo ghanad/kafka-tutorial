@@ -128,7 +128,7 @@ export const sections: CourseSection[] = [
     id: 'producer',
     title: 'Producer',
     description:
-      'ارسال پیام، Partitioning، سطوح acks، Batching، فشرده‌سازی، Retry و Producerهای Idempotent.',
+      'ارسال پیام، Partitioning، سطوح acks، Batching، فشرده‌سازی، Retry، Producerهای Idempotent و تراکنش‌ها.',
     lessons: [
       {
         id: 'producer-basics',
@@ -186,9 +186,9 @@ export const sections: CourseSection[] = [
         title: 'Transactionها در Producer',
         description:
           'نوشتن اتمیک روی چند Partition، read_committed، Transaction ID و مسیر رسیدن به exactly-once.',
-        readingTime: 9,
+        readingTime: 11,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

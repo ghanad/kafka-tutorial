@@ -13,6 +13,7 @@ import { ProducerPartitionerContent } from './producerPartitioner'
 import { ProducerAcksContent } from './producerAcks'
 import { ProducerBatchingContent } from './producerBatching'
 import { ProducerIdempotenceContent } from './producerIdempotence'
+import { ProducerTransactionsContent } from './producerTransactions'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 import { ConsumerPollLoopContent } from './consumerPollLoop'
 
@@ -58,6 +59,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'producer-idempotence': {
     Content: ProducerIdempotenceContent,
+  },
+  'producer-transactions': {
+    Content: ProducerTransactionsContent,
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,
