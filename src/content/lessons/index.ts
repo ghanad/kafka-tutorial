@@ -9,6 +9,7 @@ import { RetentionCompactionContent } from './retentionCompaction'
 import { BrokersControllerKraftContent } from './brokersControllerKraft'
 import { LeaderFollowerContent } from './leaderFollower'
 import { ProducerBasicsContent } from './producerBasics'
+import { ProducerPartitionerContent } from './producerPartitioner'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
 
 export const lessonContents: Record<string, LessonContent> = {
@@ -41,6 +42,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'producer-basics': {
     Content: ProducerBasicsContent,
+  },
+  'producer-partitioner': {
+    Content: ProducerPartitionerContent,
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,

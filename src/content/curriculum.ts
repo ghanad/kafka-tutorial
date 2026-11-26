@@ -145,10 +145,10 @@ export const sections: CourseSection[] = [
         slug: 'producer-partitioner',
         title: 'Partitioner و نقش Key',
         description:
-          'چگونه hash(key) و استراتژی‌های Round-Robin و Sticky تعیین می‌کنند پیام در کدام Partition بنشیند.',
-        readingTime: 8,
+          'چرا hash(key) مسیر رکورد را قطعی می‌کند، Sticky چگونه پیام‌های بدون کلید را پخش می‌کند و انتخاب کلید چه اثری بر ترتیب و توزیع بار دارد.',
+        readingTime: 11,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'producer-acks',
