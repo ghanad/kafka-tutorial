@@ -20,6 +20,7 @@ import { ConsumerGroupsContent } from './consumerGroups'
 import { ConsumerOffsetsContent } from './consumerOffsets'
 import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
 import { ReplicationIsrContent } from './replicationIsr'
+import { MinInsyncReplicasContent } from './minInsyncReplicas'
 import { ConsumerLagContent } from './consumerLag'
 import { ConsumerAssignmentContent } from './consumerAssignment'
 
@@ -92,6 +93,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'replication-isr': {
     Content: ReplicationIsrContent,
+  },
+  'min-insync-replicas': {
+    Content: MinInsyncReplicasContent,
   },
 }
 

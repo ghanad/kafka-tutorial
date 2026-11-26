@@ -284,7 +284,7 @@ export const sections: CourseSection[] = [
           'چگونه این دو تنظیم با هم تعیین می‌کنند چند Broker می‌تواند از کار بیفتد بدون از دست رفتن داده.',
         readingTime: 9,
         sectionId: 'reliability',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'leader-election',
