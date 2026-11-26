@@ -14,6 +14,7 @@ import { ProducerAcksContent } from './producerAcks'
 import { ProducerBatchingContent } from './producerBatching'
 import { ProducerIdempotenceContent } from './producerIdempotence'
 import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
+import { ConsumerPollLoopContent } from './consumerPollLoop'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -60,6 +61,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'kafka-vs-alternatives': {
     Content: KafkaVsAlternativesContent,
+  },
+  'consumer-poll-loop': {
+    Content: ConsumerPollLoopContent,
   },
 }
 

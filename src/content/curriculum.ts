@@ -206,7 +206,7 @@ export const sections: CourseSection[] = [
           'چرا Consumer خودش داده را Pull می‌کند، حلقه poll چگونه کار می‌کند و heartbeat چه نقشی دارد.',
         readingTime: 8,
         sectionId: 'consumer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'consumer-groups',
