@@ -138,7 +138,7 @@ export const sections: CourseSection[] = [
           'مسیر یک رکورد از فراخوانی send تا رسیدن به Broker، تفاوت ارسال همگام و ناهمگام و نقش Callback.',
         readingTime: 9,
         sectionId: 'producer',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'producer-partitioner',
