@@ -274,7 +274,7 @@ export const sections: CourseSection[] = [
           'هر Partition روی چند Broker تکرار می‌شود، ISR چیست و High Watermark چرا برای Consumer مهم است.',
         readingTime: 10,
         sectionId: 'reliability',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'min-insync-replicas',

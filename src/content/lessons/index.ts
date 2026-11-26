@@ -19,6 +19,7 @@ import { ConsumerPollLoopContent } from './consumerPollLoop'
 import { ConsumerGroupsContent } from './consumerGroups'
 import { ConsumerOffsetsContent } from './consumerOffsets'
 import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
+import { ReplicationIsrContent } from './replicationIsr'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -80,6 +81,9 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'consumer-delivery-semantics': {
     Content: ConsumerDeliverySemanticsContent,
+  },
+  'replication-isr': {
+    Content: ReplicationIsrContent,
   },
 }
 
