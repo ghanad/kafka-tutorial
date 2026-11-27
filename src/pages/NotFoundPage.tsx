@@ -2,15 +2,21 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Compass } from 'lucide-react'
 import { buttonClasses } from '../components/ui/buttonStyles'
-import { KafkaLogo } from '../components/ui/KafkaLogo'
-import { allLessons } from '../content/curriculum'
+import { SiteLogo } from '../components/ui/SiteLogo'
+import {
+  findCourseForLesson,
+  getLessonPath,
+  publishedLessons,
+} from '../content/courses'
+import { siteConfig } from '../content/site'
 
 export function NotFoundPage() {
-  const firstLesson = allLessons[0]
+  const firstLesson = publishedLessons[0]
+  const firstCourse = firstLesson ? findCourseForLesson(firstLesson) : undefined
 
   useEffect(() => {
     const previousTitle = document.title
-    document.title = 'صفحه پیدا نشد | آموزش Kafka'
+    document.title = `صفحه پیدا نشد | ${siteConfig.name}`
     return () => {
       document.title = previousTitle
     }
@@ -18,7 +24,7 @@ export function NotFoundPage() {
 
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center py-12 text-center sm:py-20">
-      <KafkaLogo className="h-14 w-14" />
+      <SiteLogo className="h-14 w-14" />
 
       <p className="mt-6 text-6xl font-extrabold tracking-tight text-primary-600 dark:text-primary-300">
         ۴۰۴
@@ -36,11 +42,11 @@ export function NotFoundPage() {
       <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
         <Link to="/" className={buttonClasses({ size: 'md' })}>
           <Compass className="h-4 w-4" aria-hidden="true" />
-          بازگشت به صفحه اصلی
+          بازگشت به همه دوره‌ها
         </Link>
-        {firstLesson && (
+        {firstLesson && firstCourse && (
           <Link
-            to={`/lessons/${firstLesson.slug}`}
+            to={getLessonPath(firstCourse, firstLesson)}
             className={buttonClasses({ variant: 'outline', size: 'md' })}
           >
             <ArrowRight className="h-4 w-4" aria-hidden="true" />

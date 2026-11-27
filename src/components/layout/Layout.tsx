@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useActiveCourse } from '../../hooks/useActiveCourse'
 import { useTypography } from '../../hooks/useTypography'
 import { Footer } from './Footer'
 import { Header } from './Header'
@@ -8,6 +9,7 @@ import { Sidebar } from './Sidebar'
 export function Layout() {
   useTypography()
   const location = useLocation()
+  const course = useActiveCourse()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const closeSidebar = useCallback(() => setSidebarOpen(false), [])
 
@@ -39,7 +41,9 @@ export function Layout() {
       <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
       <div className="mx-auto flex w-full max-w-[1500px] flex-1 items-stretch">
-        <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        {course && (
+          <Sidebar course={course} mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        )}
         <main
           id="main-content"
           tabIndex={-1}

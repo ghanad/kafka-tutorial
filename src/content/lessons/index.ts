@@ -183,6 +183,18 @@ export const lessonContents: Record<string, LessonContent> = {
   'next-steps': {
     Content: lazyLesson(() => import('./nextSteps'), 'NextStepsContent'),
   },
+  'k8s-what-is-kubernetes': {
+    Content: lazyLesson(() => import('./kubernetesIntro'), 'KubernetesIntroContent'),
+  },
+  'k8s-pods': {
+    Content: lazyLesson(() => import('./kubernetesPods'), 'KubernetesPodsContent'),
+  },
+  'k8s-deployments': {
+    Content: lazyLesson(
+      () => import('./kubernetesDeployments'),
+      'KubernetesDeploymentsContent',
+    ),
+  },
 }
 
 export function getLessonContent(slug: string): LessonContent | undefined {

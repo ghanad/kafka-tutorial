@@ -1,23 +1,25 @@
 import { Link } from 'react-router-dom'
-import { publishedLessons } from '../../content/curriculum'
-import { KafkaLogo } from '../ui/KafkaLogo'
+import { courses, getCoursePath, getCoursePublishedLessons, getLessonPath } from '../../content/courses'
+import { siteConfig } from '../../content/site'
 import { Ltr } from '../ui/Ltr'
+import { SiteLogo } from '../ui/SiteLogo'
 
 export function Footer() {
-  const firstLesson = publishedLessons[0]
+  const firstCourse = courses[0]
+  const firstLesson = firstCourse ? getCoursePublishedLessons(firstCourse)[0] : undefined
 
   return (
     <footer className="mt-auto border-t border-slate-200/70 bg-white/60 dark:border-slate-800 dark:bg-slate-950/60">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <KafkaLogo className="h-8 w-8 shrink-0" />
+          <SiteLogo className="h-8 w-8 shrink-0" />
           <div>
             <p className="text-sm font-extrabold text-slate-900 dark:text-white">
-              آموزش تعاملی <Ltr>Apache Kafka</Ltr>
+              {siteConfig.name}
             </p>
             <p className="mt-1 text-xs leading-6 text-slate-500 dark:text-slate-400">
-              محتوا و پیشرفت شما فقط در همین مرورگر ذخیره می‌شود؛ بدون سرور و بدون
-              نیاز به اینترنت.
+              {siteConfig.tagline}. محتوا و پیشرفت شما فقط در همین مرورگر ذخیره
+              می‌شود؛ بدون سرور و بدون نیاز به اینترنت.
             </p>
           </div>
         </div>
@@ -27,11 +29,20 @@ export function Footer() {
             to="/"
             className="text-xs font-medium text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-300"
           >
-            صفحه اصلی
+            همه دوره‌ها
           </Link>
-          {firstLesson && (
+          {courses.map((course) => (
             <Link
-              to={`/lessons/${firstLesson.slug}`}
+              key={course.id}
+              to={getCoursePath(course)}
+              className="text-xs font-medium text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-300"
+            >
+              {course.shortTitle}
+            </Link>
+          ))}
+          {firstCourse && firstLesson && (
+            <Link
+              to={getLessonPath(firstCourse, firstLesson)}
               className="text-xs font-medium text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-300"
             >
               شروع یادگیری

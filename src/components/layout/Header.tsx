@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
   BarChart3,
   BookOpen,
+  ChevronDown,
   Menu,
   Moon,
   PanelRightClose,
@@ -12,17 +13,26 @@ import {
   Type,
   X,
 } from 'lucide-react'
+import { useActiveCourse } from '../../hooks/useActiveCourse'
 import { useTheme } from '../../hooks/useTheme'
 import { useLessonSearch } from '../../hooks/useLessonSearch'
+import {
+  courses,
+  getCoursePath,
+  getCourseProgressPath,
+  getCoursePublishedLessons,
+  getLessonPath,
+} from '../../content/courses'
+import { siteConfig } from '../../content/site'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
 import { toPersianDigits } from '../../utils/persianDigits'
 import { getProgressPercent } from '../../utils/progress'
 import { buttonClasses } from '../ui/buttonStyles'
 import { FontSettingsModal } from '../ui/FontSettingsModal'
-import { KafkaLogo } from '../ui/KafkaLogo'
 import { Ltr } from '../ui/Ltr'
 import { ProgressBar } from '../ui/ProgressBar'
+import { SiteLogo } from '../ui/SiteLogo'
 
 interface HeaderProps {
   onOpenSidebar: () => void
@@ -31,6 +41,7 @@ interface HeaderProps {
 export function Header({ onOpenSidebar }: HeaderProps) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
+  const activeCourse = useActiveCourse()
   const completedLessons = useAppStore((state) => state.completedLessons)
   const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed)
   const toggleSidebarCollapsed = useAppStore((state) => state.toggleSidebarCollapsed)
@@ -38,9 +49,17 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [fontModalOpen, setFontModalOpen] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+  const courseMenuRef = useRef<HTMLDetailsElement>(null)
   const results = useLessonSearch(query)
-  const progressPercent = getProgressPercent(completedLessons)
+  const progressPercent = activeCourse
+    ? getProgressPercent(completedLessons, getCoursePublishedLessons(activeCourse))
+    : getProgressPercent(completedLessons)
+  const progressPath = activeCourse ? getCourseProgressPath(activeCourse) : '/progress'
   const showResults = searchOpen && query.trim() !== ''
+
+  function closeCourseMenu() {
+    if (courseMenuRef.current) courseMenuRef.current.open = false
+  }
 
   useEffect(() => {
     if (!searchOpen) return
@@ -68,57 +87,113 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     if (!firstResult) return
     setQuery('')
     setSearchOpen(false)
-    navigate(`/lessons/${firstResult.slug}`)
+    navigate(getLessonPath(firstResult.course, firstResult.lesson))
   }
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/80">
       <div className="mx-auto flex h-16 max-w-[1500px] items-center gap-2 px-3 sm:gap-3 sm:px-4">
-        <button
-          type="button"
-          onClick={onOpenSidebar}
-          aria-label="باز کردن فهرست درس‌ها"
-          className={buttonClasses({ variant: 'ghost', size: 'icon', className: 'lg:hidden' })}
-        >
-          <Menu className="h-5 w-5" aria-hidden="true" />
-        </button>
+        {activeCourse && (
+          <>
+            <button
+              type="button"
+              onClick={onOpenSidebar}
+              aria-label="باز کردن فهرست درس‌ها"
+              className={buttonClasses({
+                variant: 'ghost',
+                size: 'icon',
+                className: 'lg:hidden',
+              })}
+            >
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            </button>
 
-        <button
-          type="button"
-          onClick={toggleSidebarCollapsed}
-          aria-expanded={!sidebarCollapsed}
-          aria-controls="course-sidebar"
-          aria-label={
-            sidebarCollapsed ? 'نمایش فهرست دوره' : 'پنهان کردن فهرست دوره برای مطالعه متمرکز'
-          }
-          title={sidebarCollapsed ? 'نمایش فهرست دوره' : 'پنهان کردن فهرست دوره'}
-          className={cn(
-            buttonClasses({ variant: 'ghost', size: 'icon' }),
-            'hidden border border-slate-200 lg:inline-flex dark:border-slate-800',
-          )}
-        >
-          {sidebarCollapsed ? (
-            <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
-          ) : (
-            <PanelRightClose className="h-5 w-5" aria-hidden="true" />
-          )}
-        </button>
+            <button
+              type="button"
+              onClick={toggleSidebarCollapsed}
+              aria-expanded={!sidebarCollapsed}
+              aria-controls="course-sidebar"
+              aria-label={
+                sidebarCollapsed
+                  ? 'نمایش فهرست دوره'
+                  : 'پنهان کردن فهرست دوره برای مطالعه متمرکز'
+              }
+              title={sidebarCollapsed ? 'نمایش فهرست دوره' : 'پنهان کردن فهرست دوره'}
+              className={cn(
+                buttonClasses({ variant: 'ghost', size: 'icon' }),
+                'hidden border border-slate-200 lg:inline-flex dark:border-slate-800',
+              )}
+            >
+              {sidebarCollapsed ? (
+                <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
+              ) : (
+                <PanelRightClose className="h-5 w-5" aria-hidden="true" />
+              )}
+            </button>
+          </>
+        )}
 
         <Link
           to="/"
           className="flex shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-none"
-          aria-label="صفحه اصلی آموزش Kafka"
+          aria-label={`صفحه اصلی ${siteConfig.name}`}
         >
-          <KafkaLogo className="h-9 w-9 shrink-0" />
+          <SiteLogo className="h-9 w-9 shrink-0" />
           <span className="hidden leading-tight sm:block">
             <span className="block text-sm font-extrabold text-slate-900 dark:text-white">
-              آموزش <Ltr>Kafka</Ltr>
+              {siteConfig.name}
             </span>
             <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-              از صفر تا تولید
+              {activeCourse ? activeCourse.shortTitle : siteConfig.tagline}
             </span>
           </span>
         </Link>
+
+        <details ref={courseMenuRef} className="relative hidden shrink-0 md:block">
+          <summary
+            className={cn(
+              buttonClasses({ variant: 'ghost', size: 'sm' }),
+              'cursor-pointer list-none border border-slate-200 dark:border-slate-800 [&::-webkit-details-marker]:hidden',
+            )}
+            aria-label="انتخاب دوره"
+          >
+            <BookOpen className="h-4 w-4" aria-hidden="true" />
+            <span className="max-w-28 truncate">
+              {activeCourse ? activeCourse.shortTitle : 'همه دوره‌ها'}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+          </summary>
+          <div className="absolute top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <Link
+              to="/"
+              onClick={closeCourseMenu}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800',
+                !activeCourse
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                  : 'text-slate-600 dark:text-slate-300',
+              )}
+            >
+              <BookOpen className="h-4 w-4" aria-hidden="true" />
+              همه دوره‌ها
+            </Link>
+            {courses.map((course) => (
+              <Link
+                key={course.id}
+                to={getCoursePath(course)}
+                onClick={closeCourseMenu}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800',
+                  activeCourse?.id === course.id
+                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                    : 'text-slate-600 dark:text-slate-300',
+                )}
+              >
+                <Ltr>{course.shortTitle}</Ltr>
+              </Link>
+            ))}
+          </div>
+        </details>
 
         <div ref={searchRef} className="relative mx-auto w-full max-w-md">
           <label htmlFor="lesson-search" className="sr-only">
@@ -140,7 +215,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             onKeyDown={(event) => {
               if (event.key === 'Enter') openFirstResult()
             }}
-            placeholder="جستجوی درس…"
+            placeholder="جستجو در همه درس‌ها…"
             autoComplete="off"
             className="h-10 w-full rounded-xl border border-slate-200 bg-slate-100/70 ps-9 pe-9 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-primary-400 focus:bg-white dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100 dark:focus:border-primary-500 dark:focus:bg-slate-900 [&::-webkit-search-cancel-button]:hidden"
           />
@@ -162,10 +237,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             <div className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
               {results.length > 0 ? (
                 <ul className="max-h-80 overflow-y-auto p-1.5" aria-label="نتایج جستجو">
-                  {results.map((lesson) => (
-                    <li key={lesson.id}>
+                  {results.map(({ lesson, course }) => (
+                    <li key={`${course.id}:${lesson.id}`}>
                       <Link
-                        to={`/lessons/${lesson.slug}`}
+                        to={getLessonPath(course, lesson)}
                         onClick={() => {
                           setQuery('')
                           setSearchOpen(false)
@@ -177,6 +252,9 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                           aria-hidden="true"
                         />
                         <span className="min-w-0">
+                          <span className="block text-[10px] font-bold text-primary-600 dark:text-primary-300">
+                            {course.shortTitle}
+                          </span>
                           <span className="block truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                             {lesson.title}
                           </span>
@@ -200,7 +278,11 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         <div className="flex shrink-0 items-center gap-2">
           <div
             className="hidden items-center gap-2 md:flex"
-            title={`پیشرفت دوره: ${toPersianDigits(progressPercent)} درصد`}
+            title={
+              activeCourse
+                ? `پیشرفت ${activeCourse.shortTitle}: ${toPersianDigits(progressPercent)} درصد`
+                : `پیشرفت کل پلتفرم: ${toPersianDigits(progressPercent)} درصد`
+            }
           >
             <ProgressBar value={progressPercent} className="w-24" />
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -209,9 +291,9 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           </div>
 
           <NavLink
-            to="/progress"
-            aria-label="پیشرفت من"
-            title="پیشرفت من"
+            to={progressPath}
+            aria-label={activeCourse ? 'پیشرفت این دوره' : 'پیشرفت من'}
+            title={activeCourse ? 'پیشرفت این دوره' : 'پیشرفت من'}
             className={({ isActive }) =>
               cn(
                 buttonClasses({

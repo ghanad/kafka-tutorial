@@ -11,9 +11,17 @@ import {
   Clock,
   FileText,
   Home,
+  Layers,
   X,
 } from 'lucide-react'
-import { allLessons, publishedLessons, sections } from '../../content/curriculum'
+import {
+  getCourseLessons,
+  getCoursePath,
+  getCourseProgressPath,
+  getCoursePublishedLessons,
+  getLessonPath,
+} from '../../content/courses'
+import type { Course } from '../../content/courses'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
@@ -27,15 +35,19 @@ import { Badge } from '../ui/Badge'
 import { ProgressBar } from '../ui/ProgressBar'
 
 interface SidebarBodyProps {
+  course: Course
   onNavigate?: () => void
   /** When provided, the panel header gets a button that hides the lesson list. */
   onCollapse?: () => void
 }
 
-function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
+function SidebarBody({ course, onNavigate, onCollapse }: SidebarBodyProps) {
   const shouldReduceMotion = useReducedMotion()
   const sectionPanelId = useId()
   const { pathname } = useLocation()
+  const sections = course.sections
+  const courseLessons = getCourseLessons(course)
+  const coursePublishedLessons = getCoursePublishedLessons(course)
   const completedLessons = useAppStore((state) => state.completedLessons)
   const notes = useAppStore((state) => state.notes)
   const inlineNotes = useAppStore((state) => state.inlineNotes)
@@ -44,12 +56,13 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
   const setCollapsedSections = useAppStore((state) => state.setCollapsedSections)
   const completedSet = new Set(completedLessons)
   const collapsedSet = new Set(collapsedSections)
-  const completedCount = getCompletedLessonCount(completedLessons)
-  const progressPercent = getProgressPercent(completedLessons)
+  const completedCount = getCompletedLessonCount(completedLessons, coursePublishedLessons)
+  const progressPercent = getProgressPercent(completedLessons, coursePublishedLessons)
   const allCollapsed = sections.every((section) => collapsedSet.has(section.id))
 
-  const activeSlug = pathname.startsWith('/lessons/')
-    ? decodeURIComponent(pathname.slice('/lessons/'.length))
+  const lessonPathPrefix = `/courses/${course.slug}/lessons/`
+  const activeSlug = pathname.startsWith(lessonPathPrefix)
+    ? decodeURIComponent(pathname.slice(lessonPathPrefix.length))
     : null
   const activeSection = activeSlug
     ? sections.find((section) => section.lessons.some((lesson) => lesson.slug === activeSlug))
@@ -60,10 +73,15 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-slate-200/70 p-4 dark:border-slate-800">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">فهرست دوره</h2>
+          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            فهرست دوره
+            <span className="mt-0.5 block text-[10px] font-medium text-slate-400 dark:text-slate-500">
+              {course.shortTitle}
+            </span>
+          </h2>
           <span className="flex shrink-0 items-center gap-1.5">
             <Badge variant="neutral" size="sm">
-              {toPersianDigits(allLessons.length)} درس
+              {toPersianDigits(courseLessons.length)} درس
             </Badge>
             {onCollapse && (
               <button
@@ -86,9 +104,10 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
               {toPersianDigits(progressPercent)}٪
             </span>
           </div>
-          <ProgressBar value={progressPercent} label="پیشرفت کل دوره" />
+          <ProgressBar value={progressPercent} label="پیشرفت این دوره" />
           <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-            {toPersianDigits(completedCount)} از {toPersianDigits(publishedLessons.length)} درس
+            {toPersianDigits(completedCount)} از{' '}
+            {toPersianDigits(coursePublishedLessons.length)} درس
             منتشرشده تکمیل شده است
           </p>
         </div>
@@ -181,21 +200,25 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
                   </span>
                 </button>
 
-                {isCollapsed && isActiveSection && activeLesson && (
-                  <NavLink
-                    to={`/lessons/${activeLesson.slug}`}
-                    onClick={onNavigate}
-                    title={activeLesson.title}
-                    className="ms-8 me-1 mt-1 flex items-center gap-1.5 rounded-lg bg-primary-50 px-2 py-1.5 text-[11px] font-bold text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-200 dark:hover:bg-primary-950"
-                  >
-                    <span
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 dark:bg-primary-300"
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1 truncate">{activeLesson.title}</span>
-                    <span className="sr-only">در حال مطالعه</span>
-                  </NavLink>
-                )}
+                {isCollapsed &&
+                  isActiveSection &&
+                  activeLesson?.status === 'published' && (
+                    <NavLink
+                      to={getLessonPath(course, activeLesson)}
+                      onClick={onNavigate}
+                      title={activeLesson.title}
+                      className="ms-8 me-1 mt-1 flex items-center gap-1.5 rounded-lg bg-primary-50 px-2 py-1.5 text-[11px] font-bold text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-200 dark:hover:bg-primary-950"
+                    >
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 dark:bg-primary-300"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate">
+                        {activeLesson.title}
+                      </span>
+                      <span className="sr-only">در حال مطالعه</span>
+                    </NavLink>
+                  )}
 
                 <AnimatePresence initial={false}>
                   {!isCollapsed && (
@@ -234,7 +257,7 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
                           return (
                             <li key={lesson.id}>
                               <NavLink
-                                to={`/lessons/${lesson.slug}`}
+                                to={getLessonPath(course, lesson)}
                                 onClick={onNavigate}
                                 className={({ isActive }) =>
                                   cn(
@@ -300,20 +323,28 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
 
       <div className="shrink-0 space-y-1 border-t border-slate-200/70 p-3 dark:border-slate-800">
         <Link
-          to="/progress"
+          to={getCourseProgressPath(course)}
           onClick={onNavigate}
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70"
         >
           <BarChart3 className="h-4 w-4" aria-hidden="true" />
-          پیشرفت من
+          پیشرفت این دوره
+        </Link>
+        <Link
+          to={getCoursePath(course)}
+          onClick={onNavigate}
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70"
+        >
+          <Home className="h-4 w-4" aria-hidden="true" />
+          صفحه اصلی دوره
         </Link>
         <Link
           to="/"
           onClick={onNavigate}
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70"
         >
-          <Home className="h-4 w-4" aria-hidden="true" />
-          صفحه اصلی دوره
+          <Layers className="h-4 w-4" aria-hidden="true" />
+          همه دوره‌ها
         </Link>
       </div>
     </div>
@@ -321,11 +352,12 @@ function SidebarBody({ onNavigate, onCollapse }: SidebarBodyProps) {
 }
 
 interface SidebarProps {
+  course: Course
   mobileOpen: boolean
   onClose: () => void
 }
 
-export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
+export function Sidebar({ course, mobileOpen, onClose }: SidebarProps) {
   const shouldReduceMotion = useReducedMotion()
   const drawerRef = useRef<HTMLElement>(null)
   const collapsed = useAppStore((state) => state.sidebarCollapsed)
@@ -359,7 +391,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         )}
       >
         <div className="sticky top-16 h-[calc(100vh-4rem)]">
-          <SidebarBody onCollapse={() => setSidebarCollapsed(true)} />
+          <SidebarBody course={course} onCollapse={() => setSidebarCollapsed(true)} />
         </div>
       </aside>
 
@@ -402,7 +434,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 </button>
               </div>
               <div className="min-h-0 flex-1">
-                <SidebarBody onNavigate={onClose} />
+                <SidebarBody course={course} onNavigate={onClose} />
               </div>
             </motion.aside>
           </motion.div>

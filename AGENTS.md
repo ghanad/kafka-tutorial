@@ -4,11 +4,12 @@ Guidance for LLM-based coding agents working on this repository.
 
 ## Project
 
-A Persian, offline-first interactive tutorial for Apache Kafka. The UI and all
-lesson content are in Persian and the whole layout is RTL. There is no backend:
-all user data lives in the browser's `localStorage`. The site must work fully
-offline after `npm run build`; do not add external CDNs, remote fonts, or
-runtime network dependencies.
+A Persian, offline-first multi-course learning platform. Each course (Apache
+Kafka, Kubernetes, and future topics) has its own sections, lessons, and
+progress. The UI and all lesson content are in Persian and the whole layout is
+RTL. There is no backend: all user data lives in the browser's `localStorage`.
+The site must work fully offline after `npm run build`; do not add external
+CDNs, remote fonts, or runtime network dependencies.
 
 ## Commands
 
@@ -51,9 +52,10 @@ src/
     diagrams/     Hand-written inline SVG diagrams
     simulators/   Interactive simulators
   content/
-    curriculum.ts Section and lesson metadata
+    courses/      Course model, one file per course, and aggregate helpers
     lessons/      Lesson content modules and the content registry
-  pages/          Landing, Lesson, Progress, NotFound
+    site.ts       Platform name and description
+  pages/          Courses, Course, Lesson, Progress, NotFound
   store/          Zustand store + persistence
   hooks/          Shared hooks
   utils/          Helpers, progress calculation, data transfer
@@ -61,9 +63,20 @@ src/
 
 ## Lesson content model
 
-- Course structure lives in `src/content/curriculum.ts`.
+- The platform is a list of courses in `src/content/courses/index.ts`.
+- Each course lives in its own file under `src/content/courses/` (for example
+  `kafka.ts` and `kubernetes.ts`) and exports a `Course` object.
+- A `Course` has `id`, `slug`, Persian `title`, `shortTitle`, `description`,
+  `longDescription`, `level`, `icon`, and `sections`.
+- Course structure is defined with `CourseSectionInput[]`; the course builder
+  attaches `courseId` to every lesson automatically.
 - Each lesson has `id`, `slug`, Persian `title`, Persian `description`,
-  `readingTime`, `sectionId`, and `status`.
+  `readingTime`, `sectionId`, `courseId`, and `status`.
+- Lesson ids and slugs must be globally unique across all courses. Keep the
+  existing Kafka ids unchanged and prefix new courses (for example
+  `k8s-pods`); this preserves users' saved progress in `localStorage`.
+- Section ids must also be globally unique. Prefix new course sections (for
+  example `k8s-basics`).
 - `status: 'published'` means the lesson has content and counts toward progress.
   `status: 'planned'` means the metadata exists but the lesson is not yet
   available.
@@ -71,6 +84,8 @@ src/
   registered in `src/content/lessons/index.ts` via `getLessonContent`.
 - Lesson content should use `h2` and `h3` headings because the table of contents
   is generated automatically from them.
+- Progress is computed per course with `getCourseProgress` and globally with
+  `getProgressPercent`; do not hard-code the Kafka course in shared UI.
 - Keep content in Persian. Personal notes are an existing feature: each lesson
   has one general note plus inline notes anchored to selected text. Keep both
   working when touching lesson pages; do not add quizzes.
@@ -215,9 +230,12 @@ Follow this order and reuse existing components and tokens:
 
 Routes are defined in `src/App.tsx` under `HashRouter`:
 
-- `/` landing page
-- `/lessons/:slug` lesson page
-- `/progress` progress and backup page
+- `/` platform landing page (course list)
+- `/courses/:courseSlug` course landing page
+- `/courses/:courseSlug/lessons/:slug` lesson page
+- `/courses/:courseSlug/progress` per-course progress and backup page
+- `/progress` global progress and backup page
+- `/lessons/:slug` legacy redirect to the course-scoped lesson URL
 - `*` Persian 404 page
 
 Keep links working with hash-based routing; do not use plain `href="#..."` for

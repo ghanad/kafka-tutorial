@@ -15,8 +15,8 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react'
-import type { CourseSection, LessonMeta } from '../../content/curriculum'
-import { sections } from '../../content/curriculum'
+import { getCoursePath, getLessonPath } from '../../content/courses'
+import type { Course, CourseSection, LessonMeta } from '../../content/courses'
 import type { LessonContent } from '../../content/lessons/types'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
@@ -61,6 +61,7 @@ function LessonContentRenderer({ Content, onReady }: LessonContentRendererProps)
 }
 
 interface LessonLayoutProps {
+  course: Course
   lesson: LessonMeta
   section?: CourseSection
   content?: LessonContent
@@ -69,6 +70,7 @@ interface LessonLayoutProps {
 }
 
 export function LessonLayout({
+  course,
   lesson,
   section,
   content,
@@ -98,7 +100,9 @@ export function LessonLayout({
 
   const isCompleted = completedLessons.includes(lesson.id)
   const isBookmarked = bookmarks.includes(lesson.id)
-  const sectionIndex = section ? sections.findIndex((item) => item.id === section.id) : -1
+  const sectionIndex = section
+    ? course.sections.findIndex((item) => item.id === section.id)
+    : -1
 
   function scrollToNotes() {
     const el = document.getElementById('lesson-notes')
@@ -230,7 +234,14 @@ export function LessonLayout({
             className="flex items-center gap-1 transition-colors hover:text-primary-600 dark:hover:text-primary-300"
           >
             <Home className="h-3.5 w-3.5" aria-hidden="true" />
-            خانه
+            همه دوره‌ها
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link
+            to={getCoursePath(course)}
+            className="transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+          >
+            {course.shortTitle}
           </Link>
           <span aria-hidden="true">/</span>
           {section && (
@@ -479,7 +490,7 @@ export function LessonLayout({
         <nav aria-label="درس قبلی و بعدی" className="mt-6 grid gap-3 sm:grid-cols-2">
           {previousLesson ? (
             <Link
-              to={`/lessons/${previousLesson.slug}`}
+              to={getLessonPath(course, previousLesson)}
               className="group flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-4 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
             >
               <ArrowRight
@@ -506,7 +517,7 @@ export function LessonLayout({
 
           {nextLesson ? (
             <Link
-              to={`/lessons/${nextLesson.slug}`}
+              to={getLessonPath(course, nextLesson)}
               className="group flex items-center justify-end gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-4 text-end transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
             >
               <span className="min-w-0">
@@ -533,7 +544,7 @@ export function LessonLayout({
         </nav>
 
         <p className="mt-8 text-center text-[11px] leading-6 text-slate-400 dark:text-slate-500">
-          این درس بخشی از دوره <Ltr>Apache Kafka</Ltr> است. همه داده‌ها فقط در همین
+          این درس بخشی از دوره <Ltr>{course.shortTitle}</Ltr> است. همه داده‌ها فقط در همین
           مرورگر نگهداری می‌شوند.
         </p>
       </article>

@@ -2,17 +2,20 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { LessonLayout } from '../components/layout/LessonLayout'
 import {
-  findLessonBySlug,
-  findSectionForLesson,
-  publishedLessons,
-} from '../content/curriculum'
+  findLessonInCourse,
+  getCourseBySlug,
+  getCoursePublishedLessons,
+} from '../content/courses'
 import { getLessonContent } from '../content/lessons'
+import { siteConfig } from '../content/site'
 import { useAppStore } from '../store/useAppStore'
 import { NotFoundPage } from './NotFoundPage'
 
 export function LessonPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const lesson = slug ? findLessonBySlug(slug) : undefined
+  const { courseSlug, slug } = useParams<{ courseSlug: string; slug: string }>()
+  const course = courseSlug ? getCourseBySlug(decodeURIComponent(courseSlug)) : undefined
+  const lesson =
+    course && slug ? findLessonInCourse(course, decodeURIComponent(slug)) : undefined
   const setLastVisitedLesson = useAppStore((state) => state.setLastVisitedLesson)
 
   useEffect(() => {
@@ -24,18 +27,21 @@ export function LessonPage() {
   useEffect(() => {
     if (!lesson) return
     const previousTitle = document.title
-    document.title = `${lesson.title} | آموزش Kafka`
+    document.title = course
+      ? `${lesson.title} | ${course.shortTitle} | ${siteConfig.name}`
+      : `${lesson.title} | ${siteConfig.name}`
     return () => {
       document.title = previousTitle
     }
-  }, [lesson])
+  }, [course, lesson])
 
-  if (!lesson) {
+  if (!course || !lesson) {
     return <NotFoundPage />
   }
 
-  const section = findSectionForLesson(lesson)
+  const section = course.sections.find((item) => item.id === lesson.sectionId)
   const content = getLessonContent(lesson.slug)
+  const publishedLessons = getCoursePublishedLessons(course)
   const publishedIndex = publishedLessons.findIndex((item) => item.id === lesson.id)
   const previousLesson =
     publishedIndex > 0 ? publishedLessons[publishedIndex - 1] : undefined
@@ -46,6 +52,7 @@ export function LessonPage() {
 
   return (
     <LessonLayout
+      course={course}
       lesson={lesson}
       section={section}
       content={content}

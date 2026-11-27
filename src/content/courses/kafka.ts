@@ -1,23 +1,6 @@
-export type LessonStatus = 'published' | 'planned'
+import type { Course, CourseSectionInput } from './types'
 
-export interface LessonMeta {
-  id: string
-  slug: string
-  title: string
-  description: string
-  readingTime: number
-  sectionId: string
-  status: LessonStatus
-}
-
-export interface CourseSection {
-  id: string
-  title: string
-  description: string
-  lessons: LessonMeta[]
-}
-
-export const sections: CourseSection[] = [
+const kafkaSectionsInput: CourseSectionInput[] = [
   {
     id: 'introduction',
     title: 'مقدمه و مفاهیم پایه',
@@ -532,30 +515,19 @@ export const sections: CourseSection[] = [
   },
 ]
 
-export const allLessons: LessonMeta[] = sections.flatMap((section) => section.lessons)
-
-export const publishedLessons: LessonMeta[] = allLessons.filter(
-  (lesson) => lesson.status === 'published',
-)
-
-export function findLessonBySlug(slug: string): LessonMeta | undefined {
-  return allLessons.find((lesson) => lesson.slug === slug)
-}
-
-export function findLessonById(id: string): LessonMeta | undefined {
-  return allLessons.find((lesson) => lesson.id === id)
-}
-
-export function findSectionById(id: string): CourseSection | undefined {
-  return sections.find((section) => section.id === id)
-}
-
-export function findSectionForLesson(lesson: LessonMeta): CourseSection | undefined {
-  return findSectionById(lesson.sectionId)
-}
-
-export function areAllLessonsCompleted(completedLessons: string[]): boolean {
-  if (publishedLessons.length === 0) return false
-  const completed = new Set(completedLessons)
-  return publishedLessons.every((lesson) => completed.has(lesson.id))
+export const kafkaCourse: Course = {
+  id: 'kafka',
+  slug: 'kafka',
+  title: 'آموزش جامع Apache Kafka',
+  shortTitle: 'Apache Kafka',
+  description:
+    'از مفاهیم پایه و معماری داخلی تا Producer، Consumer، اطمینان‌پذیری، اکوسیستم و عملیات تولیدی.',
+  longDescription:
+    'یک مسیر فارسی، مرحله‌به‌مرحله و تعاملی برای فهمیدن Kafka از مفاهیم پایه تا معماری داخلی، Producer، Consumer، تکرارپذیری، ابزارهای عملی و الگوهای طراحی. هر درس شامل توضیح دقیق، نمودار، نمونه کد و اشتباه‌های رایج است.',
+  level: 'از صفر تا تولید',
+  icon: 'kafka',
+  sections: kafkaSectionsInput.map((section) => ({
+    ...section,
+    lessons: section.lessons.map((lesson) => ({ ...lesson, courseId: 'kafka' })),
+  })),
 }

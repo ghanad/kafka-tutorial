@@ -53,7 +53,7 @@ export function extractImportedState(text: string): unknown {
   }
 
   if (!isRecord(parsed)) {
-    throw new Error('ساختار فایل با داده‌های دوره سازگار نیست.')
+    throw new Error('ساختار فایل با داده‌های پلتفرم سازگار نیست.')
   }
 
   const hasEnvelope = 'state' in parsed
@@ -61,7 +61,7 @@ export function extractImportedState(text: string): unknown {
 
   if (hasEnvelope) {
     if ('app' in parsed && parsed.app !== APP_ID) {
-      throw new Error('این فایل پشتیبان مربوط به این دوره نیست.')
+      throw new Error('این فایل پشتیبان مربوط به این پلتفرم نیست.')
     }
 
     if ('schemaVersion' in parsed) {
@@ -101,5 +101,5 @@ export function downloadTextFile(filename: string, content: string): void {
 export function backupFileName(): string {
   const now = new Date()
   const pad = (value: number) => String(value).padStart(2, '0')
-  return `kafka-tutorial-backup-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`
+  return `academy-backup-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`
 }

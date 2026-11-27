@@ -24,10 +24,18 @@ import { FontSettingsPanel } from '../components/ui/FontSettingsPanel'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { Tabs } from '../components/ui/Tabs'
 import {
+  courses,
+  findCourseForLesson,
   findLessonById,
+  getCoursePath,
+  getCourseProgressPath,
+  getCoursePublishedLessons,
+  getCourseSections,
+  getLessonPath,
   publishedLessons,
-  sections,
-} from '../content/curriculum'
+} from '../content/courses'
+import type { Course, LessonMeta } from '../content/courses'
+import { siteConfig } from '../content/site'
 import { useAppStore } from '../store/useAppStore'
 import { cn } from '../utils/cn'
 import { previewQuote } from '../utils/inlineNoteAnchor'
@@ -38,7 +46,11 @@ import {
   extractImportedState,
 } from '../utils/dataTransfer'
 import { toPersianDigits } from '../utils/persianDigits'
-import { getCompletedLessonCount, getProgressPercent } from '../utils/progress'
+import {
+  getCompletedLessonCount,
+  getCourseProgress,
+  getProgressPercent,
+} from '../utils/progress'
 
 interface StatusMessage {
   type: 'success' | 'error'
@@ -53,7 +65,7 @@ const dateFormatter = new Intl.DateTimeFormat('fa-IR', {
 
 const reportTimestamp = new Date()
 
-export function ProgressPage() {
+export function ProgressPage({ course }: { course?: Course }) {
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
   const notes = useAppStore((state) => state.notes)
@@ -67,19 +79,26 @@ export function ProgressPage() {
 
   useEffect(() => {
     const previousTitle = document.title
-    document.title = 'پیشرفت من | آموزش Kafka'
+    document.title = course
+      ? `پیشرفت ${course.shortTitle} | ${siteConfig.name}`
+      : `پیشرفت من | ${siteConfig.name}`
     return () => {
       document.title = previousTitle
     }
-  }, [])
+  }, [course])
 
   const completedSet = new Set(completedLessons)
-  const completed = publishedLessons.filter((lesson) => completedSet.has(lesson.id))
+  const scopePublished = course ? getCoursePublishedLessons(course) : publishedLessons
+  const scopeSections = course ? getCourseSections(course) : null
+  const completed = scopePublished.filter((lesson) => completedSet.has(lesson.id))
   const bookmarkedLessons = bookmarks
     .map((id) => findLessonById(id))
-    .filter((lesson): lesson is NonNullable<typeof lesson> => Boolean(lesson))
+    .filter(
+      (lesson): lesson is NonNullable<typeof lesson> =>
+        Boolean(lesson) && (!course || lesson?.courseId === course.id),
+    )
 
-  const notedLessons = publishedLessons
+  const notedLessons = scopePublished
     .map((lesson) => ({
       lesson,
       note: (notes[lesson.id] ?? '').trim(),
@@ -87,8 +106,13 @@ export function ProgressPage() {
     }))
     .filter((item) => item.note.length > 0 || item.anchors.length > 0)
 
-  const progressPercent = getProgressPercent(completedLessons)
-  const completedCount = getCompletedLessonCount(completedLessons)
+  const courseProgress = course ? getCourseProgress(course, completedLessons) : null
+  const progressPercent = courseProgress
+    ? courseProgress.percent
+    : getProgressPercent(completedLessons)
+  const completedCount = courseProgress
+    ? courseProgress.completed
+    : getCompletedLessonCount(completedLessons)
 
   function showMessage(type: StatusMessage['type'], text: string) {
     setMessage({ type, text })
@@ -132,8 +156,40 @@ export function ProgressPage() {
     <Callout variant="info">{text}</Callout>
   )
 
+  function lessonHref(lesson: LessonMeta): string {
+    const lessonCourse = findCourseForLesson(lesson)
+    return lessonCourse ? getLessonPath(lessonCourse, lesson) : '/'
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
+      <nav
+        aria-label="مسیر صفحه"
+        className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
+      >
+        <Link
+          to="/"
+          className="transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+        >
+          همه دوره‌ها
+        </Link>
+        <span aria-hidden="true">/</span>
+        {course ? (
+          <>
+            <Link
+              to={getCoursePath(course)}
+              className="transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+            >
+              {course.shortTitle}
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">پیشرفت</span>
+          </>
+        ) : (
+          <span className="font-semibold text-slate-700 dark:text-slate-200">پیشرفت من</span>
+        )}
+      </nav>
+
       <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
         <div
           className="pointer-events-none absolute -end-16 -top-20 h-52 w-52 rounded-full bg-primary-500/15 blur-3xl"
@@ -145,28 +201,41 @@ export function ProgressPage() {
             پنل شخصی
           </Badge>
           <h1 className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
-            پیشرفت من
+            {course ? `پیشرفت دوره ${course.shortTitle}` : 'پیشرفت من'}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-8 text-slate-600 dark:text-slate-300">
-            همه داده‌های این صفحه فقط در حافظه همین مرورگر نگه‌داری می‌شوند. می‌توانید
-            از آن‌ها نسخه پشتیبان بگیرید، در مرورگر دیگری وارد کنید یا کاملاً پاک
-            کنید.
+            {course
+              ? `وضعیت درس‌های دوره ${course.shortTitle} به‌همراه نشانک‌ها و یادداشت‌های شما.`
+              : 'وضعیت همه دوره‌ها به‌همراه نشانک‌ها و یادداشت‌های شما.'}{' '}
+            همه داده‌های این صفحه فقط در حافظه همین مرورگر نگه‌داری می‌شوند؛ می‌توانید
+            از آن‌ها نسخه پشتیبان بگیرید، در مرورگر دیگری وارد کنید یا کاملاً پاک کنید.
           </p>
 
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between gap-3 text-sm">
               <span className="font-bold text-slate-700 dark:text-slate-200">
-                پیشرفت کل دوره
+                {course ? `پیشرفت دوره ${course.shortTitle}` : 'پیشرفت کل پلتفرم'}
               </span>
               <span className="font-extrabold text-primary-700 dark:text-primary-300">
                 {toPersianDigits(progressPercent)}٪
               </span>
             </div>
-            <ProgressBar value={progressPercent} label="پیشرفت کل دوره" />
+            <ProgressBar
+              value={progressPercent}
+              label={course ? `پیشرفت دوره ${course.shortTitle}` : 'پیشرفت کل پلتفرم'}
+            />
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              {toPersianDigits(completedCount)} از {toPersianDigits(publishedLessons.length)} درس
+              {toPersianDigits(completedCount)} از {toPersianDigits(scopePublished.length)} درس
               منتشرشده تکمیل شده است.
             </p>
+            {course && (
+              <Link
+                to="/progress"
+                className="mt-2 inline-flex text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+              >
+                مشاهده پیشرفت همه دوره‌ها
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -212,36 +281,71 @@ export function ProgressPage() {
       <section className="mt-6" aria-labelledby="section-progress-title">
         <Card>
           <CardHeader className="border-b border-slate-200/80 dark:border-slate-800">
-            <CardTitle id="section-progress-title">پیشرفت فصل‌ها</CardTitle>
+            <CardTitle id="section-progress-title">
+              {course ? 'پیشرفت فصل‌ها' : 'پیشرفت دوره‌ها'}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 p-5">
-            {sections.map((section) => {
-              const published = section.lessons.filter(
-                (lesson) => lesson.status === 'published',
-              )
-              const done = published.filter((lesson) => completedSet.has(lesson.id)).length
-              const percent = published.length > 0 ? Math.round((done / published.length) * 100) : 0
+            {scopeSections
+              ? scopeSections.map((section) => {
+                  const published = section.lessons.filter(
+                    (lesson) => lesson.status === 'published',
+                  )
+                  const done = published.filter((lesson) =>
+                    completedSet.has(lesson.id),
+                  ).length
+                  const percent =
+                    published.length > 0
+                      ? Math.round((done / published.length) * 100)
+                      : 0
 
-              return (
-                <div key={section.id}>
-                  <div className="mb-1 flex items-center justify-between gap-3 text-xs">
-                    <span className="font-medium text-slate-700 dark:text-slate-200">
-                      {section.title}
-                    </span>
-                    <span className="text-slate-500 dark:text-slate-400">
-                      {published.length > 0
-                        ? `${toPersianDigits(done)}/${toPersianDigits(published.length)}`
-                        : 'به‌زودی'}
-                    </span>
-                  </div>
-                  <ProgressBar
-                    value={percent}
-                    label={`پیشرفت ${section.title}`}
-                    className="[&>div:first-child]:h-1.5"
-                  />
-                </div>
-              )
-            })}
+                  return (
+                    <div key={section.id}>
+                      <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span className="font-medium text-slate-700 dark:text-slate-200">
+                          {section.title}
+                        </span>
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {published.length > 0
+                            ? `${toPersianDigits(done)}/${toPersianDigits(published.length)}`
+                            : 'به‌زودی'}
+                        </span>
+                      </div>
+                      <ProgressBar
+                        value={percent}
+                        label={`پیشرفت ${section.title}`}
+                        className="[&>div:first-child]:h-1.5"
+                      />
+                    </div>
+                  )
+                })
+              : courses.map((courseItem) => {
+                  const courseProgress = getCourseProgress(courseItem, completedLessons)
+
+                  return (
+                    <Link
+                      key={courseItem.id}
+                      to={getCourseProgressPath(courseItem)}
+                      className="block rounded-xl border border-slate-200/80 p-3 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
+                    >
+                      <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span className="font-medium text-slate-700 dark:text-slate-200">
+                          {courseItem.shortTitle}
+                        </span>
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {courseProgress.published > 0
+                            ? `${toPersianDigits(courseProgress.completed)}/${toPersianDigits(courseProgress.published)}`
+                            : 'به‌زودی'}
+                        </span>
+                      </div>
+                      <ProgressBar
+                        value={courseProgress.percent}
+                        label={`پیشرفت ${courseItem.shortTitle}`}
+                        className="[&>div:first-child]:h-1.5"
+                      />
+                    </Link>
+                  )
+                })}
           </CardContent>
         </Card>
       </section>
@@ -262,7 +366,7 @@ export function ProgressPage() {
                     {completed.map((lesson) => (
                       <li key={lesson.id}>
                         <Link
-                          to={`/lessons/${lesson.slug}`}
+                          to={lessonHref(lesson)}
                           className="flex items-center gap-3 rounded-xl border border-slate-200/80 p-3 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
                         >
                           <CheckCircle2
@@ -280,7 +384,11 @@ export function ProgressPage() {
                     ))}
                   </ul>
                 ) : (
-                  emptyState('هنوز درسی را تکمیل نکرده‌اید. از صفحه اصلی شروع کنید.')
+                  emptyState(
+                    course
+                      ? 'هنوز درسی از این دوره را تکمیل نکرده‌اید. از صفحه دوره شروع کنید.'
+                      : 'هنوز درسی را تکمیل نکرده‌اید. از صفحه اصلی شروع کنید.',
+                  )
                 ),
             },
             {
@@ -292,7 +400,7 @@ export function ProgressPage() {
                     {bookmarkedLessons.map((lesson) => (
                       <li key={lesson.id}>
                         <Link
-                          to={`/lessons/${lesson.slug}`}
+                          to={lessonHref(lesson)}
                           className="flex items-center gap-3 rounded-xl border border-slate-200/80 p-3 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
                         >
                           <Bookmark
@@ -319,7 +427,7 @@ export function ProgressPage() {
                     {notedLessons.map(({ lesson, note, anchors }) => (
                       <li key={lesson.id}>
                         <Link
-                          to={`/lessons/${lesson.slug}`}
+                          to={lessonHref(lesson)}
                           className="group block rounded-xl border border-slate-200/80 p-4 transition-colors hover:border-primary-300 hover:bg-primary-50/40 dark:border-slate-800 dark:hover:border-primary-700 dark:hover:bg-primary-950/30"
                         >
                           <div className="flex items-center justify-between gap-3">
