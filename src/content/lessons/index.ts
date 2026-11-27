@@ -1,181 +1,187 @@
+import { lazy } from 'react'
+import type { ComponentType } from 'react'
 import type { LessonContent } from './types'
-import { WhatIsKafkaContent } from './whatIsKafka'
-import { KafkaUseCasesContent } from './kafkaUseCases'
-import { KeyTermsContent } from './keyTerms'
-import { DockerKraftSetupContent } from './dockerKraftSetup'
-import { TopicsPartitionsContent } from './topicsPartitions'
-import { LogSegmentsContent } from './logSegments'
-import { RetentionCompactionContent } from './retentionCompaction'
-import { BrokersControllerKraftContent } from './brokersControllerKraft'
-import { LeaderFollowerContent } from './leaderFollower'
-import { ProducerBasicsContent } from './producerBasics'
-import { ProducerPartitionerContent } from './producerPartitioner'
-import { ProducerAcksContent } from './producerAcks'
-import { ProducerBatchingContent } from './producerBatching'
-import { ProducerIdempotenceContent } from './producerIdempotence'
-import { ProducerTransactionsContent } from './producerTransactions'
-import { KafkaVsAlternativesContent } from './kafkaVsAlternatives'
-import { ConsumerPollLoopContent } from './consumerPollLoop'
-import { ConsumerGroupsContent } from './consumerGroups'
-import { ConsumerOffsetsContent } from './consumerOffsets'
-import { ConsumerDeliverySemanticsContent } from './consumerDeliverySemantics'
-import { ReplicationIsrContent } from './replicationIsr'
-import { MinInsyncReplicasContent } from './minInsyncReplicas'
-import { LeaderElectionContent } from './leaderElection'
-import { FailureRecoveryContent } from './failureRecovery'
-import { DurabilityDesignContent } from './durabilityDesign'
-import { ConsumerLagContent } from './consumerLag'
-import { ConsumerAssignmentContent } from './consumerAssignment'
-import { CliToolsContent } from './cliTools'
-import { DockerThreeNodeContent } from './dockerThreeNode'
-import { TopicManagementContent } from './topicManagement'
-import { PartitionReassignmentContent } from './partitionReassignment'
-import { KafkaUiToolsContent } from './kafkaUiTools'
-import { KafkaConnectContent } from './kafkaConnect'
-import { SchemaRegistryContent } from './schemaRegistry'
-import { KafkaStreamsContent } from './kafkaStreams'
-import { SecurityContent } from './security'
-import { MonitoringContent } from './monitoring'
-import { TuningCapacityContent } from './tuningCapacity'
-import { TroubleshootingContent } from './troubleshooting'
-import { UpgradesMirrorMakerContent } from './upgradesMirrorMaker'
-import { ArchitecturePatternsContent } from './architecturePatterns'
-import { TopicDesignContent } from './topicDesign'
-import { InterviewQuestionsContent } from './interviewQuestions'
-import { NextStepsContent } from './nextSteps'
+
+function lazyLesson<T extends Record<string, unknown>>(
+  loader: () => Promise<T>,
+  exportName: keyof T & string,
+): ComponentType {
+  return lazy(() =>
+    loader().then((module) => ({ default: module[exportName] as ComponentType })),
+  ) as unknown as ComponentType
+}
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
-    Content: WhatIsKafkaContent,
+    Content: lazyLesson(() => import('./whatIsKafka'), 'WhatIsKafkaContent'),
   },
   'kafka-use-cases': {
-    Content: KafkaUseCasesContent,
+    Content: lazyLesson(() => import('./kafkaUseCases'), 'KafkaUseCasesContent'),
   },
   'key-terms': {
-    Content: KeyTermsContent,
+    Content: lazyLesson(() => import('./keyTerms'), 'KeyTermsContent'),
   },
   'docker-kraft-setup': {
-    Content: DockerKraftSetupContent,
+    Content: lazyLesson(() => import('./dockerKraftSetup'), 'DockerKraftSetupContent'),
   },
   'topics-partitions': {
-    Content: TopicsPartitionsContent,
+    Content: lazyLesson(() => import('./topicsPartitions'), 'TopicsPartitionsContent'),
   },
   'log-segments': {
-    Content: LogSegmentsContent,
+    Content: lazyLesson(() => import('./logSegments'), 'LogSegmentsContent'),
   },
   'retention-compaction': {
-    Content: RetentionCompactionContent,
+    Content: lazyLesson(
+      () => import('./retentionCompaction'),
+      'RetentionCompactionContent',
+    ),
   },
   'brokers-controller-kraft': {
-    Content: BrokersControllerKraftContent,
+    Content: lazyLesson(
+      () => import('./brokersControllerKraft'),
+      'BrokersControllerKraftContent',
+    ),
   },
   'leader-follower': {
-    Content: LeaderFollowerContent,
+    Content: lazyLesson(() => import('./leaderFollower'), 'LeaderFollowerContent'),
   },
   'producer-basics': {
-    Content: ProducerBasicsContent,
+    Content: lazyLesson(() => import('./producerBasics'), 'ProducerBasicsContent'),
   },
   'producer-partitioner': {
-    Content: ProducerPartitionerContent,
+    Content: lazyLesson(
+      () => import('./producerPartitioner'),
+      'ProducerPartitionerContent',
+    ),
   },
   'producer-acks': {
-    Content: ProducerAcksContent,
+    Content: lazyLesson(() => import('./producerAcks'), 'ProducerAcksContent'),
   },
   'producer-batching': {
-    Content: ProducerBatchingContent,
+    Content: lazyLesson(() => import('./producerBatching'), 'ProducerBatchingContent'),
   },
   'producer-idempotence': {
-    Content: ProducerIdempotenceContent,
+    Content: lazyLesson(
+      () => import('./producerIdempotence'),
+      'ProducerIdempotenceContent',
+    ),
   },
   'producer-transactions': {
-    Content: ProducerTransactionsContent,
+    Content: lazyLesson(
+      () => import('./producerTransactions'),
+      'ProducerTransactionsContent',
+    ),
   },
   'kafka-vs-alternatives': {
-    Content: KafkaVsAlternativesContent,
+    Content: lazyLesson(
+      () => import('./kafkaVsAlternatives'),
+      'KafkaVsAlternativesContent',
+    ),
   },
   'consumer-poll-loop': {
-    Content: ConsumerPollLoopContent,
+    Content: lazyLesson(() => import('./consumerPollLoop'), 'ConsumerPollLoopContent'),
   },
   'consumer-groups': {
-    Content: ConsumerGroupsContent,
+    Content: lazyLesson(() => import('./consumerGroups'), 'ConsumerGroupsContent'),
   },
   'consumer-offsets': {
-    Content: ConsumerOffsetsContent,
+    Content: lazyLesson(() => import('./consumerOffsets'), 'ConsumerOffsetsContent'),
   },
   'consumer-delivery-semantics': {
-    Content: ConsumerDeliverySemanticsContent,
+    Content: lazyLesson(
+      () => import('./consumerDeliverySemantics'),
+      'ConsumerDeliverySemanticsContent',
+    ),
   },
   'consumer-lag': {
-    Content: ConsumerLagContent,
+    Content: lazyLesson(() => import('./consumerLag'), 'ConsumerLagContent'),
   },
   'consumer-assignment': {
-    Content: ConsumerAssignmentContent,
+    Content: lazyLesson(
+      () => import('./consumerAssignment'),
+      'ConsumerAssignmentContent',
+    ),
   },
   'replication-isr': {
-    Content: ReplicationIsrContent,
+    Content: lazyLesson(() => import('./replicationIsr'), 'ReplicationIsrContent'),
   },
   'min-insync-replicas': {
-    Content: MinInsyncReplicasContent,
+    Content: lazyLesson(
+      () => import('./minInsyncReplicas'),
+      'MinInsyncReplicasContent',
+    ),
   },
   'leader-election': {
-    Content: LeaderElectionContent,
+    Content: lazyLesson(() => import('./leaderElection'), 'LeaderElectionContent'),
   },
   'failure-recovery': {
-    Content: FailureRecoveryContent,
+    Content: lazyLesson(() => import('./failureRecovery'), 'FailureRecoveryContent'),
   },
   'durability-design': {
-    Content: DurabilityDesignContent,
+    Content: lazyLesson(() => import('./durabilityDesign'), 'DurabilityDesignContent'),
   },
   'cli-tools': {
-    Content: CliToolsContent,
+    Content: lazyLesson(() => import('./cliTools'), 'CliToolsContent'),
   },
   'docker-three-node': {
-    Content: DockerThreeNodeContent,
+    Content: lazyLesson(() => import('./dockerThreeNode'), 'DockerThreeNodeContent'),
   },
   'topic-management': {
-    Content: TopicManagementContent,
+    Content: lazyLesson(() => import('./topicManagement'), 'TopicManagementContent'),
   },
   'partition-reassignment': {
-    Content: PartitionReassignmentContent,
+    Content: lazyLesson(
+      () => import('./partitionReassignment'),
+      'PartitionReassignmentContent',
+    ),
   },
   'kafka-ui-tools': {
-    Content: KafkaUiToolsContent,
+    Content: lazyLesson(() => import('./kafkaUiTools'), 'KafkaUiToolsContent'),
   },
   'kafka-connect': {
-    Content: KafkaConnectContent,
+    Content: lazyLesson(() => import('./kafkaConnect'), 'KafkaConnectContent'),
   },
   'schema-registry': {
-    Content: SchemaRegistryContent,
+    Content: lazyLesson(() => import('./schemaRegistry'), 'SchemaRegistryContent'),
   },
   'kafka-streams': {
-    Content: KafkaStreamsContent,
+    Content: lazyLesson(() => import('./kafkaStreams'), 'KafkaStreamsContent'),
   },
   security: {
-    Content: SecurityContent,
+    Content: lazyLesson(() => import('./security'), 'SecurityContent'),
   },
   monitoring: {
-    Content: MonitoringContent,
+    Content: lazyLesson(() => import('./monitoring'), 'MonitoringContent'),
   },
   'tuning-capacity': {
-    Content: TuningCapacityContent,
+    Content: lazyLesson(() => import('./tuningCapacity'), 'TuningCapacityContent'),
   },
   troubleshooting: {
-    Content: TroubleshootingContent,
+    Content: lazyLesson(() => import('./troubleshooting'), 'TroubleshootingContent'),
   },
   'upgrades-mirrormaker': {
-    Content: UpgradesMirrorMakerContent,
+    Content: lazyLesson(
+      () => import('./upgradesMirrorMaker'),
+      'UpgradesMirrorMakerContent',
+    ),
   },
   'architecture-patterns': {
-    Content: ArchitecturePatternsContent,
+    Content: lazyLesson(
+      () => import('./architecturePatterns'),
+      'ArchitecturePatternsContent',
+    ),
   },
   'topic-design': {
-    Content: TopicDesignContent,
+    Content: lazyLesson(() => import('./topicDesign'), 'TopicDesignContent'),
   },
   'interview-questions': {
-    Content: InterviewQuestionsContent,
+    Content: lazyLesson(
+      () => import('./interviewQuestions'),
+      'InterviewQuestionsContent',
+    ),
   },
   'next-steps': {
-    Content: NextStepsContent,
+    Content: lazyLesson(() => import('./nextSteps'), 'NextStepsContent'),
   },
 }
 

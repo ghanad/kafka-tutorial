@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import type { ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
@@ -34,6 +35,31 @@ interface TocItem {
   level: number
 }
 
+function LessonContentFallback() {
+  return (
+    <div className="space-y-4" role="status" aria-live="polite">
+      <span className="sr-only">در حال بارگذاری محتوای درس…</span>
+      <div className="h-5 w-2/3 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-800" />
+      <div className="h-4 w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-800" />
+      <div className="h-4 w-11/12 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-800" />
+      <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-800" />
+    </div>
+  )
+}
+
+interface LessonContentRendererProps {
+  Content: ComponentType
+  onReady: () => void
+}
+
+function LessonContentRenderer({ Content, onReady }: LessonContentRendererProps) {
+  useEffect(() => {
+    onReady()
+  }, [onReady])
+
+  return <Content />
+}
+
 interface LessonLayoutProps {
   lesson: LessonMeta
   section?: CourseSection
@@ -54,6 +80,8 @@ export function LessonLayout({
   const inlineNotesRef = useRef<InlineNotesLayerHandle>(null)
   const [toc, setToc] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [contentReady, setContentReady] = useState(0)
+  const notifyContentReady = useCallback(() => setContentReady((value) => value + 1), [])
 
   const completedLessons = useAppStore((state) => state.completedLessons)
   const bookmarks = useAppStore((state) => state.bookmarks)
@@ -111,7 +139,7 @@ export function LessonLayout({
 
     setToc(items)
     setActiveId(items[0]?.id ?? null)
-  }, [lesson.slug, content])
+  }, [lesson.slug, content, contentReady])
 
   useEffect(() => {
     if (toc.length === 0) return
@@ -322,7 +350,9 @@ export function LessonLayout({
           <div className="relative min-w-0 scroll-mt-24" id="lesson-content-start">
             {Content ? (
               <div ref={contentRef} className="lesson-prose">
-                <Content />
+                <Suspense fallback={<LessonContentFallback />}>
+                  <LessonContentRenderer Content={Content} onReady={notifyContentReady} />
+                </Suspense>
               </div>
             ) : (
               <Card>

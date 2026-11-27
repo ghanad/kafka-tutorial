@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Type, X } from 'lucide-react'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { FontSettingsPanel } from './FontSettingsPanel'
 
 interface FontSettingsModalProps {
@@ -9,6 +10,7 @@ interface FontSettingsModalProps {
 
 export function FontSettingsModal({ open, onClose }: FontSettingsModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(open, dialogRef)
 
   useEffect(() => {
     if (!open) return
@@ -50,6 +52,7 @@ export function FontSettingsModal({ open, onClose }: FontSettingsModalProps) {
     >
       <div
         ref={dialogRef}
+        tabIndex={-1}
         className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200/90 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-6"
       >
         <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">

@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { allLessons, publishedLessons, sections } from '../../content/curriculum'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { useAppStore } from '../../store/useAppStore'
 import { cn } from '../../utils/cn'
 import { toPersianDigits } from '../../utils/persianDigits'
@@ -326,8 +327,10 @@ interface SidebarProps {
 
 export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const shouldReduceMotion = useReducedMotion()
+  const drawerRef = useRef<HTMLElement>(null)
   const collapsed = useAppStore((state) => state.sidebarCollapsed)
   const setSidebarCollapsed = useAppStore((state) => state.setSidebarCollapsed)
+  useFocusTrap(mobileOpen, drawerRef)
 
   useEffect(() => {
     if (!mobileOpen) return
@@ -374,9 +377,11 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             />
 
             <motion.aside
+              ref={drawerRef}
               role="dialog"
               aria-modal="true"
               aria-label="فهرست درس‌ها"
+              tabIndex={-1}
               initial={shouldReduceMotion ? false : { x: '100%' }}
               animate={{ x: 0 }}
               exit={shouldReduceMotion ? { opacity: 0 } : { x: '100%' }}
