@@ -186,6 +186,12 @@ export const lessonContents: Record<string, LessonContent> = {
   'k8s-what-is-kubernetes': {
     Content: lazyLesson(() => import('./kubernetesIntro'), 'KubernetesIntroContent'),
   },
+  'k8s-cluster-anatomy': {
+    Content: lazyLesson(
+      () => import('./kubernetesClusterAnatomy'),
+      'KubernetesClusterAnatomyContent',
+    ),
+  },
   'k8s-pods': {
     Content: lazyLesson(() => import('./kubernetesPods'), 'KubernetesPodsContent'),
   },
