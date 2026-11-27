@@ -31,6 +31,14 @@ import { DockerThreeNodeContent } from './dockerThreeNode'
 import { TopicManagementContent } from './topicManagement'
 import { PartitionReassignmentContent } from './partitionReassignment'
 import { KafkaUiToolsContent } from './kafkaUiTools'
+import { KafkaConnectContent } from './kafkaConnect'
+import { SchemaRegistryContent } from './schemaRegistry'
+import { KafkaStreamsContent } from './kafkaStreams'
+import { SecurityContent } from './security'
+import { MonitoringContent } from './monitoring'
+import { TuningCapacityContent } from './tuningCapacity'
+import { TroubleshootingContent } from './troubleshooting'
+import { UpgradesMirrorMakerContent } from './upgradesMirrorMaker'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -128,6 +136,30 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'kafka-ui-tools': {
     Content: KafkaUiToolsContent,
+  },
+  'kafka-connect': {
+    Content: KafkaConnectContent,
+  },
+  'schema-registry': {
+    Content: SchemaRegistryContent,
+  },
+  'kafka-streams': {
+    Content: KafkaStreamsContent,
+  },
+  security: {
+    Content: SecurityContent,
+  },
+  monitoring: {
+    Content: MonitoringContent,
+  },
+  'tuning-capacity': {
+    Content: TuningCapacityContent,
+  },
+  troubleshooting: {
+    Content: TroubleshootingContent,
+  },
+  'upgrades-mirrormaker': {
+    Content: UpgradesMirrorMakerContent,
   },
 }
 

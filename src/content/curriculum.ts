@@ -390,7 +390,7 @@ export const sections: CourseSection[] = [
           'Source و Sink Connector، Worker و Task، Converter، SMT و یک نمونه CDC با Debezium.',
         readingTime: 10,
         sectionId: 'ecosystem',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'schema-registry',
@@ -400,7 +400,7 @@ export const sections: CourseSection[] = [
           'Avro، Protobuf و JSON Schema؛ حالت‌های سازگاری backward، forward و full و مدیریت تغییر schema.',
         readingTime: 10,
         sectionId: 'ecosystem',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'kafka-streams',
@@ -410,7 +410,7 @@ export const sections: CourseSection[] = [
           'KStream، KTable، windowing و state store؛ و مقایسه Kafka Streams با Flink و ksqlDB.',
         readingTime: 10,
         sectionId: 'ecosystem',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
@@ -428,7 +428,7 @@ export const sections: CourseSection[] = [
           'رمزنگاری ارتباط، احراز هویت با PLAIN، SCRAM و OAUTHBEARER و کنترل دسترسی به منابع.',
         readingTime: 11,
         sectionId: 'operations',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'monitoring',
@@ -438,7 +438,7 @@ export const sections: CourseSection[] = [
           'JMX، متریک‌های UnderReplicatedPartitions و ActiveControllerCount، تأخیر درخواست‌ها و Consumer Lag.',
         readingTime: 10,
         sectionId: 'operations',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'tuning-capacity',
@@ -448,7 +448,7 @@ export const sections: CourseSection[] = [
           'پهنای باند دیسک، حافظه Page Cache، تعداد Partition و برآورد ظرفیت برای بار واقعی.',
         readingTime: 9,
         sectionId: 'operations',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'troubleshooting',
@@ -458,7 +458,7 @@ export const sections: CourseSection[] = [
           'Rebalance مداوم، Lag بالا، پر شدن دیسک و توزیع نامتعادل Leader؛ از نشانه تا راه‌حل.',
         readingTime: 10,
         sectionId: 'operations',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'upgrades-mirrormaker',
@@ -468,7 +468,7 @@ export const sections: CourseSection[] = [
           'ارتقای خوشه بدون قطعی و تکرار داده بین چند دیتاسنتر با MirrorMaker 2.',
         readingTime: 9,
         sectionId: 'operations',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
