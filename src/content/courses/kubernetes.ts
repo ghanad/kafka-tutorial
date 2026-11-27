@@ -35,7 +35,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'سفر یک manifest از API Server و etcd تا Scheduler، kubelet و container runtime؛ با مثال گام‌به‌گام.',
         readingTime: 10,
         sectionId: 'k8s-basics',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-kubectl-yaml',
@@ -45,7 +45,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'ساختار manifest، فیلدهای apiVersion، kind، metadata و spec و دستورهای پرکاربرد kubectl برای مشاهده و ویرایش منابع.',
         readingTime: 9,
         sectionId: 'k8s-basics',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
