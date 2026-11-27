@@ -486,7 +486,7 @@ export const sections: CourseSection[] = [
           'Event Sourcing، CQRS، Outbox، Saga، Dead Letter Queue و Retry Topic با مثال‌های عملی.',
         readingTime: 10,
         sectionId: 'patterns',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'topic-design',
@@ -496,7 +496,7 @@ export const sections: CourseSection[] = [
           'قواعد نام‌گذاری، انتخاب تعداد Partition و Key مناسب برای ترتیب، مقیاس و نگهداری آسان.',
         readingTime: 9,
         sectionId: 'patterns',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'kafka-vs-alternatives',
@@ -516,7 +516,7 @@ export const sections: CourseSection[] = [
           'پرسش‌های رایج مصاحبه‌های فنی همراه با پاسخ کوتاه و اشاره به درس مرتبط.',
         readingTime: 8,
         sectionId: 'patterns',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'next-steps',
@@ -526,7 +526,7 @@ export const sections: CourseSection[] = [
           'پس از این دوره چه بخوانیم، چه چیزی بسازیم و چگونه دانش Kafka را در پروژه واقعی به کار ببریم.',
         readingTime: 6,
         sectionId: 'patterns',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

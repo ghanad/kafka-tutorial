@@ -39,6 +39,10 @@ import { MonitoringContent } from './monitoring'
 import { TuningCapacityContent } from './tuningCapacity'
 import { TroubleshootingContent } from './troubleshooting'
 import { UpgradesMirrorMakerContent } from './upgradesMirrorMaker'
+import { ArchitecturePatternsContent } from './architecturePatterns'
+import { TopicDesignContent } from './topicDesign'
+import { InterviewQuestionsContent } from './interviewQuestions'
+import { NextStepsContent } from './nextSteps'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -160,6 +164,18 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'upgrades-mirrormaker': {
     Content: UpgradesMirrorMakerContent,
+  },
+  'architecture-patterns': {
+    Content: ArchitecturePatternsContent,
+  },
+  'topic-design': {
+    Content: TopicDesignContent,
+  },
+  'interview-questions': {
+    Content: InterviewQuestionsContent,
+  },
+  'next-steps': {
+    Content: NextStepsContent,
   },
 }
 
