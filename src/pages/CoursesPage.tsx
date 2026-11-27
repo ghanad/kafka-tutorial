@@ -4,10 +4,7 @@ import {
   ArrowLeft,
   BookOpen,
   CheckCircle2,
-  GraduationCap,
-  Layers,
   Sparkles,
-  WifiOff,
 } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
 import { buttonClasses } from '../components/ui/buttonStyles'
@@ -29,27 +26,6 @@ import { siteConfig } from '../content/site'
 import { useAppStore } from '../store/useAppStore'
 import { toPersianDigits } from '../utils/persianDigits'
 import { getCourseProgress, getProgressPercent } from '../utils/progress'
-
-const features = [
-  {
-    icon: GraduationCap,
-    title: 'دوره‌های مستقل و پیوسته',
-    description:
-      'هر دوره مسیر خودش را دارد؛ می‌توانید Kafka و Kubernetes را جداگانه یا کنار هم یاد بگیرید.',
-  },
-  {
-    icon: Layers,
-    title: 'ساختار یکسان درس‌ها',
-    description:
-      'همه دوره‌ها از یک موتور درس با فهرست مطالب، نمودار، نمونه کد و یادداشت شخصی استفاده می‌کنند.',
-  },
-  {
-    icon: WifiOff,
-    title: 'آفلاین و بدون سرور',
-    description:
-      'پیشرفت، نشانک‌ها و یادداشت‌ها فقط در حافظه مرورگر شما ذخیره می‌شوند؛ بدون نیاز به اینترنت.',
-  },
-]
 
 export function CoursesPage() {
   const completedLessons = useAppStore((state) => state.completedLessons)
@@ -249,39 +225,6 @@ export function CoursesPage() {
                     </Link>
                   </div>
                 </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-      </section>
-
-      <section className="mt-10" aria-labelledby="platform-features-title">
-        <div className="mb-5 max-w-2xl">
-          <Badge variant="neutral">چرا این پلتفرم؟</Badge>
-          <h2
-            id="platform-features-title"
-            className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white"
-          >
-            یک موتور درس برای همه دوره‌ها
-          </h2>
-          <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-            درس‌های تازه با همان ساختار، نمودار و امکانات یادداشت اضافه می‌شوند؛
-            بدون اینکه تجربه خواندن تغییر کند.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {features.map((feature) => {
-            const Icon = feature.icon
-            return (
-              <Card key={feature.title}>
-                <CardHeader>
-                  <span className="mb-1 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-200">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <CardTitle>{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardHeader>
               </Card>
             )
           })}
