@@ -9,9 +9,17 @@ bootstrap.servers=localhost:9092
 key.serializer=org.apache.kafka.common.serialization.StringSerializer
 value.serializer=org.apache.kafka.common.serialization.StringSerializer
 
-# در درس acks معنی دقیق این خط را میبینیم
+# در درس acks معنی دقیق این خط را می‌بینیم
 acks=all
 linger.ms=5`
+
+const perfTest = `# ارسال ۱۰۰٬۰۰۰ رکورد ۱ کیلوبایتی برای سنجش توان و تأخیر
+kafka-producer-perf-test.sh \\
+  --topic orders \\
+  --num-records 100000 \\
+  --record-size 1024 \\
+  --throughput -1 \\
+  --producer-props bootstrap.servers=localhost:9092 acks=all linger.ms=5 batch.size=65536`
 
 const asyncSend = `Properties props = new Properties();
 props.put("bootstrap.servers", "localhost:9092");
@@ -69,15 +77,24 @@ export function ProducerBasicsContent() {
   return (
     <>
       <p className="text-base font-medium leading-8 text-slate-800 dark:text-slate-200">
-        فصل دوم به اینجا رسید که داده کجا ذخیره می‌شود. از این فصل، از سمت دیگر
-        خط شروع می‌کنیم: کدی که رکورد را می‌سازد و می‌فرستد. اولین سؤال عملی هر
-        کسی که با <Ltr>KafkaProducer</Ltr> کار می‌کند این است: «اگر{' '}
-        <Ltr>send()</Ltr> ناهمگام است، چرا بعضی‌ها پشتش <Ltr>get()</Ltr>{' '}
-        می‌گذارند؟» در این درس مسیر یک رکورد را از فراخوانی <Ltr>send</Ltr> تا
-        رسیدن به لیدر پارتیشن دنبال می‌کنیم، می‌بینیم همگام و ناهمگام در واقع دو
-        رفتار متفاوت نیستند بلکه دو نحوهٔ انتظار برای یک <Ltr>Future</Ltr> هستند،
-        و یاد می‌گیریم خطا را کجا بگیریم تا داده بی‌صدا گم نشود.
+        تا اینجا دیدیم داده کجا ذخیره می‌شود. اما در تولید، بیشتر شکایت‌های
+        «کافکا کند است» یا «پیام گم شد» از سمت <Ltr>Producer</Ltr> شروع می‌شود:
+        بافر پر شده، تأخیر بالا رفته، یا یک <Ltr>retry</Ltr> بی‌صدا پیام تکراری
+        ساخته است. در این درس مسیر یک رکورد را از <Ltr>send</Ltr> تا لیدر
+        پارتیشن دنبال می‌کنیم، تفاوت رفتار همگام و ناهمگام را از دید اپراتور
+        روشن می‌کنیم، و یاد می‌گیریم با کدام متریک و کدام ابزار خط فرمان این
+        رفتار را ببینیم.
       </p>
+
+      <Callout variant="tip" title="چرا اپراتور باید رفتار Producer را بشناسد">
+        <p>
+          <Ltr>Producer</Ltr> یک کتابخانهٔ سمت کلاینت است؛ خیلی از متریک‌های
+          مهمش روی خود اپلیکیشن است، نه روی بروکر. اگر تیم اپ فقط بگوید «کافکا
+          کند است»، بدون دانستن <Ltr>buffer.memory</Ltr>، <Ltr>linger.ms</Ltr>،{' '}
+          <Ltr>acks</Ltr> و <Ltr>delivery.timeout.ms</Ltr> نمی‌توانید تشخیص
+          بدهید مشکل از خوشه است یا از کلاینت.
+        </p>
+      </Callout>
 
       <h2>۱. مسیر یک رکورد از send تا Broker</h2>
       <p>
@@ -124,58 +141,27 @@ export function ProducerBasicsContent() {
         <strong>همهٔ ارسال‌ها در کافکا ناهمگام‌اند</strong> و «ارسال همگام» یعنی
         همان thread برنامه روی <Ltr>Future</Ltr> منتظر بماند.
       </p>
+
       <CodeBlock
         code={producerConfig}
         language="properties"
         filename="producer.properties"
       />
-      <CodeBlock code={asyncSend} language="java" filename="AsyncSend.java" />
       <p>
-        در نمونهٔ بالا، <Ltr>try-with-resources</Ltr> در پایان{' '}
-        <Ltr>close()</Ltr> را صدا می‌زند و <Ltr>close()</Ltr> بافر را خالی
-        می‌کند. اگر پرودیوسر را بدون <Ltr>flush()</Ltr> یا <Ltr>close()</Ltr>{' '}
-        رها کنید، رکوردهایی که هنوز در بافرند هرگز ارسال نمی‌شوند.
-      </p>
-      <Callout variant="info" title="send همیشه فوری برنمی‌گردد">
-        <p>
-          <Ltr>send()</Ltr> در دو حالت می‌تواند قبل از برگشت بلوکه شود: وقتی
-          متادیتای تاپیک هنوز دریافت نشده است، و وقتی حافظهٔ بافر (
-          <Ltr>buffer.memory</Ltr>) پر شده است. هر دو انتظار حداکثر تا{' '}
-          <Ltr>max.block.ms</Ltr> (پیش‌فرض ۶۰ ثانیه) طول می‌کشد و بعد با{' '}
-          <Ltr>TimeoutException</Ltr> شکست می‌خورد. پس «ناهمگام» به معنی «بدون
-          هیچ انتظاری» نیست؛ فقط انتظار برای تأیید بروکر نیست.
-        </p>
-      </Callout>
-      <p>
-        <Ltr>RecordMetadata</Ltr> چیزی است که در پایان مسیر به دست می‌آید:
-        نام تاپیک، شمارهٔ پارتیشن، <Ltr>offset</Ltr>، زمان رکورد و اندازهٔ
-        سریالایزشدهٔ کلید و مقدار. اگر <Ltr>acks=0</Ltr> باشد، پرودیوسر منتظر
-        تأیید نمی‌ماند؛ در این حالت <Ltr>offset</Ltr> برابر <Ltr>-1</Ltr> است،
-        چون بروکر هیچ عددی برنگردانده است.
+        این فایل نقطهٔ شروع گفت‌وگو با تیم اپ است. خطوط <Ltr>acks</Ltr> و{' '}
+        <Ltr>linger.ms</Ltr> بیشترین اثر را روی دوام و تأخیر دارند؛ بقیهٔ
+        تنظیم‌های مؤثر را در درس‌های <Ltr>acks</Ltr>، <Ltr>Batching</Ltr> و{' '}
+        <Ltr>Idempotence</Ltr> باز می‌کنیم.
       </p>
 
-      <h2>۲. ناهمگام: نتیجه را با Callback بگیرید</h2>
+      <h2>۲. «همگام» و «ناهمگام» دو تنظیم نیستند، دو رفتارند</h2>
       <p>
         در حالت ناهمگام، برنامه بعد از <Ltr>send()</Ltr> به کارش ادامه می‌دهد و
-        نتیجه را با یک <Ltr>Callback</Ltr> می‌گیرد. در مسیر عادی، این callback
-        یک بار صدا زده می‌شود: یا با متادیتا و <Ltr>exception = null</Ltr>، یا
-        با متادیتای ناقص و یک استثنا. همین‌جا محل اصلی اشتباه است: اگر callback
-        را ندهید و <Ltr>Future</Ltr> را هم بررسی نکنید، خطای ارسال هیچ‌جا دیده
-        نمی‌شود.
-      </p>
-      <CodeBlock
-        code={asyncCallback}
-        language="java"
-        filename="AsyncWithCallback.java"
-      />
-      <p>
-        callback به‌طور معمول روی همان I/O thread پرودیوسر اجرا می‌شود، نه روی
-        thread شما. این یعنی هر کار سنگین یا مسدودکننده داخل callback، ارسال
-        رکوردهای دیگر را متوقف می‌کند. اگر لازم است پردازش سنگینی انجام دهید،
-        داده را به یک <Ltr>Executor</Ltr> یا صف دیگری بسپارید و callback را سریع
-        تمام کنید. همچنین داخل callback روی <Ltr>Future</Ltr> دیگری{' '}
-        <Ltr>get()</Ltr> نزنید؛ ممکن است همان threadی را بلوکه کنید که باید آن
-        <Ltr>Future</Ltr> را کامل کند.
+        نتیجه را با یک <Ltr>Callback</Ltr> می‌گیرد. در حالت همگام، برنامه
+        بلافاصله روی <Ltr>Future</Ltr>، <Ltr>get()</Ltr> را صدا می‌زند و تا
+        رسیدن تأیید یا خطا منتظر می‌ماند. هیچ API جداگانه‌ای برای ارسال همگام
+        وجود ندارد؛ همین انتظار، همان ارسال ناهمگام را برای thread فعلی همگام
+        نشان می‌دهد.
       </p>
       <p>
         مزیت اصلی ناهمگام فقط سرعت نیست؛ امکان <strong>بچ‌شدن</strong> است.
@@ -183,65 +169,6 @@ export function ProducerBasicsContent() {
         در یک درخواست جمع می‌کند و هزینهٔ شبکه و تأیید بین چند رکورد تقسیم
         می‌شود. به همین دلیل مسیر پرترافیک تقریباً همیشه ناهمگام است.
       </p>
-      <Callout variant="warning" title="ترتیب در برابر Retry">
-        <p>
-          رکوردهایی که از یک thread و برای یک پارتیشن فرستاده می‌شوند، در حالت
-          عادی به همان ترتیب می‌نشینند. اما اگر یک بچ شکست بخورد و دوباره
-          فرستاده شود، در حالی که بچ‌های بعدی هم در راه‌اند، ترتیب می‌تواند به
-          هم بریزد. از <Ltr>Kafka 3.0</Ltr> به بعد{' '}
-          <Ltr>enable.idempotence=true</Ltr> پیش‌فرض است و ترتیب را حتی در
-          حضور retry حفظ می‌کند. در درس <Ltr>Retry و Idempotence</Ltr> این
-          مکانیزم را باز می‌کنیم.
-        </p>
-      </Callout>
-
-      <h2>۳. همگام: انتظار با get</h2>
-      <p>
-        برای اینکه ارسال از دید برنامه همگام شود، کافی است بلافاصله روی{' '}
-        <Ltr>Future</Ltr>، <Ltr>get()</Ltr> را صدا بزنید. این فراخوانی thread
-        فعلی را تا کامل شدن <Ltr>Future</Ltr> نگه می‌دارد و بعد متادیتا را
-        برمی‌گرداند یا استثنا پرتاب می‌کند. هیچ API جداگانه‌ای برای ارسال همگام
-        وجود ندارد؛ همین یک خط، همان ارسال ناهمگام را همگام نشان می‌دهد.
-      </p>
-      <CodeBlock code={syncSend} language="java" filename="SyncSend.java" />
-      <p>
-        دو نکته در این نمونه مهم است. اول، همیشه برای <Ltr>get()</Ltr> مهلت
-        بگذارید؛ انتظار بی‌نهایت یعنی اگر بروکر یا شبکه مشکل داشته باشد، thread
-        برنامه برای همیشه قفل می‌شود. دوم، <Ltr>TimeoutException</Ltr> به معنی
-        «نوشته نشد» نیست. ممکن است درخواست بعد از پایان مهلت به بروکر برسد و
-        رکورد نوشته شود؛ پس تلاش دوبارهٔ کورکورانه می‌تواند رکورد تکراری بسازد.
-        این وضعیت «نامشخص» است و باید با <Ltr>idempotence</Ltr> یا یک کلید
-        یکتا مدیریت شود.
-      </p>
-      <p>
-        هزینهٔ همگام‌سازی هم ساده است: هر thread در هر لحظه فقط یک رکورد در
-        پرواز دارد. اگر رفت‌وبرگشت شبکه ۵ میلی‌ثانیه باشد، هر thread حداکثر
-        حدود ۲۰۰ رکورد در ثانیه می‌فرستد. با ده thread به حدود ۲٬۰۰۰ رکورد در
-        ثانیه می‌رسید، در حالی که همان ده thread در حالت ناهمگام با بچ‌های ۱۰۰
-        تایی می‌توانند به ده‌ها هزار رکورد در ثانیه برسند. این عددها ساده‌شده‌اند
-        ولی نسبت را خوب نشان می‌دهند.
-      </p>
-      <p>
-        پس همگام کجا به کار می‌آید؟ جایی که حجم کم است و می‌خواهید قبل از قدم
-        بعد مطمئن شوید رکورد نوشته شده است: یک اسکریپت مهاجرت، یک ابزار
-        ادمینی، ارسال یک فرمان کنترلی، یا زمانی که سادگی کد مهم‌تر از توان
-        عملیاتی است. در چنین مواردی <Ltr>send().get()</Ltr> با مهلت مشخص، کد
-        خواناتری می‌دهد.
-      </p>
-      <CodeBlock
-        code={flushAndClose}
-        language="java"
-        filename="FlushAndClose.java"
-      />
-      <p>
-        اگر چند رکورد را ناهمگام فرستادید و فقط در پایان کار به تأیید همهٔ آن‌ها
-        نیاز دارید، به‌جای <Ltr>get()</Ltr> روی هر کدام، یک بار{' '}
-        <Ltr>flush()</Ltr> صدا بزنید. <Ltr>flush()</Ltr> تا کامل شدن همهٔ
-        رکوردهای بافر بلوکه می‌شود و خطاها را از طریق callback همان رکوردها
-        گزارش می‌کند.
-      </p>
-
-      <h2>۴. مقایسهٔ مستقیم Sync و Async</h2>
       <table>
         <thead>
           <tr>
@@ -284,59 +211,86 @@ export function ProducerBasicsContent() {
         </tbody>
       </table>
 
-      <DeepDive title="درون Producer: بافر، Batch و Sender">
-        <DeepDiveSection title="buffer.memory و max.block.ms">
-          <p>
-            بافر پرودیوسر به‌طور پیش‌فرض ۳۲ مگابایت است. وقتی این فضا پر شود،{' '}
-            <Ltr>send()</Ltr> تا آزاد شدن جا یا پایان{' '}
-            <Ltr>max.block.ms</Ltr> منتظر می‌ماند. اگر مصرف‌کنندهٔ پایین‌دستی
-            کند باشد و بروکر تأییدها را دیر بدهد، بافر پر می‌شود و فشار به
-            thread برنامه برمی‌گردد. دیدن <Ltr>bufferpool</Ltr> و زمان صرف‌شده
-            در <Ltr>send</Ltr> یکی از اولین کارهای عیب‌یابی پرودیوسر است.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="batch.size و linger.ms">
-          <p>
-            <Ltr>batch.size</Ltr> (پیش‌فرض ۱۶ کیلوبایت) سقف اندازهٔ هر بچ است و{' '}
-            <Ltr>linger.ms</Ltr> تعیین می‌کند <Ltr>Sender</Ltr> چقدر صبر کند تا
-            بچ پر شود. در <Ltr>Kafka 3.x</Ltr> پیش‌فرض <Ltr>linger.ms</Ltr>{' '}
-            صفر است؛ یعنی بچ فقط اگر همان لحظه رکورد دیگری در صف باشد ساخته
-            می‌شود. از <Ltr>Kafka 4.0</Ltr> این پیش‌فرض به ۵ میلی‌ثانیه تغییر
-            کرده است. افزایش{' '}
-            <Ltr>linger.ms</Ltr> توان عملیاتی را بالا و تأخیر را کمی بیشتر
-            می‌کند.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="چند درخواست در پرواز و ترتیب">
-          <p>
-            <Ltr>max.in.flight.requests.per.connection</Ltr> (پیش‌فرض ۵) تعداد
-            درخواست‌های تأییدنشده‌ای است که همزمان در شبکه هستند. مقدار بیشتر
-            یعنی توان عملیاتی بیشتر، اما بدون <Ltr>idempotence</Ltr> می‌تواند
-            ترتیب را در صورت retry به هم بزند. با{' '}
-            <Ltr>enable.idempotence=true</Ltr> کافکا شمارهٔ ترتیب هر بچ را
-            نگه می‌دارد و بروکر بچ‌های تکراری یا خارج از ترتیب را کنار می‌گذارد.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="چرا callback روی I/O thread اجرا می‌شود؟">
-          <p>
-            <Ltr>Sender</Ltr> یک thread واحد است که هم شبکه را مدیریت می‌کند و
-            هم پاسخ بروکر را پردازش می‌کند. callback در همان مسیر و بعد از
-            پردازش پاسخ اجرا می‌شود تا نیازی به کپی و همگام‌سازی اضافه نباشد.
-            به همین دلیل هر تأخیر در callback، مستقیماً تأخیر ارسال رکوردهای
-            بعدی است. برای کارهای سنگین، فقط داده را از callback بیرون ببرید.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="مهلت‌های مهم">
-          <p>
-            <Ltr>request.timeout.ms</Ltr> (پیش‌فرض ۳۰ ثانیه) مهلت انتظار برای
-            پاسخ یک درخواست است، <Ltr>retry.backoff.ms</Ltr> فاصلهٔ بین
-            تلاش‌ها، و <Ltr>delivery.timeout.ms</Ltr> (پیش‌فرض ۱۲۰ ثانیه)
-            سقف کل زمان از <Ltr>send</Ltr> تا موفقیت یا شکست نهایی. وقتی{' '}
-            <Ltr>delivery.timeout.ms</Ltr> تمام شود، دیگر retry ادامه پیدا
-            نمی‌کند و خطا به callback می‌رسد.
-          </p>
-        </DeepDiveSection>
-      </DeepDive>
+      <h2>۳. عدسی SRE: از کجا بفهمیم Producer مشکل دارد</h2>
+      <p>
+        متریک‌های پرودیوسر روی خود کلاینت منتشر می‌شوند. این‌ها را در داشبورد
+        داشته باشید تا بتوانید «کندی کافکا» را به یک جزء مشخص نسبت بدهید:
+      </p>
+      <ul>
+        <li>
+          <Ltr>record-send-rate</Ltr> و <Ltr>record-error-rate</Ltr>: نرخ
+          واقعی ارسال و نرخ خطا.
+        </li>
+        <li>
+          <Ltr>record-retry-rate</Ltr>: اگر بالا رفت، شبکه یا بروکر ناپایدار است
+          و خطر تکرار پیام جدی می‌شود.
+        </li>
+        <li>
+          <Ltr>request-latency-avg</Ltr> و <Ltr>request-latency-max</Ltr>:
+          تأخیر رفت‌وبرگشت به بروکر؛ نه تأخیر کل مسیر برنامه.
+        </li>
+        <li>
+          <Ltr>buffer-available-bytes</Ltr> و{' '}
+          <Ltr>buffer-exhausted-rate</Ltr>: فضای آزاد بافر و تعداد دفعاتی که
+          بافر پر شده است.
+        </li>
+        <li>
+          <Ltr>record-queue-time-avg</Ltr>: مدت ماندن رکورد در بافر پیش از
+          ارسال؛ اگر بالا رفت، <Ltr>linger.ms</Ltr> یا کندی بروکر را ببینید.
+        </li>
+        <li>
+          <Ltr>waiting-threads</Ltr>: تعداد threadهایی که روی{' '}
+          <Ltr>send()</Ltr> بلوکه شده‌اند؛ نشانهٔ فشار برگشتی به اپلیکیشن.
+        </li>
+      </ul>
+      <p>
+        سه حالت خرابی را از هم جدا کنید. اول، <strong>پر شدن بافر</strong>: وقتی
+        مصرف‌کنندهٔ پایین‌دستی یا بروکر کند است، بافر پر می‌شود و{' '}
+        <Ltr>send()</Ltr> تا <Ltr>max.block.ms</Ltr> بلوکه می‌شود؛ نتیجه،
+        کندی خود اپلیکیشن است نه خوشه. دوم، <strong>تأخیر بالا با بافر خالی</strong>:
+        مشکل از شبکه یا بروکر است. سوم، <strong>نرخ retry بالا</strong>: حتی اگر
+        ارسال در نهایت موفق شود، احتمال رکورد تکراری و ترتیب به‌هم‌ریخته وجود
+        دارد.
+      </p>
+      <Callout variant="warning" title="Timeout یعنی «نامشخص»، نه «نوشته نشد»">
+        <p>
+          وقتی مهلت انتظار تمام می‌شود، درخواست ممکن است هنوز در شبکه باشد یا
+          بروکر آن را نوشته باشد. فرض «نوشته نشد» و ارسال دوبارهٔ کورکورانه،
+          منبع رکورد تکراری است. این وضعیت را نامشخص بدانید و با{' '}
+          <Ltr>idempotence</Ltr> یا یک کلید یکتا مدیریت کنید.
+        </p>
+      </Callout>
+      <Callout variant="info" title="send همیشه فوری برنمی‌گردد">
+        <p>
+          <Ltr>send()</Ltr> در دو حالت می‌تواند قبل از برگشت بلوکه شود: وقتی
+          متادیتای تاپیک هنوز دریافت نشده است، و وقتی حافظهٔ بافر (
+          <Ltr>buffer.memory</Ltr>) پر شده است. هر دو انتظار حداکثر تا{' '}
+          <Ltr>max.block.ms</Ltr> (پیش‌فرض ۶۰ ثانیه) طول می‌کشد و بعد با{' '}
+          <Ltr>TimeoutException</Ltr> شکست می‌خورد. پس «ناهمگام» به معنی «بدون
+          هیچ انتظاری» نیست؛ فقط انتظار برای تأیید بروکر نیست.
+        </p>
+      </Callout>
+
+      <h2>۴. دیدن رفتار Producer با ابزارهای خط فرمان</h2>
+      <p>
+        برای یک بررسی سریع، به‌جای نوشتن کد از ابزارهای خود کافکا استفاده کنید.
+        <Ltr>kafka-console-producer.sh</Ltr> برای تست دستی یک تاپیک کافی است، و
+        <Ltr>kafka-producer-perf-test.sh</Ltr> توان و تأخیر را با تنظیمات دلخواه
+        می‌سنجد:
+      </p>
+      <CodeBlock
+        code={perfTest}
+        language="bash"
+        filename="producer-perf-test.sh"
+      />
+      <p>
+        خروجی این ابزار چند عدد کلیدی می‌دهد: رکورد در ثانیه، مگابایت در ثانیه،
+        میانگین و بیشینهٔ تأخیر، و صدک‌های ۹۵ و ۹۹. همین اعداد را با تنظیمات
+        پیش‌فرض و تنظیمات پیشنهادی مقایسه کنید تا اثر <Ltr>linger.ms</Ltr> و{' '}
+        <Ltr>batch.size</Ltr> را روی <Ltr>p99</Ltr> ببینید. این ابزار به بروکر
+        دست نمی‌زند و فقط یک کلاینت معمولی است؛ بنابراین برای تست ظرفیت هم
+        مناسب است.
+      </p>
 
       <h2>۵. یک رکورد، دو رفتار</h2>
       <p>
@@ -350,86 +304,110 @@ export function ProducerBasicsContent() {
 
       <ProducerSendExplainer />
 
-      <h2>۶. خطا، Retry و مهلت‌ها</h2>
-      <p>
-        در حالت ناهمگام، خطاها در callback ظاهر می‌شوند؛ در حالت همگام،{' '}
-        <Ltr>get()</Ltr> آن‌ها را به شکل <Ltr>ExecutionException</Ltr> پرتاب
-        می‌کند. در هر دو حالت، پرودیوسر خودش خطاهای موقتی را retry می‌کند:
-        قطع ارتباط، <Ltr>NotLeaderForPartition</Ltr>،{' '}
-        <Ltr>NotEnoughReplicas</Ltr> و مشابه آن. خطاهای دائمی مثل{' '}
-        <Ltr>RecordTooLargeException</Ltr>، <Ltr>SerializationException</Ltr>{' '}
-        یا <Ltr>TopicAuthorizationException</Ltr> بلافاصله به شما می‌رسند و
-        retry بی‌فایده است.
-      </p>
-      <p>
-        سقف تلاش‌ها را <Ltr>delivery.timeout.ms</Ltr> تعیین می‌کند، نه فقط{' '}
-        <Ltr>retries</Ltr>. اگر <Ltr>retries</Ltr> را زیاد کنید ولی{' '}
-        <Ltr>delivery.timeout.ms</Ltr> کوتاه باشد، باز هم زودتر از موعد خطا
-        می‌گیرید. برای مسیرهای حساس، این سه تنظیم را با هم ببینید:{' '}
-        <Ltr>delivery.timeout.ms</Ltr>، <Ltr>request.timeout.ms</Ltr> و{' '}
-        <Ltr>retry.backoff.ms</Ltr>.
-      </p>
-      <Callout variant="danger" title="retry بدون idempotence یعنی تکرار">
+      <h2>۶. اشتباه‌های رایج عملیاتی</h2>
+      <Callout variant="danger" title="acks پایین بدون درک دوام">
         <p>
-          اگر تأیید یک بچ گم شود، پرودیوسر نمی‌داند بروکر آن را نوشته یا نه و
-          دوباره می‌فرستد. بدون <Ltr>idempotence</Ltr> این کار می‌تواند رکورد
-          تکراری بسازد. از <Ltr>Kafka 3.0</Ltr> به بعد{' '}
-          <Ltr>enable.idempotence</Ltr>{' '}
-          پیش‌فرض فعال است و همین مشکل را برای ارسال‌های معمولی حل می‌کند؛ اما
-          اگر آن را آگاهانه خاموش کرده‌اید، باید خودتان برای تکرار فکر کنید.
+          <Ltr>acks=0</Ltr> هیچ تأییدی نمی‌گیرد و <Ltr>acks=1</Ltr> فقط تأیید
+          لیدر را می‌گیرد. اگر این‌ها را بدون توجه به{' '}
+          <Ltr>min.insync.replicas</Ltr> انتخاب کنید، ممکن است در از کار افتادن
+          لیدر داده از دست برود. انتخاب درست را در درس <Ltr>acks</Ltr> ببینید.
+        </p>
+      </Callout>
+      <Callout variant="warning" title="افزایش linger.ms بدون سنجش p99">
+        <p>
+          <Ltr>linger.ms</Ltr> بالا بچ را بزرگ‌تر و توان را بیشتر می‌کند، اما
+          تأخیر انتها‌به‌انتها را هم بالا می‌برد. قبل و بعد از تغییر،{' '}
+          <Ltr>p99</Ltr> را با <Ltr>kafka-producer-perf-test.sh</Ltr> بسنجید.
+        </p>
+      </Callout>
+      <Callout variant="danger" title="buffer.memory کوچک برای بار بالا">
+        <p>
+          بافر پیش‌فرض ۳۲ مگابایت است. در بار بالا و با کندی موقت بروکر، بافر پر
+          می‌شود و threadهای اپلیکیشن روی <Ltr>send()</Ltr> بلوکه می‌شوند.
+          <Ltr>waiting-threads</Ltr> و <Ltr>buffer-exhausted-rate</Ltr> را
+          ببینید.
+        </p>
+      </Callout>
+      <Callout variant="danger" title="retry بدون idempotence">
+        <p>
+          اگر تأیید یک بچ گم شود، پرودیوسر دوباره می‌فرستد و بدون{' '}
+          <Ltr>idempotence</Ltr> ممکن است رکورد تکراری بسازد. از{' '}
+          <Ltr>Kafka 3.0</Ltr> به بعد این تنظیم پیش‌فرض فعال است؛ اگر آگاهانه
+          خاموشش کرده‌اید، باید خودتان برای تکرار فکر کنید.
+        </p>
+      </Callout>
+      <Callout variant="warning" title="پایش فقط بروکر و نه کلاینت">
+        <p>
+          متریک‌های <Ltr>buffer-available-bytes</Ltr>،{' '}
+          <Ltr>record-queue-time-avg</Ltr> و <Ltr>record-retry-rate</Ltr> روی
+          کلاینت هستند. بدون این‌ها، «کندی کافکا» همیشه به گردن خوشه می‌افتد.
         </p>
       </Callout>
 
-      <h2>۷. اشتباه‌های رایج</h2>
-      <Callout variant="danger" title="send بدون callback و بدون بررسی Future">
+      <DeepDive title="برای توسعه‌دهندهٔ اپلیکیشن: کد ارسال، Callback و Flush">
         <p>
-          رایج‌ترین شکل گم شدن داده. <Ltr>send()</Ltr> بدون callback خطا را
-          جایی نشان نمی‌دهد؛ نه لاگی، نه استثنایی. یا callback بدهید، یا{' '}
-          <Ltr>Future</Ltr> را بررسی کنید، یا حداقل در پایان{' '}
-          <Ltr>flush()</Ltr> بزنید و خطاها را جمع کنید.
+          این بخش برای کسی است که خود کد <Ltr>Producer</Ltr> را می‌نویسد. برای
+          مسیر عملیاتی دوره لازم نیست و می‌توانید از آن رد شوید.
         </p>
-      </Callout>
-      <Callout variant="warning" title="get روی هر رکورد در مسیر پرترافیک">
-        <p>
-          <Ltr>send().get()</Ltr> در یک حلقه، توان عملیاتی را به یک رکورد در هر
-          رفت‌وبرگشت کاهش می‌دهد و مزیت بچ را از بین می‌برد. اگر به تأیید
-          نهایی نیاز دارید، رکوردها را ناهمگام بفرستید و در پایان یک بار{' '}
-          <Ltr>flush()</Ltr> بزنید.
-        </p>
-      </Callout>
-      <Callout variant="danger" title="کار سنگین داخل callback">
-        <p>
-          callback روی I/O thread اجرا می‌شود. یک درخواست HTTP کند، یک کوئری
-          دیتابیس یا یک <Ltr>Thread.sleep</Ltr> داخل callback، ارسال همهٔ
-          رکوردهای بعدی را متوقف می‌کند. داده را به یک executor بسپارید و
-          callback را فوراً تمام کنید.
-        </p>
-      </Callout>
-      <Callout variant="warning" title="تفسیر TimeoutException به «نوشته نشد»">
-        <p>
-          وقتی <Ltr>get(2, SECONDS)</Ltr> مهلت تمام می‌کند، درخواست ممکن است
-          هنوز در شبکه باشد یا بروکر آن را نوشته باشد. فرض «نوشته نشد» و ارسال
-          دوبارهٔ کورکورانه، منبع رکورد تکراری است. وضعیت را نامشخص بدانید و با
-          کلید یکتا یا <Ltr>idempotence</Ltr> آن را مدیریت کنید.
-        </p>
-      </Callout>
-      <Callout variant="warning" title="بستن پرودیوسر بدون flush">
-        <p>
-          رکوردهایی که در بافر مانده‌اند تا ارسال نشوند از بین می‌روند.{' '}
-          <Ltr>close()</Ltr> به‌طور پیش‌فرض بافر را خالی می‌کند، اما اگر
-          برنامه را با <Ltr>System.exit</Ltr> یا کشتن process تمام کنید، این
-          فرصت را از دست می‌دهید. در پایان کار همیشه <Ltr>flush()</Ltr> و بعد{' '}
-          <Ltr>close()</Ltr> را صدا بزنید.
-        </p>
-      </Callout>
-      <Callout variant="info" title="send همیشه فوری نیست">
-        <p>
-          اگر متادیتای تاپیک هنوز نیامده باشد یا بافر پر باشد،{' '}
-          <Ltr>send()</Ltr> تا <Ltr>max.block.ms</Ltr> بلوکه می‌شود. این را با
-          «ارسال همگام» اشتباه نگیرید؛ این انتظار برای آماده شدن شرایط ارسال
-          است، نه برای تأیید بروکر.
-        </p>
-      </Callout>
+        <DeepDiveSection title="ارسال ناهمگام و Callback">
+          <p>
+            در حالت ناهمگام، برنامه بعد از <Ltr>send()</Ltr> به کارش ادامه
+            می‌دهد و نتیجه را با یک <Ltr>Callback</Ltr> می‌گیرد. اگر callback
+            را ندهید و <Ltr>Future</Ltr> را هم بررسی نکنید، خطای ارسال هیچ‌جا
+            دیده نمی‌شود.
+          </p>
+          <CodeBlock code={asyncSend} language="java" filename="AsyncSend.java" />
+          <CodeBlock
+            code={asyncCallback}
+            language="java"
+            filename="AsyncWithCallback.java"
+          />
+          <p>
+            callback به‌طور معمول روی همان I/O thread پرودیوسر اجرا می‌شود، نه
+            روی thread شما. هر کار سنگین یا مسدودکننده داخل callback، ارسال
+            رکوردهای دیگر را متوقف می‌کند.
+          </p>
+        </DeepDiveSection>
+        <DeepDiveSection title="ارسال همگام با get">
+          <p>
+            برای همگام‌سازی، بلافاصله روی <Ltr>Future</Ltr>، <Ltr>get()</Ltr> را
+            صدا بزنید. همیشه مهلت بگذارید؛ انتظار بی‌نهایت یعنی اگر بروکر یا
+            شبکه مشکل داشته باشد، thread برنامه برای همیشه قفل می‌شود.
+          </p>
+          <CodeBlock code={syncSend} language="java" filename="SyncSend.java" />
+        </DeepDiveSection>
+        <DeepDiveSection title="Flush و Close">
+          <p>
+            اگر چند رکورد را ناهمگام فرستادید و فقط در پایان کار به تأیید همه
+            نیاز دارید، یک بار <Ltr>flush()</Ltr> صدا بزنید. <Ltr>close()</Ltr>{' '}
+            هم به‌طور پیش‌فرض بافر را خالی می‌کند؛ اما اگر process را با{' '}
+            <Ltr>System.exit</Ltr> یا کشتن ناگهانی تمام کنید، این فرصت از دست
+            می‌رود.
+          </p>
+          <CodeBlock
+            code={flushAndClose}
+            language="java"
+            filename="FlushAndClose.java"
+          />
+        </DeepDiveSection>
+        <DeepDiveSection title="درون Producer: بافر، Batch و Sender">
+          <p>
+            بافر پرودیوسر به‌طور پیش‌فرض ۳۲ مگابایت است. وقتی این فضا پر شود،{' '}
+            <Ltr>send()</Ltr> تا آزاد شدن جا یا پایان{' '}
+            <Ltr>max.block.ms</Ltr> منتظر می‌ماند. <Ltr>batch.size</Ltr>{' '}
+            (پیش‌فرض ۱۶ کیلوبایت) سقف اندازهٔ هر بچ است و <Ltr>linger.ms</Ltr>{' '}
+            تعیین می‌کند <Ltr>Sender</Ltr> چقدر صبر کند تا بچ پر شود.
+          </p>
+          <p>
+            <Ltr>max.in.flight.requests.per.connection</Ltr> (پیش‌فرض ۵) تعداد
+            درخواست‌های تأییدنشده‌ای است که همزمان در شبکه هستند. مقدار بیشتر
+            یعنی توان بیشتر، اما بدون <Ltr>idempotence</Ltr> می‌تواند ترتیب را
+            در صورت retry به هم بزند. <Ltr>delivery.timeout.ms</Ltr> (پیش‌فرض
+            ۱۲۰ ثانیه) سقف کل زمان از <Ltr>send</Ltr> تا موفقیت یا شکست نهایی
+            است.
+          </p>
+        </DeepDiveSection>
+      </DeepDive>
 
       <h2>جمع‌بندی</h2>
       <ul className="rounded-xl bg-slate-100 p-4 font-bold text-slate-800 dark:bg-slate-800/80 dark:text-slate-200">
@@ -442,20 +420,16 @@ export function ProducerBasicsContent() {
           thread فعلی همگام می‌کند.
         </li>
         <li>
-          ناهمگام با callback خطا را می‌گیرد و اجازهٔ بچ‌شدن می‌دهد؛ همگام
-          سادگی می‌دهد و توان عملیاتی را کم می‌کند.
-        </li>
-        <li>
-          callback روی I/O thread اجرا می‌شود؛ داخلش کار سنگین یا{' '}
-          <Ltr>get()</Ltr> نکنید.
+          پر شدن بافر، تأخیر بالا و نرخ retry بالا سه حالت خرابی جدا هستند و هر
+          کدام متریک خودشان را دارند.
         </li>
         <li>
           مهلت <Ltr>get()</Ltr> به معنی «نوشته نشد» نیست؛ وضعیت نامشخص را با
           idempotence یا کلید یکتا مدیریت کنید.
         </li>
         <li>
-          پایان کار همیشه با <Ltr>flush()</Ltr> و <Ltr>close()</Ltr> همراه
-          باشد تا بافر خالی شود.
+          برای سنجش واقعی از <Ltr>kafka-producer-perf-test.sh</Ltr> استفاده
+          کنید و اثر تنظیمات را روی <Ltr>p99</Ltr> ببینید.
         </li>
       </ul>
       <p>

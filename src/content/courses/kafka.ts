@@ -5,15 +5,15 @@ const kafkaSectionsInput: CourseSectionInput[] = [
     id: 'introduction',
     title: 'مقدمه و مفاهیم پایه',
     description:
-      'Kafka چیست، چه مشکلی را حل می‌کند و مفاهیم بنیادی مانند Topic، Partition و Offset چگونه کنار هم قرار می‌گیرند.',
+      'چرا به Kafka نیاز داریم، چه تفاوتی با صف‌ها و Orchestratorها دارد و مفاهیم بنیادی مانند Event، Topic، Partition و Offset چگونه کنار هم قرار می‌گیرند.',
     lessons: [
       {
         id: 'what-is-kafka',
         slug: 'what-is-kafka',
         title: 'Kafka چیست و چه مشکلی را حل می‌کند؟',
         description:
-          'کافکا را با داستان کلاس، تشبیه دفترچه جادویی، توضیح تعاملی گام‌به‌گام و شکل‌های متحرک مثل یک کودک ۸ ساله درک کنید.',
-        readingTime: 7,
+          'چرا به Kafka نیاز داریم، چه تفاوتی با صف‌ها و Orchestratorها دارد و چگونه با داستان کلاس و دفترچه جادویی می‌توان آن را ساده فهمید.',
+        readingTime: 9,
         sectionId: 'introduction',
         status: 'published',
       },
@@ -34,16 +34,6 @@ const kafkaSectionsInput: CourseSectionInput[] = [
         description:
           'کالبدشکافی پیام، نحوه توزیع کلیدها در پارتیشن‌ها و نقش حیاتی آفست‌ها به همراه توضیح تعاملی گام‌به‌گام.',
         readingTime: 7,
-        sectionId: 'introduction',
-        status: 'published',
-      },
-      {
-        id: 'docker-kraft-setup',
-        slug: 'docker-kraft-setup',
-        title: 'نصب سریع با Docker Compose و KRaft',
-        description:
-          'راه‌اندازی خوشه‌کافکا در حالت مدرن KRaft بدون نیاز به ZooKeeper به همراه شبیه‌ساز گام‌به‌گام ترمینال.',
-        readingTime: 8,
         sectionId: 'introduction',
         status: 'published',
       },
@@ -305,8 +295,18 @@ const kafkaSectionsInput: CourseSectionInput[] = [
     id: 'practice',
     title: 'Kafka در عمل',
     description:
-      'ابزارهای CLI، اجرای یک خوشه سه‌گانه KRaft با Docker Compose و مدیریت Topicها در محیط واقعی.',
+      'راه‌اندازی خوشه تک‌نود و سه‌گانه KRaft با Docker Compose، ابزارهای CLI و مدیریت Topicها در محیط واقعی.',
     lessons: [
+      {
+        id: 'docker-kraft-setup',
+        slug: 'docker-kraft-setup',
+        title: 'نصب سریع با Docker Compose و KRaft',
+        description:
+          'راه‌اندازی خوشه‌کافکا در حالت مدرن KRaft بدون نیاز به ZooKeeper به همراه شبیه‌ساز گام‌به‌گام ترمینال.',
+        readingTime: 8,
+        sectionId: 'practice',
+        status: 'published',
+      },
       {
         id: 'cli-tools',
         slug: 'cli-tools',
@@ -521,9 +521,9 @@ export const kafkaCourse: Course = {
   title: 'آموزش جامع Apache Kafka',
   shortTitle: 'Apache Kafka',
   description:
-    'از مفاهیم پایه و معماری داخلی تا Producer، Consumer، اطمینان‌پذیری، اکوسیستم و عملیات تولیدی.',
+    'دورهٔ عملیاتی Kafka برای مهندسان DevOps و SRE: از معماری و پیکربندی تا پایش، عیب‌یابی و بهره‌برداری در تولید.',
   longDescription:
-    'یک مسیر فارسی، مرحله‌به‌مرحله و تعاملی برای فهمیدن Kafka از مفاهیم پایه تا معماری داخلی، Producer، Consumer، تکرارپذیری، ابزارهای عملی و الگوهای طراحی. هر درس شامل توضیح دقیق، نمودار، نمونه کد و اشتباه‌های رایج است.',
+    'یک مسیر فارسی و تعاملی برای مهندسان DevOps و SRE که باید یک خوشهٔ Kafka را راه‌اندازی، پیکربندی، پایش و عیب‌یابی کنند. تمرکز دوره روی رفتار واقعی خوشه، تنظیمات، متریک‌ها، حالت‌های خرابی و ابزارهای خط فرمان است. نمونه‌های کد اپلیکیشنی فقط برای درک رفتار Producer و Consumer آورده شده‌اند و داخل بخش‌های بازشو قرار می‌گیرند؛ برای دنبال کردن مسیر اصلی نیازی به نوشتن کد ندارید.',
   level: 'از صفر تا تولید',
   icon: 'kafka',
   sections: kafkaSectionsInput.map((section) => ({

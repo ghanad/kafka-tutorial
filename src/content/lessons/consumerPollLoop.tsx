@@ -79,16 +79,24 @@ export function ConsumerPollLoopContent() {
   return (
     <>
       <p className="text-base font-medium leading-8 text-slate-800 dark:text-slate-200">
-        فصل سوم از سمت تولیدکننده بود. حالا به سمت دیگر خط می‌رسیم: کسی که داده
-        را می‌خواند. اولین سؤال عملی این است: «اگر کافکا یک سیستم پیام‌رسانی
-        است، چرا خودش پیام را به مصرف‌کننده push نمی‌کند و مصرف‌کننده باید
-        مدام <Ltr>poll</Ltr> بزند؟» در این درس می‌بینیم مدل{' '}
-        <strong>Pull</strong> چه مزیتی دارد، یک دور کامل{' '}
-        <Ltr>poll</Ltr> از درخواست تا پردازش چه مراحلی دارد، و سه زمان‌بند{' '}
-        <Ltr>heartbeat</Ltr>، <Ltr>session.timeout.ms</Ltr> و{' '}
-        <Ltr>max.poll.interval.ms</Ltr> چطور تعیین می‌کنند مصرف‌کننده زنده
-        بماند یا از گروه بیرون بیفتد.
+        فصل قبل از سمت تولیدکننده بود. حالا به سمت دیگر خط می‌رسیم: کسی که داده
+        را می‌خواند. برای اپراتور، این درس مهم است چون بیشتر lag، rebalanceهای
+        پیاپی و مصرف تکراری از رفتار همین حلقه می‌آید. می‌بینیم مدل{' '}
+        <strong>Pull</strong> چه مزیتی دارد، یک دور کامل <Ltr>poll</Ltr> از
+        درخواست تا پردازش چه مراحلی دارد، و سه زمان‌بند <Ltr>heartbeat</Ltr>،{' '}
+        <Ltr>session.timeout.ms</Ltr> و <Ltr>max.poll.interval.ms</Ltr> چطور
+        تعیین می‌کنند مصرف‌کننده زنده بماند یا از گروه بیرون بیفتد.
       </p>
+
+      <Callout variant="tip" title="چرا اپراتور باید حلقهٔ poll را بشناسد">
+        <p>
+          خیلی از هشدارهای <Ltr>Consumer Lag</Ltr> و rebalanceهای بی‌پایان،
+          ریشه در پردازش کند یا تنظیم نامناسب همین حلقه دارند، نه در خوشه. اگر
+          بدانید <Ltr>max.poll.records</Ltr>، <Ltr>max.poll.interval.ms</Ltr> و{' '}
+          <Ltr>session.timeout.ms</Ltr> چه می‌کنند، می‌توانید بین «خوشه کند
+          است» و «اپلیکیشن کند است» تفکیک کنید.
+        </p>
+      </Callout>
 
       <h2>۱. چرا Pull و نه Push؟</h2>
       <p>
@@ -138,15 +146,9 @@ export function ConsumerPollLoopContent() {
           <Ltr>FetchRequest</Ltr>، برگرداندن رکوردها از بافر، و heartbeat و
           commit را مدیریت می‌کند.
         </p>
-        <p>
-          به همین دلیل یک <Ltr>poll</Ltr> می‌تواند بدون درخواست جدید هم رکورد
-          برگرداند، یا خالی برگردد. خودِ درخواست واقعی به بروکر{' '}
-          <Ltr>FetchRequest</Ltr> است؛ <Ltr>poll</Ltr> لایه‌ای است که برنامه با
-          آن مصرف‌کننده را جلو می‌برد.
-        </p>
       </Callout>
 
-      <h2>۲. حلقهٔ poll: از درخواست تا پردازش</h2>
+      <h2>۲. حلقهٔ poll از دید اپراتور</h2>
       <p>
         مصرف‌کننده در کافکا یک شیء <Ltr>KafkaConsumer</Ltr> است که با یک حلقه
         کار می‌کند. هر بار <Ltr>poll</Ltr> صدا زده می‌شود، این کارها انجام
@@ -173,7 +175,11 @@ export function ConsumerPollLoopContent() {
           اگر commit خودکار فعال باشد، پیشرفت را در پس‌زمینه ذخیره می‌کند.
         </li>
       </ol>
-      <CodeBlock code={pollLoop} language="java" filename="PollLoop.java" />
+      <CodeBlock
+        code={consumerConfig}
+        language="properties"
+        filename="consumer.properties"
+      />
       <p>
         دو نکته در این حلقه مهم است. اول، <Ltr>KafkaConsumer</Ltr> thread-safe
         نیست؛ یک مصرف‌کننده را فقط از یک thread صدا بزنید. دوم،{' '}
@@ -267,7 +273,74 @@ export function ConsumerPollLoopContent() {
         </p>
       </Callout>
 
-      <h2>۵. تنظیمات Fetch و poll در عمل</h2>
+      <h2>۵. عدسی SRE: lag، rebalance و commit</h2>
+      <p>
+        سلامت مصرف‌کننده را با سه دسته متریک بسنجید: پیشرفت، تأخیر و پایداری
+        گروه.
+      </p>
+      <ul>
+        <li>
+          <Ltr>records-lag-max</Ltr> و <Ltr>records-lag</Ltr>: فاصلهٔ
+          مصرف‌کننده با انتهای لاگ؛ روند صعودی پایدار یعنی مصرف‌کننده از بار
+          عقب است.
+        </li>
+        <li>
+          <Ltr>records-consumed-rate</Ltr>: نرخ واقعی مصرف؛ آن را با نرخ تولید
+          مقایسه کنید.
+        </li>
+        <li>
+          <Ltr>commit-latency-avg</Ltr> و <Ltr>commit-latency-max</Ltr>: کندی
+          commit معمولاً یعنی فشار روی <Ltr>__consumer_offsets</Ltr> یا شبکه.
+        </li>
+        <li>
+          <Ltr>last-poll-seconds-ago</Ltr>: اگر نزدیک{' '}
+          <Ltr>max.poll.interval.ms</Ltr> شود، rebalance در راه است.
+        </li>
+        <li>
+          <Ltr>rebalance-rate-per-hour</Ltr> و{' '}
+          <Ltr>rebalance-latency-avg</Ltr>: نرخ و هزینهٔ rebalance؛ نرخ بالا
+          یعنی عضویت گروه ناپایدار است.
+        </li>
+        <li>
+          <Ltr>assigned-partitions</Ltr>: اگر مدام صفر و مثبت می‌شود، گروه در
+          حال flapping است.
+        </li>
+      </ul>
+      <p>
+        برای یک بررسی سریع بدون داشبورد، وضعیت گروه را مستقیم از خط فرمان
+        ببینید:
+      </p>
+      <CodeBlock
+        code={describeGroup}
+        language="bash"
+        filename="describe-group.sh"
+      />
+      <p>
+        در خروجی، <Ltr>CURRENT-OFFSET</Ltr> آخرین offset commitشده و{' '}
+        <Ltr>LOG-END-OFFSET</Ltr> انتهای لاگ است. تفاوت این دو همان{' '}
+        <Ltr>LAG</Ltr> است؛ اگر <Ltr>position</Ltr> مصرف‌کننده جلو برود ولی
+        commit نشود، این دو عدد از هم فاصله می‌گیرند. اگر ستون{' '}
+        <Ltr>CONSUMER-ID</Ltr> خالی باشد، یعنی هیچ مصرف‌کننده‌ای در آن لحظه
+        عضو گروه نیست.
+      </p>
+      <p>
+        سه حالت خرابی را از هم جدا کنید. اول، <strong>lag صعودی با CPU سالم</strong>:
+        احتمالاً پردازش یا I/O پایین‌دستی کند است. دوم،{' '}
+        <strong>rebalance پیاپی</strong>: پردازش از{' '}
+        <Ltr>max.poll.interval.ms</Ltr> عبور می‌کند یا <Ltr>session.timeout.ms</Ltr>{' '}
+        برای محیط شبکه‌ای شما کوتاه است. سوم، <strong>مصرف تکراری</strong>:
+        commit بعد از پردازش انجام نمی‌شود یا پروسه بین پردازش و commit می‌میرد.
+      </p>
+      <Callout variant="tip" title="در Kubernetes از static membership استفاده کنید">
+        <p>
+          با تنظیم <Ltr>group.instance.id</Ltr>، یک مصرف‌کننده پس از ری‌استارت
+          سریع همان هویت قبلی را می‌گیرد و تا <Ltr>session.timeout.ms</Ltr>{' '}
+          rebalance غیرضروری رخ نمی‌دهد. این کار برای podهایی که مرتب جابه‌جا
+          می‌شوند، تعداد rebalanceها را به‌طور محسوسی کم می‌کند.
+        </p>
+      </Callout>
+
+      <h2>۶. تنظیمات Fetch و poll در عمل</h2>
       <p>
         بیشتر تنظیمات این درس دو هدف متضاد دارند: <strong>تأخیر کم</strong> در
         برابر <strong>توان عملیاتی بالا</strong>. جدول زیر نقطهٔ شروع خوبی است:
@@ -323,11 +396,6 @@ export function ConsumerPollLoopContent() {
           </tr>
         </tbody>
       </table>
-      <CodeBlock
-        code={consumerConfig}
-        language="properties"
-        filename="consumer.properties"
-      />
       <p>
         برای مسیرهای حساس به تأخیر، <Ltr>fetch.min.bytes</Ltr> و{' '}
         <Ltr>fetch.max.wait.ms</Ltr> را کوچک نگه دارید تا رکورد تازه سریع برسد.
@@ -336,79 +404,8 @@ export function ConsumerPollLoopContent() {
         <Ltr>max.poll.records</Ltr> را طوری انتخاب کنید که پردازش یک دسته با
         حاشیهٔ امن زیر <Ltr>max.poll.interval.ms</Ltr> تمام شود.
       </p>
-      <CodeBlock
-        code={describeGroup}
-        language="bash"
-        filename="describe-group.sh"
-      />
-      <p>
-        در خروجی، <Ltr>CURRENT-OFFSET</Ltr> آخرین offset commitشده و{' '}
-        <Ltr>LOG-END-OFFSET</Ltr> انتهای لاگ است. تفاوت این دو همان{' '}
-        <Ltr>LAG</Ltr> است؛ اگر <Ltr>position</Ltr> مصرف‌کننده جلو برود ولی
-        commit نشود، این دو عدد از هم فاصله می‌گیرند.
-      </p>
 
-      <DeepDive title="درون FetchRequest و حلقهٔ poll">
-        <DeepDiveSection title="long polling دقیقاً چطور کار می‌کند؟">
-          <p>
-            Broker درخواست Fetch را فوراً رد نمی‌کند. اگر دادهٔ موجود کمتر از{' '}
-            <Ltr>fetch.min.bytes</Ltr> باشد، درخواست را در صف نگه می‌دارد و تا
-            رسیدن دادهٔ کافی یا پایان <Ltr>fetch.max.wait.ms</Ltr> صبر می‌کند.
-            این انتظار روی thread درخواست‌های شبکه انجام نمی‌شود؛ کافکا از{' '}
-            <Ltr>purgatory</Ltr> استفاده می‌کند تا درخواست‌های معلق بدون اشغال
-            thread منتظر بمانند. به همین دلیل هزاران مصرف‌کنندهٔ بی‌کار، بروکر را
-            از کار نمی‌اندازند.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="max.poll.records در برابر بایت‌های Fetch">
-          <p>
-            مصرف‌کننده در هر درخواست ممکن است بیش از <Ltr>max.poll.records</Ltr>{' '}
-            رکورد دریافت کند و آن‌ها را در حافظه نگه دارد. <Ltr>poll</Ltr> بعدی
-            می‌تواند بدون رفت‌وبرگشت شبکه، از همان بافر بخواند. پس{' '}
-            <Ltr>max.poll.records</Ltr> فقط اندازهٔ دستهٔ تحویلی به برنامه را
-            کنترل می‌کند، نه اندازهٔ درخواست شبکه. اگر حافظه محدود است،{' '}
-            <Ltr>max.partition.fetch.bytes</Ltr> و <Ltr>fetch.max.bytes</Ltr>{' '}
-            را هم ببینید.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="Fetch Session و درخواست‌های افزایشی">
-          <p>
-            از <Ltr>Kafka 1.1</Ltr> و با <Ltr>KIP-227</Ltr>، مصرف‌کننده و بروکر
-            یک <Ltr>FetchSession</Ltr> نگه می‌دارند تا در درخواست‌های بعدی فقط
-            تغییرات پارتیشن‌ها رد و بدل شود. این کار در خوشه‌های بزرگ با صدها
-            پارتیشن، حجم متادیتای هر درخواست Fetch را به‌شدت کم می‌کند. اگر
-            شمارهٔ session از دست برود، کافکا خودش یک session کامل جدید می‌سازد.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="heartbeat thread و static membership">
-          <p>
-            heartbeat در thread جداگانه‌ای به نام <Ltr>HeartbeatThread</Ltr>{' '}
-            اجرا می‌شود تا حتی وقتی thread اصلی مشغول پردازش است، عضویت زنده
-            بماند. با تنظیم <Ltr>group.instance.id</Ltr> می‌توانید{' '}
-            <Ltr>static membership</Ltr> فعال کنید: اگر مصرف‌کننده سریع ری‌استارت
-            شود، قبل از <Ltr>session.timeout.ms</Ltr> دوباره همان هویت را
-            می‌گیرد و rebalance غیرضروری رخ نمی‌دهد. این تنظیم برای محیط‌هایی مثل
-            Kubernetes که podها مرتب جابه‌جا می‌شوند بسیار مفید است.
-          </p>
-        </DeepDiveSection>
-        <DeepDiveSection title="خروج تمیز با wakeup">
-          <p>
-            <Ltr>poll</Ltr> می‌تواند تا پایان مهلتش بلوکه بماند. برای خاموشی
-            سریع، از یک thread دیگر <Ltr>wakeup()</Ltr> را صدا بزنید؛{' '}
-            <Ltr>poll</Ltr> با <Ltr>WakeupException</Ltr> برمی‌گردد و می‌توانید
-            حلقه را ببندید و <Ltr>close()</Ltr> بزنید. <Ltr>close()</Ltr> قبل از
-            خروج، آخرین offsetها را commit می‌کند و عضویت را تمیز پایان می‌دهد.
-          </p>
-        </DeepDiveSection>
-      </DeepDive>
-
-      <CodeBlock
-        code={wakeupExample}
-        language="java"
-        filename="WakeupAndClose.java"
-      />
-
-      <h2>۶. اشتباه‌های رایج</h2>
+      <h2>۷. اشتباه‌های رایج عملیاتی</h2>
       <Callout variant="danger" title="پردازش سنگین داخل حلقهٔ poll">
         <p>
           اگر پردازش هر دسته بیشتر از <Ltr>max.poll.interval.ms</Ltr> طول بکشد،
@@ -418,13 +415,18 @@ export function ConsumerPollLoopContent() {
           شود، نه بعد از تحویل به صف.
         </p>
       </Callout>
-      <Callout variant="danger" title="استفاده از یک KafkaConsumer در چند thread">
+      <Callout variant="danger" title="session.timeout.ms کوتاه در شبکهٔ پرتأخیر">
         <p>
-          <Ltr>KafkaConsumer</Ltr> thread-safe نیست. اگر دو thread هم‌زمان{' '}
-          <Ltr>poll</Ltr> بزنند یا یکی <Ltr>commit</Ltr> کند و دیگری{' '}
-          <Ltr>poll</Ltr>، وضعیت داخلی خراب می‌شود و خطاهایی مثل{' '}
-          <Ltr>ConcurrentModificationException</Ltr> می‌بینید. برای موازی‌سازی،
-          چند مصرف‌کننده در یک گروه بسازید، نه چند thread روی یک مصرف‌کننده.
+          اگر <Ltr>session.timeout.ms</Ltr> از تأخیر شبکه کمتر باشد، heartbeat
+          دیر می‌رسد و گروه مدام rebalance می‌کند. این را با پردازش کند اشتباه
+          نگیرید؛ در این حالت <Ltr>last-poll-seconds-ago</Ltr> سالم است ولی
+          <Ltr>rebalance-rate-per-hour</Ltr> بالاست.
+        </p>
+      </Callout>
+      <Callout variant="danger" title="یک KafkaConsumer در چند thread">
+        <p>
+          <Ltr>KafkaConsumer</Ltr> thread-safe نیست. برای موازی‌سازی، چند
+          مصرف‌کننده در یک گروه بسازید، نه چند thread روی یک مصرف‌کننده.
         </p>
       </Callout>
       <Callout variant="warning" title="حلقهٔ تنگ با poll(0)">
@@ -432,14 +434,7 @@ export function ConsumerPollLoopContent() {
           <Ltr>poll(Duration.ZERO)</Ltr> فوراً برمی‌گردد. اگر در یک{' '}
           <Ltr>while</Ltr> بدون هیچ وقفه‌ای صدا زده شود، CPU و شبکه را می‌سوزاند
           و به بروکر فشار می‌آورد. از یک مهلت معقول مثل ۵۰۰ میلی‌ثانیه استفاده
-          کنید یا بین دورها وقفه بگذارید.
-        </p>
-      </Callout>
-      <Callout variant="warning" title="انتظار برای دریافت همهٔ رکوردها در یک poll">
-        <p>
-          <Ltr>poll</Ltr> تضمین نمی‌کند همهٔ دادهٔ موجود را برگرداند؛ سقف{' '}
-          <Ltr>max.poll.records</Ltr>، اندازهٔ Fetch و مهلت <Ltr>poll</Ltr> روی
-          تعداد اثر می‌گذارند. برای رسیدن به انتهای لاگ باید حلقه را ادامه دهید.
+          کنید.
         </p>
       </Callout>
       <Callout variant="info" title="commit خودکار را باور نکنید">
@@ -451,6 +446,72 @@ export function ConsumerPollLoopContent() {
           کنید.
         </p>
       </Callout>
+
+      <DeepDive title="برای توسعه‌دهندهٔ اپلیکیشن: حلقهٔ poll و خروج تمیز">
+        <p>
+          این بخش برای کسی است که خود کد <Ltr>Consumer</Ltr> را می‌نویسد. برای
+          مسیر عملیاتی دوره لازم نیست و می‌توانید از آن رد شوید.
+        </p>
+        <DeepDiveSection title="حلقهٔ poll در کد">
+          <p>
+            در کد، حلقه تا زمانی که thread قطع نشده ادامه دارد؛ هر{' '}
+            <Ltr>poll</Ltr> ممکن است لیست خالی برگرداند و commit فقط بعد از
+            پردازش موفق انجام می‌شود.
+          </p>
+          <CodeBlock code={pollLoop} language="java" filename="PollLoop.java" />
+        </DeepDiveSection>
+        <DeepDiveSection title="خروج تمیز با wakeup">
+          <p>
+            <Ltr>poll</Ltr> می‌تواند تا پایان مهلتش بلوکه بماند. برای خاموشی
+            سریع، از یک thread دیگر <Ltr>wakeup()</Ltr> را صدا بزنید؛{' '}
+            <Ltr>poll</Ltr> با <Ltr>WakeupException</Ltr> برمی‌گردد و می‌توانید
+            حلقه را ببندید و <Ltr>close()</Ltr> بزنید. <Ltr>close()</Ltr> قبل از
+            خروج، آخرین offsetها را commit می‌کند و عضویت را تمیز پایان می‌دهد.
+          </p>
+          <CodeBlock
+            code={wakeupExample}
+            language="java"
+            filename="WakeupAndClose.java"
+          />
+        </DeepDiveSection>
+        <DeepDiveSection title="long polling دقیقاً چطور کار می‌کند؟">
+          <p>
+            Broker درخواست Fetch را فوراً رد نمی‌کند. اگر دادهٔ موجود کمتر از{' '}
+            <Ltr>fetch.min.bytes</Ltr> باشد، درخواست را در صف نگه می‌دارد و تا
+            رسیدن دادهٔ کافی یا پایان <Ltr>fetch.max.wait.ms</Ltr> صبر می‌کند.
+            این انتظار روی thread درخواست‌های شبکه انجام نمی‌شود؛ کافکا از{' '}
+            <Ltr>purgatory</Ltr> استفاده می‌کند تا درخواست‌های معلق بدون اشغال
+            thread منتظر بمانند.
+          </p>
+        </DeepDiveSection>
+        <DeepDiveSection title="max.poll.records در برابر بایت‌های Fetch">
+          <p>
+            مصرف‌کننده در هر درخواست ممکن است بیش از <Ltr>max.poll.records</Ltr>{' '}
+            رکورد دریافت کند و آن‌ها را در حافظه نگه دارد. <Ltr>poll</Ltr> بعدی
+            می‌تواند بدون رفت‌وبرگشت شبکه، از همان بافر بخواند. پس{' '}
+            <Ltr>max.poll.records</Ltr> فقط اندازهٔ دستهٔ تحویلی به برنامه را
+            کنترل می‌کند، نه اندازهٔ درخواست شبکه.
+          </p>
+        </DeepDiveSection>
+        <DeepDiveSection title="Fetch Session و درخواست‌های افزایشی">
+          <p>
+            از <Ltr>Kafka 1.1</Ltr> و با <Ltr>KIP-227</Ltr>، مصرف‌کننده و بروکر
+            یک <Ltr>FetchSession</Ltr> نگه می‌دارند تا در درخواست‌های بعدی فقط
+            تغییرات پارتیشن‌ها رد و بدل شود. این کار در خوشه‌های بزرگ با صدها
+            پارتیشن، حجم متادیتای هر درخواست Fetch را به‌شدت کم می‌کند.
+          </p>
+        </DeepDiveSection>
+        <DeepDiveSection title="heartbeat thread و static membership">
+          <p>
+            heartbeat در thread جداگانه‌ای به نام <Ltr>HeartbeatThread</Ltr>{' '}
+            اجرا می‌شود تا حتی وقتی thread اصلی مشغول پردازش است، عضویت زنده
+            بماند. با تنظیم <Ltr>group.instance.id</Ltr> می‌توانید{' '}
+            <Ltr>static membership</Ltr> فعال کنید: اگر مصرف‌کننده سریع ری‌استارت
+            شود، قبل از <Ltr>session.timeout.ms</Ltr> دوباره همان هویت را
+            می‌گیرد و rebalance غیرضروری رخ نمی‌دهد.
+          </p>
+        </DeepDiveSection>
+      </DeepDive>
 
       <h2>جمع‌بندی</h2>
       <ul className="rounded-xl bg-slate-100 p-4 font-bold text-slate-800 dark:bg-slate-800/80 dark:text-slate-200">
@@ -464,20 +525,18 @@ export function ConsumerPollLoopContent() {
           جلوگیری می‌کند.
         </li>
         <li>
-          <Ltr>position</Ltr> در حافظه جلو می‌رود؛ committed offset چیزی است که
-          در کافکا ذخیره می‌شود.
-        </li>
-        <li>
           heartbeat زنده‌بودن پروسه را نشان می‌دهد و{' '}
-          <Ltr>max.poll.interval.ms</Ltr> پیشرفت حلقه را.
-        </li>
-        <li>
-          پردازش کند یا heartbeat قطع‌شده هر دو به حذف از گروه و rebalance
+          <Ltr>max.poll.interval.ms</Ltr> پیشرفت حلقه را؛ هر دو به rebalance
           می‌رسند.
         </li>
         <li>
-          یک <Ltr>KafkaConsumer</Ltr> را فقط از یک thread صدا بزنید و برای خروج
-          تمیز از <Ltr>wakeup()</Ltr> و <Ltr>close()</Ltr> استفاده کنید.
+          lag صعودی، rebalance پیاپی و مصرف تکراری سه حالت خرابی جدا هستند و هر
+          کدام متریک و علت خودشان را دارند.
+        </li>
+        <li>
+          برای بررسی سریع از <Ltr>kafka-consumer-groups.sh --describe</Ltr> و
+          برای پایداری در Kubernetes از <Ltr>group.instance.id</Ltr> استفاده
+          کنید.
         </li>
       </ul>
       <p>
