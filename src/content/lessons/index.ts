@@ -201,6 +201,18 @@ export const lessonContents: Record<string, LessonContent> = {
       'KubernetesDeploymentsContent',
     ),
   },
+  'cilium-architecture': {
+    Content: lazyLesson(
+      () => import('./ciliumArchitecture'),
+      'CiliumArchitectureContent',
+    ),
+  },
+  'cilium-ebpf-basics': {
+    Content: lazyLesson(
+      () => import('./ciliumEbpfBasics'),
+      'CiliumEbpfBasicsContent',
+    ),
+  },
 }
 
 export function getLessonContent(slug: string): LessonContent | undefined {

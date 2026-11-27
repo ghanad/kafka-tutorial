@@ -46,3 +46,27 @@ Prism.languages.properties = {
     },
   },
 }
+
+Prism.languages.c = {
+  comment: [
+    { pattern: /\/\*[\s\S]*?\*\//, greedy: true },
+    { pattern: /\/\/[^\r\n]*/, greedy: true },
+  ],
+  preprocessor: {
+    pattern: /^\s*#.*$/m,
+    greedy: true,
+    alias: 'comment',
+  },
+  string: {
+    pattern: /"(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*'/,
+    greedy: true,
+  },
+  keyword:
+    /\b(?:auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|inline|int|long|register|restrict|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while|_Bool|bool)\b/,
+  boolean: /\b(?:true|false|NULL)\b/,
+  number:
+    /\b(?:0[xX][\da-fA-F_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?[uUlLfF]*)\b/,
+  function: /\b[a-z_]\w*(?=\s*\()/i,
+  operator: /[+\-*/%=<>!&|^~?:]+/,
+  punctuation: /[{}[\];(),.:]/,
+}

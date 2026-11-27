@@ -1,10 +1,11 @@
 import { kafkaCourse } from './kafka'
 import { kubernetesCourse } from './kubernetes'
+import { ciliumCourse } from './cilium'
 import type { Course, CourseSection, LessonMeta } from './types'
 
 export type { Course, CourseSection, LessonMeta, LessonStatus } from './types'
 
-export const courses: Course[] = [kafkaCourse, kubernetesCourse]
+export const courses: Course[] = [kafkaCourse, kubernetesCourse, ciliumCourse]
 
 export const allSections: CourseSection[] = courses.flatMap((course) => course.sections)
 
