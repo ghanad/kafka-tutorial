@@ -332,7 +332,7 @@ export const sections: CourseSection[] = [
           'kafka-topics.sh، kafka-console-producer.sh، kafka-console-consumer.sh و kafka-consumer-groups.sh در عمل.',
         readingTime: 10,
         sectionId: 'practice',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'docker-three-node',
@@ -342,7 +342,7 @@ export const sections: CourseSection[] = [
           'یک فایل Docker Compose کامل برای سه Broker، سه Controller و ذخیره‌سازی پایدار.',
         readingTime: 9,
         sectionId: 'practice',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'topic-management',
@@ -352,7 +352,7 @@ export const sections: CourseSection[] = [
           'ساخت، توصیف، تغییر تعداد Partition و حذف Topic؛ همراه با نکات امنیتی و اثر هر تغییر.',
         readingTime: 9,
         sectionId: 'practice',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'partition-reassignment',
@@ -362,7 +362,7 @@ export const sections: CourseSection[] = [
           'جابه‌جایی Partitionها بین Brokerها، فایل‌های reassignment و کاهش ریسک در خوشه زنده.',
         readingTime: 8,
         sectionId: 'practice',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'kafka-ui-tools',
@@ -372,7 +372,7 @@ export const sections: CourseSection[] = [
           'چه زمانی رابط گرافیکی کمک می‌کند، چه چیزهایی را باید با احتیاط انجام داد و جایگزین‌های سبک.',
         readingTime: 7,
         sectionId: 'practice',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

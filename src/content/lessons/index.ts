@@ -26,6 +26,11 @@ import { FailureRecoveryContent } from './failureRecovery'
 import { DurabilityDesignContent } from './durabilityDesign'
 import { ConsumerLagContent } from './consumerLag'
 import { ConsumerAssignmentContent } from './consumerAssignment'
+import { CliToolsContent } from './cliTools'
+import { DockerThreeNodeContent } from './dockerThreeNode'
+import { TopicManagementContent } from './topicManagement'
+import { PartitionReassignmentContent } from './partitionReassignment'
+import { KafkaUiToolsContent } from './kafkaUiTools'
 
 export const lessonContents: Record<string, LessonContent> = {
   'what-is-kafka': {
@@ -108,6 +113,21 @@ export const lessonContents: Record<string, LessonContent> = {
   },
   'durability-design': {
     Content: DurabilityDesignContent,
+  },
+  'cli-tools': {
+    Content: CliToolsContent,
+  },
+  'docker-three-node': {
+    Content: DockerThreeNodeContent,
+  },
+  'topic-management': {
+    Content: TopicManagementContent,
+  },
+  'partition-reassignment': {
+    Content: PartitionReassignmentContent,
+  },
+  'kafka-ui-tools': {
+    Content: KafkaUiToolsContent,
   },
 }
 
