@@ -29,7 +29,7 @@ export const sections: CourseSection[] = [
         slug: 'what-is-kafka',
         title: 'Kafka چیست و چه مشکلی را حل می‌کند؟',
         description:
-          'کافکا را با داستان کلاس، تشبیه دفترچه جادویی، شبیه‌ساز زنده و شکل‌های متحرک مثل یک کودک ۸ ساله درک کنید.',
+          'کافکا را با داستان کلاس، تشبیه دفترچه جادویی، توضیح تعاملی گام‌به‌گام و شکل‌های متحرک مثل یک کودک ۸ ساله درک کنید.',
         readingTime: 7,
         sectionId: 'introduction',
         status: 'published',
@@ -49,7 +49,7 @@ export const sections: CourseSection[] = [
         slug: 'key-terms',
         title: 'مفاهیم کلیدی: Event، Topic، Partition و Offset',
         description:
-          'کالبدشکافی پیام، نحوه توزیع کلیدها در پارتیشن‌ها و نقش حیاتی آفست‌ها به همراه شبیه‌ساز زنده.',
+          'کالبدشکافی پیام، نحوه توزیع کلیدها در پارتیشن‌ها و نقش حیاتی آفست‌ها به همراه توضیح تعاملی گام‌به‌گام.',
         readingTime: 7,
         sectionId: 'introduction',
         status: 'published',
@@ -59,7 +59,7 @@ export const sections: CourseSection[] = [
         slug: 'docker-kraft-setup',
         title: 'نصب سریع با Docker Compose و KRaft',
         description:
-          'راه‌اندازی خوشه‌کافکا در حالت مدرن KRaft بدون نیاز به ZooKeeper به همراه ترمینال تعاملی درون مرورگر.',
+          'راه‌اندازی خوشه‌کافکا در حالت مدرن KRaft بدون نیاز به ZooKeeper به همراه شبیه‌ساز گام‌به‌گام ترمینال.',
         readingTime: 8,
         sectionId: 'introduction',
         status: 'published',

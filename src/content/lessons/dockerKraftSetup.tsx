@@ -1,7 +1,7 @@
 import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
-import { KafkaTerminalSimulator } from '../../components/simulators/KafkaTerminalSimulator'
+import { DockerSetupExplainer } from '../../components/simulators/DockerSetupExplainer'
 
 const dockerComposeYaml = `services:
   kafka:
@@ -100,15 +100,13 @@ export function DockerKraftSetupContent() {
 
       <CodeBlock code={dockerComposeYaml} language="yaml" filename="docker-compose.yml" />
 
-      <h2>ترمینال زنده و تعاملی: اجرای گام‌به‌گام دستورات</h2>
+      <h2>قدم‌به‌قدم: از اجرای خوشه تا خواندن اولین پیام</h2>
       <p>
-        برای اینکه قبل از اجرای واقعی در سیستم خود با رفتار دستورات آشنا شوید، در
-        ترمینال شبیه‌سازی‌شده زیر روی هر مرحله کلیک کنید تا نتیجه آن را به صورت زنده
-        ببینید:
+        پیش از اجرای واقعی روی سیستم خود، در شبیه‌ساز گام‌به‌گام زیر دستورها را به
+        ترتیب جلو ببرید و خروجی هر مرحله را ببینید:
       </p>
 
-      {/* Interactive Terminal Simulator */}
-      <KafkaTerminalSimulator />
+      <DockerSetupExplainer />
 
       <h2>گام‌های عملی در ترمینال واقعی سیستم شما</h2>
 

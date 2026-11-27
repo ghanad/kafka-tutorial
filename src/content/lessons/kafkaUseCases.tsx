@@ -1,6 +1,6 @@
 import { Callout } from '../../components/ui/Callout'
 import { Ltr } from '../../components/ui/Ltr'
-import { UseCaseFlowVisualizer } from '../../components/diagrams/UseCaseFlowVisualizer'
+import { UseCaseFlowExplainer } from '../../components/simulators/UseCaseFlowExplainer'
 
 export function KafkaUseCasesContent() {
   return (
@@ -13,15 +13,14 @@ export function KafkaUseCasesContent() {
         پروژه‌های روزمره هم به کار می‌آید؟
       </p>
 
-      <h2>کافکا در عمل: شبیه‌ساز ۴ سناریوی واقعی</h2>
+      <h2>کافکا در عمل: یک سفارش را قدم‌به‌قدم دنبال کنید</h2>
       <p>
-        در شبیه‌ساز تعاملی زیر، ۴ صنعت مختلف را انتخاب کنید و ببینید چطور کافکا
-        جریان صدها هزار رویداد را بدون قفل شدن سرورها و بدون از دست رفتن داده
-        مدیریت می‌کند:
+        در توضیح تعاملی زیر یک سناریوی واقعی فروشگاه اینترنتی را می‌بینیم: یک
+        سفارش ثبت می‌شود و چند سرویس مستقل آن را می‌خوانند. با گام‌ها جلو بروید
+        تا ببینید چرا قطعی یا کندی یک سرویس، بقیه را متوقف نمی‌کند.
       </p>
 
-      {/* Interactive Use Case Visualizer */}
-      <UseCaseFlowVisualizer />
+      <UseCaseFlowExplainer />
 
       <h2>۱. ارتباط بین میکروسرویس‌ها (معماری رویدادمحور)</h2>
       <p>

@@ -1,7 +1,7 @@
 import { Callout } from '../../components/ui/Callout'
 import { Ltr } from '../../components/ui/Ltr'
 import { ClassroomChaosDiagram } from '../../components/diagrams/ClassroomChaosDiagram'
-import { KafkaNotebookSimulator } from '../../components/simulators/KafkaNotebookSimulator'
+import { NotebookExplainer } from '../../components/simulators/NotebookExplainer'
 import { QueueVsKafkaDiagram } from '../../components/diagrams/QueueVsKafkaDiagram'
 import { StoryToCodeMap } from '../../components/diagrams/StoryToCodeMap'
 
@@ -53,11 +53,11 @@ export function WhatIsKafkaContent() {
         می‌گذارد و یک قانون ساده اعلام می‌کند:
       </p>
 
-      <blockquote className="my-4 rounded-xl border-s-4 border-amber-400 bg-amber-50/80 p-4 font-bold text-amber-950 dark:border-amber-500 dark:bg-amber-950/30 dark:text-amber-200">
+      <Callout variant="tip" title="قانون دفترچه">
         «از این به بعد، هیچ‌کس پیش دیگری نمی‌دود! علی هر خبری دارد، فقط در این
         دفترچه می‌نویسد و به کارش می‌رسد. بقیه هر وقت بیدار شدند یا از راه
         رسیدند، دفترچه را باز می‌کنند و خبر را می‌خوانند.»
-      </blockquote>
+      </Callout>
 
       <p>
         این دفترچه جادویی، دقیقاً همان <strong><Ltr>Apache Kafka</Ltr></strong> است!
@@ -81,16 +81,16 @@ export function WhatIsKafkaContent() {
         </li>
       </ol>
 
-      {/* Simulator 2: Live interactive Kafka Notebook Simulator */}
-      <h2>آزمایشگاه زنده: خودتان دفترچه جادویی را امتحان کنید!</h2>
+      {/* Step-by-step notebook explainer */}
+      <h2>قدم‌به‌قدم: دفترچه جادویی چطور کار می‌کند؟</h2>
       <p>
-        در شبیه‌ساز زیر می‌توانید خودتان نقش علی را بازی کنید و پیام بنویسید. سپس
-        ببینید که چطور سارا و رضا با <strong>نشانک‌های رنگی خود</strong> پیام‌ها را
-        می‌خوانند. حتی می‌توانید رضا را به خواب ببرید (شبیه‌سازی قطعی سرور) و
-        ببینید پیام‌ها هرگز گم نمی‌شوند:
+        در توضیح تعاملی زیر یک سناریوی مشخص را با هم دنبال می‌کنیم: علی چند خبر
+        در دفترچه می‌نویسد، سارا و رضا هر کدام با <strong>نشانک خودشان</strong>
+        می‌خوانند و یک بار رضا از دسترس خارج می‌شود. با دکمه‌های «گام قبل» و
+        «گام بعد» جلو بروید و ببینید چرا هیچ پیامی گم نمی‌شود.
       </p>
 
-      <KafkaNotebookSimulator />
+      <NotebookExplainer />
 
       <h2>شخصیت‌های داستان در دنیای برنامه‌نویسی چه نام دارند؟</h2>
       <p>
@@ -290,11 +290,11 @@ export function WhatIsKafkaContent() {
       <p>
         تبریک می‌گوییم! شما حالا مهم‌ترین راز <Ltr>Kafka</Ltr> را می‌دانید:
       </p>
-      <p className="rounded-xl bg-primary-50 p-4 font-bold text-primary-950 dark:bg-primary-950/40 dark:text-primary-100">
+      <Callout variant="info" title="خلاصه">
         کافکا یک <strong>دفترچه یادداشت دیجیتالی، ضدآب و شماره‌گذاری‌شده</strong>{' '}
         است که همه سیستم‌ها در انتهای آن می‌نویسند و با نشانک‌های اختصاصی خودشان
         از روی آن می‌خوانند.
-      </p>
+      </Callout>
       <p>
         در درس بعدی به سراغ کاربردهای هیجان‌انگیز کافکا در شرکت‌های بزرگ مثل اوبر،
         نتفلیکس و لینکدین می‌رویم و می‌بینیم آن‌ها چطور میلیاردها پیام در روز را

@@ -1,7 +1,7 @@
 import { Callout } from '../../components/ui/Callout'
 import { CodeBlock } from '../../components/ui/CodeBlock'
 import { Ltr } from '../../components/ui/Ltr'
-import { PartitionRoutingSimulator } from '../../components/simulators/PartitionRoutingSimulator'
+import { PartitionRoutingExplainer } from '../../components/simulators/PartitionRoutingExplainer'
 
 const recordSample = `{
   "key": "customer-1042",
@@ -126,8 +126,13 @@ export function KeyTermsContent() {
         </li>
       </ol>
 
-      {/* Interactive Simulator: Key-to-partition Routing */}
-      <PartitionRoutingSimulator />
+      <p>
+        در توضیح تعاملی زیر همین قاعده را با یک تاپیک سه‌پارتیشنی و چند کلید ثابت
+        می‌بینیم؛ گام‌به‌گام جلو بروید تا ببینید چرا کلید یکسان همیشه به یک
+        پارتیشن می‌رود و ترتیب همان مشتری حفظ می‌شود.
+      </p>
+
+      <PartitionRoutingExplainer />
 
       <h2>۵. آفست (Offset): شناسه موقعیت در لاگ</h2>
       <p>
@@ -202,12 +207,14 @@ export function KeyTermsContent() {
       <p>
         در این درس با آجرهای سازنده کافکا آشنا شدیم:
       </p>
-      <ul className="rounded-xl bg-slate-100 p-4 font-bold text-slate-800 dark:bg-slate-800/80 dark:text-slate-200">
-        <li>رکورد = یک رویداد دارای کلید، مقدار، زمان و هدر.</li>
-        <li>تاپیک = دسته‌بندی موضوعی لاگ‌ها.</li>
-        <li>پارتیشن = واحد مقیاس‌پذیری و تضمین ترتیب.</li>
-        <li>آفست = شماره خط ترتیبی پیام برای ردیابی مصرف‌کننده‌ها.</li>
-      </ul>
+      <Callout variant="info" title="خلاصه">
+        <ul className="list-disc space-y-1 ps-5 font-medium">
+          <li>رکورد = یک رویداد دارای کلید، مقدار، زمان و هدر.</li>
+          <li>تاپیک = دسته‌بندی موضوعی لاگ‌ها.</li>
+          <li>پارتیشن = واحد مقیاس‌پذیری و تضمین ترتیب.</li>
+          <li>آفست = شماره خط ترتیبی پیام برای ردیابی مصرف‌کننده‌ها.</li>
+        </ul>
+      </Callout>
       <p>
         اکنون که تمام تئوری‌ها را یاد گرفتیم، در درس پایانی این فصل به سراغ عمل
         می‌رویم و اولین خوشه کافکا را با <Ltr>Docker Compose</Ltr> در حالت مدرن{' '}
