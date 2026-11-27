@@ -1,6 +1,19 @@
 import { STORE_VERSION, useAppStore } from '../store/useAppStore'
 import type { PersistedAppState } from '../store/useAppStore'
 
+const APP_ID = 'kafka-tutorial'
+
+const PROGRESS_STATE_KEYS = [
+  'completedLessons',
+  'bookmarks',
+  'notes',
+  'inlineNotes',
+] as const
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
 export function getPersistedSnapshot(): PersistedAppState {
   const state = useAppStore.getState()
   return {
@@ -21,7 +34,7 @@ export function getPersistedSnapshot(): PersistedAppState {
 
 export function buildExportJson(): string {
   const payload = {
-    app: 'kafka-tutorial',
+    app: APP_ID,
     schemaVersion: STORE_VERSION,
     exportedAt: new Date().toISOString(),
     state: getPersistedSnapshot(),
@@ -39,15 +52,35 @@ export function extractImportedState(text: string): unknown {
     throw new Error('فایل انتخاب‌شده یک JSON معتبر نیست.')
   }
 
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+  if (!isRecord(parsed)) {
     throw new Error('ساختار فایل با داده‌های دوره سازگار نیست.')
   }
 
-  const record = parsed as Record<string, unknown>
-  const state = 'state' in record ? record.state : parsed
+  const hasEnvelope = 'state' in parsed
+  const state = hasEnvelope ? parsed.state : parsed
 
-  if (!state || typeof state !== 'object' || Array.isArray(state)) {
+  if (hasEnvelope) {
+    if ('app' in parsed && parsed.app !== APP_ID) {
+      throw new Error('این فایل پشتیبان مربوط به این دوره نیست.')
+    }
+
+    if ('schemaVersion' in parsed) {
+      const version = parsed.schemaVersion
+      if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
+        throw new Error('نسخه اسکیمای فایل پشتیبان معتبر نیست.')
+      }
+      if (version > STORE_VERSION) {
+        throw new Error('این فایل پشتیبان با نسخه جدیدتری از برنامه ساخته شده است.')
+      }
+    }
+  }
+
+  if (!isRecord(state)) {
     throw new Error('داده‌های پیشرفت در فایل پیدا نشد.')
+  }
+
+  if (!PROGRESS_STATE_KEYS.some((key) => key in state)) {
+    throw new Error('در فایل انتخاب‌شده هیچ داده پیشرفتی پیدا نشد.')
   }
 
   return state

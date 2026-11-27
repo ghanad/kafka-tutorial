@@ -1,7 +1,8 @@
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Copy, FileText, LocateFixed, PencilLine, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
 import type { InlineNote } from '../../store/useAppStore'
+import { copyTextToClipboard } from '../../utils/clipboard'
 import { cn } from '../../utils/cn'
 import { previewQuote } from '../../utils/inlineNoteAnchor'
 import { toPersianDigits } from '../../utils/persianDigits'
@@ -28,6 +29,9 @@ export const LessonNotes = forwardRef<HTMLTextAreaElement, LessonNotesProps>(
     const [value, setValue] = useState(savedNote)
     const [isCopied, setIsCopied] = useState(false)
     const [isSaved, setIsSaved] = useState(true)
+    const valueRef = useRef(value)
+    const savedRef = useRef(savedNote)
+    const copyTimerRef = useRef<number | undefined>(undefined)
 
     const sortedInlineNotes = useMemo(
       () => [...inlineNotes].sort((a, b) => b.createdAt - a.createdAt),
@@ -37,8 +41,28 @@ export const LessonNotes = forwardRef<HTMLTextAreaElement, LessonNotesProps>(
     // Sync state when lessonId changes
     useEffect(() => {
       setValue(savedNote)
+      valueRef.current = savedNote
+      savedRef.current = savedNote
       setIsSaved(true)
     }, [lessonId, savedNote])
+
+    const flushPendingNote = useCallback(() => {
+      const text = valueRef.current
+      if (text === savedRef.current) return
+      savedRef.current = text
+      setLessonNote(lessonId, text)
+    }, [lessonId, setLessonNote])
+
+    // Persist the last keystrokes even when the reader navigates away mid-debounce.
+    useEffect(() => {
+      return () => flushPendingNote()
+    }, [flushPendingNote])
+
+    useEffect(() => {
+      return () => {
+        if (copyTimerRef.current !== undefined) window.clearTimeout(copyTimerRef.current)
+      }
+    }, [])
 
     // Auto-save debounced
     useEffect(() => {
@@ -49,6 +73,7 @@ export const LessonNotes = forwardRef<HTMLTextAreaElement, LessonNotesProps>(
 
       setIsSaved(false)
       const timer = setTimeout(() => {
+        savedRef.current = value
         setLessonNote(lessonId, value)
         setIsSaved(true)
       }, 400)
@@ -56,17 +81,23 @@ export const LessonNotes = forwardRef<HTMLTextAreaElement, LessonNotesProps>(
       return () => clearTimeout(timer)
     }, [value, lessonId, savedNote, setLessonNote])
 
-    function handleCopy() {
+    async function handleCopy() {
       if (!value.trim()) return
-      navigator.clipboard.writeText(value).then(() => {
+      try {
+        await copyTextToClipboard(value)
         setIsCopied(true)
-        setTimeout(() => setIsCopied(false), 2000)
-      })
+        if (copyTimerRef.current !== undefined) window.clearTimeout(copyTimerRef.current)
+        copyTimerRef.current = window.setTimeout(() => setIsCopied(false), 2000)
+      } catch {
+        setIsCopied(false)
+      }
     }
 
     function handleDelete() {
       if (window.confirm('آیا مطمئن هستید که می‌خواهید یادداشت این درس را حذف کنید؟')) {
         deleteLessonNote(lessonId)
+        valueRef.current = ''
+        savedRef.current = ''
         setValue('')
         setIsSaved(true)
       }
@@ -235,7 +266,10 @@ export const LessonNotes = forwardRef<HTMLTextAreaElement, LessonNotesProps>(
                 ref={ref}
                 id="lesson-note-textarea"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => {
+                  valueRef.current = e.target.value
+                  setValue(e.target.value)
+                }}
                 placeholder="نکات مهم، پرسش‌ها یا خلاصه شخصی خود از این درس را اینجا بنویسید..."
                 rows={4}
                 aria-label="یادداشت کلی برای این درس"

@@ -1,18 +1,22 @@
 import { useMemo } from 'react'
 import { allLessons } from '../content/curriculum'
 import type { LessonMeta } from '../content/curriculum'
+import { normalizeSearchText } from '../utils/searchText'
+
+const searchIndex = allLessons.map((lesson) => ({
+  lesson,
+  text: normalizeSearchText(`${lesson.title} ${lesson.description}`),
+}))
 
 export function filterLessons(query: string, limit = 6): LessonMeta[] {
-  const normalized = query.trim().toLowerCase()
+  const normalized = normalizeSearchText(query)
   if (normalized === '') return []
+  const tokens = normalized.split(' ').filter(Boolean)
 
-  return allLessons
-    .filter(
-      (lesson) =>
-        lesson.title.toLowerCase().includes(normalized) ||
-        lesson.description.toLowerCase().includes(normalized),
-    )
+  return searchIndex
+    .filter((entry) => tokens.every((token) => entry.text.includes(token)))
     .slice(0, limit)
+    .map((entry) => entry.lesson)
 }
 
 export function useLessonSearch(query: string, limit = 6): LessonMeta[] {

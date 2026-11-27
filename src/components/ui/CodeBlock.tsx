@@ -3,24 +3,9 @@ import { Highlight, Prism, themes } from 'prism-react-renderer'
 import type { Language } from 'prism-react-renderer'
 import { Check, Copy } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
+import { copyTextToClipboard } from '../../utils/clipboard'
 import { cn } from '../../utils/cn'
-
-async function writeToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text)
-    return
-  }
-
-  const textarea = document.createElement('textarea')
-  textarea.value = text
-  textarea.setAttribute('readonly', '')
-  textarea.style.position = 'fixed'
-  textarea.style.opacity = '0'
-  document.body.appendChild(textarea)
-  textarea.select()
-  document.execCommand('copy')
-  document.body.removeChild(textarea)
-}
+import './prismLanguages'
 
 interface CodeBlockProps {
   code: string
@@ -49,7 +34,7 @@ export function CodeBlock({
 
   async function handleCopy() {
     try {
-      await writeToClipboard(code)
+      await copyTextToClipboard(code)
       setCopied(true)
       if (timer.current !== undefined) window.clearTimeout(timer.current)
       timer.current = window.setTimeout(() => setCopied(false), 2000)
@@ -62,7 +47,7 @@ export function CodeBlock({
   const prismTheme = isDark ? themes.vsDark : themes.github
   const languageAvailable =
     (Prism.languages as Record<string, unknown>)[language] !== undefined
-  const safeLanguage = (languageAvailable ? language : 'bash') as Language
+  const safeLanguage = (languageAvailable ? language : 'text') as Language
 
   return (
     <div
