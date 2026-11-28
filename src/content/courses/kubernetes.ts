@@ -277,7 +277,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
     id: 'k8s-cilium',
     title: 'Cilium (مقدماتی)',
     description:
-      'چرا eBPF، نصب Cilium، جایگزینی kube-proxy و مشاهده ترافیک با Hubble.',
+      'چرا eBPF، نصب Cilium، جایگزینی kube-proxy، مشاهده ترافیک با Hubble و سیاست شبکه.',
     lessons: [
       {
         id: 'k8s-cilium-ebpf',
@@ -287,7 +287,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'eBPF چیست، چرا datapath مبتنی بر هسته سریع‌تر است و Cilium چه چیزی را ساده‌تر می‌کند.',
         readingTime: 9,
         sectionId: 'k8s-cilium',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-cilium-install',
@@ -297,7 +297,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'نصب با Helm، انتخاب حالت شبکه و نکات استقرار روی کلاسترهای واقعی مثل RKE2.',
         readingTime: 9,
         sectionId: 'k8s-cilium',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-cilium-kube-proxy',
@@ -307,7 +307,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'چطور Cilium نقش kube-proxy را برمی‌دارد و چه تنظیماتی برای این حالت لازم است.',
         readingTime: 8,
         sectionId: 'k8s-cilium',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-cilium-hubble',
@@ -317,7 +317,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'دیدن جریان‌های شبکه، متریک‌ها و عیب‌یابی ارتباط سرویس‌ها با Hubble.',
         readingTime: 8,
         sectionId: 'k8s-cilium',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-cilium-policy',
@@ -327,7 +327,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'سیاست‌های L3/L4 و L7 با CiliumNetworkPolicy و تفاوت آن با NetworkPolicy استاندارد.',
         readingTime: 9,
         sectionId: 'k8s-cilium',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },

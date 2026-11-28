@@ -240,6 +240,36 @@ export const lessonContents: Record<string, LessonContent> = {
       'KubernetesWorkloadTypesContent',
     ),
   },
+  'k8s-cilium-ebpf': {
+    Content: lazyLesson(
+      () => import('./kubernetesCiliumEbpf'),
+      'KubernetesCiliumEbpfContent',
+    ),
+  },
+  'k8s-cilium-install': {
+    Content: lazyLesson(
+      () => import('./kubernetesCiliumInstall'),
+      'KubernetesCiliumInstallContent',
+    ),
+  },
+  'k8s-cilium-kube-proxy': {
+    Content: lazyLesson(
+      () => import('./kubernetesCiliumKubeProxy'),
+      'KubernetesCiliumKubeProxyContent',
+    ),
+  },
+  'k8s-cilium-hubble': {
+    Content: lazyLesson(
+      () => import('./kubernetesCiliumHubble'),
+      'KubernetesCiliumHubbleContent',
+    ),
+  },
+  'k8s-cilium-policy': {
+    Content: lazyLesson(
+      () => import('./kubernetesCiliumPolicy'),
+      'KubernetesCiliumPolicyContent',
+    ),
+  },
   'cilium-architecture': {
     Content: lazyLesson(
       () => import('./ciliumArchitecture'),
