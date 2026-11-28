@@ -225,6 +225,69 @@ export const lessonContents: Record<string, LessonContent> = {
       'CiliumEbpfBasicsContent',
     ),
   },
+  'cilium-packet-path': {
+    Content: lazyLesson(
+      () => import('./ciliumPacketPath'),
+      'CiliumPacketPathContent',
+    ),
+  },
+  'cilium-ipam-routing': {
+    Content: lazyLesson(
+      () => import('./ciliumIpamRouting'),
+      'CiliumIpamRoutingContent',
+    ),
+  },
+  'cilium-kube-proxy-replacement': {
+    Content: lazyLesson(
+      () => import('./ciliumKubeProxyReplacement'),
+      'CiliumKubeProxyReplacementContent',
+    ),
+  },
+  'cilium-network-policy': {
+    Content: lazyLesson(
+      () => import('./ciliumNetworkPolicy'),
+      'CiliumNetworkPolicyContent',
+    ),
+  },
+  'cilium-encryption': {
+    Content: lazyLesson(
+      () => import('./ciliumEncryption'),
+      'CiliumEncryptionContent',
+    ),
+  },
+  'cilium-tetragon': {
+    Content: lazyLesson(() => import('./ciliumTetragon'), 'CiliumTetragonContent'),
+  },
+  'cilium-hubble': {
+    Content: lazyLesson(() => import('./ciliumHubble'), 'CiliumHubbleContent'),
+  },
+  'cilium-bgp-lb': {
+    Content: lazyLesson(() => import('./ciliumBgpLb'), 'CiliumBgpLbContent'),
+  },
+  'cilium-gateway-api': {
+    Content: lazyLesson(
+      () => import('./ciliumGatewayApi'),
+      'CiliumGatewayApiContent',
+    ),
+  },
+  'cilium-service-mesh': {
+    Content: lazyLesson(
+      () => import('./ciliumServiceMesh'),
+      'CiliumServiceMeshContent',
+    ),
+  },
+  'cilium-clustermesh': {
+    Content: lazyLesson(
+      () => import('./ciliumClustermesh'),
+      'CiliumClustermeshContent',
+    ),
+  },
+  'cilium-troubleshooting': {
+    Content: lazyLesson(
+      () => import('./ciliumTroubleshooting'),
+      'CiliumTroubleshootingContent',
+    ),
+  },
 }
 
 export function getLessonContent(slug: string): LessonContent | undefined {
