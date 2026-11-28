@@ -213,6 +213,33 @@ export const lessonContents: Record<string, LessonContent> = {
       'KubernetesDeploymentsContent',
     ),
   },
+  'k8s-namespaces-labels': {
+    Content: lazyLesson(
+      () => import('./kubernetesNamespacesLabels'),
+      'KubernetesNamespacesLabelsContent',
+    ),
+  },
+  'k8s-configmaps-secrets': {
+    Content: lazyLesson(
+      () => import('./kubernetesConfigmapsSecrets'),
+      'KubernetesConfigmapsSecretsContent',
+    ),
+  },
+  'k8s-probes': {
+    Content: lazyLesson(() => import('./kubernetesProbes'), 'KubernetesProbesContent'),
+  },
+  'k8s-resources-qos': {
+    Content: lazyLesson(
+      () => import('./kubernetesResourcesQos'),
+      'KubernetesResourcesQosContent',
+    ),
+  },
+  'k8s-workload-types': {
+    Content: lazyLesson(
+      () => import('./kubernetesWorkloadTypes'),
+      'KubernetesWorkloadTypesContent',
+    ),
+  },
   'cilium-architecture': {
     Content: lazyLesson(
       () => import('./ciliumArchitecture'),

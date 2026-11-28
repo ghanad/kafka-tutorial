@@ -83,7 +83,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'جداسازی منطقی منابع، انتخاب گروهی با label و selector و تفاوت annotation با label در عمل.',
         readingTime: 8,
         sectionId: 'k8s-workloads',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-configmaps-secrets',
@@ -93,7 +93,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'جداسازی پیکربندی از image، تزریق متغیر محیطی و محدودیت‌های امنیتی Secret.',
         readingTime: 8,
         sectionId: 'k8s-workloads',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-probes',
@@ -103,7 +103,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'تفاوت سه نوع probe، اثر هرکدام بر restart و ارسال ترافیک، و تنظیم درست آستانه‌ها.',
         readingTime: 9,
         sectionId: 'k8s-workloads',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-resources-qos',
@@ -113,7 +113,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'چطور requests و limits روی زمان‌بندی و OOM اثر می‌گذارند، کلاس‌های QoS و کنترل با LimitRange و ResourceQuota.',
         readingTime: 10,
         sectionId: 'k8s-workloads',
-        status: 'planned',
+        status: 'published',
       },
       {
         id: 'k8s-workload-types',
@@ -123,7 +123,7 @@ const kubernetesSectionsInput: CourseSectionInput[] = [
           'چه زمانی هر نوع بارکاری را انتخاب کنیم و هرکدام چه تضمین‌هایی برای هویت، ترتیب و اجرا می‌دهند.',
         readingTime: 11,
         sectionId: 'k8s-workloads',
-        status: 'planned',
+        status: 'published',
       },
     ],
   },
